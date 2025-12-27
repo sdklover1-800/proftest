@@ -1,9 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.services.assessment_service import assessment_service
-from app.schemas.assessment import QuestionDTO, AssessmentSession, AssessmentSessionCreate, AnswerCreate, UserResponse
+from app.schemas.assessment import (
+    QuestionDTO, 
+    AssessmentSession, 
+    AssessmentSessionCreate, 
+    AnswerCreate, 
+    UserResponse,
+    SessionSummary
+)
+from app.models.user import User
+from app.api import deps
 
 router = APIRouter()
 
@@ -13,9 +22,6 @@ async def get_questions(db: AsyncSession = Depends(get_db)):
     Returns list of questions.
     """
     return await assessment_service.get_all_questions(db)
-
-from app.models.user import User
-from app.api import deps
 
 @router.post("/start", response_model=AssessmentSession)
 async def start_assessment(
@@ -35,13 +41,13 @@ async def submit_answer(answer_in: AnswerCreate, db: AsyncSession = Depends(get_
     """
     return await assessment_service.save_answer(db, answer_in)
 
-@router.get("/history", response_model=List[AssessmentSession])
+@router.get("/history", response_model=List[SessionSummary])
 async def get_assessment_history(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(deps.get_current_user)
 ):
     """
-    Returns the current user's assessment history.
+    Returns the current user's assessment history as summaries.
+    Thin router implementation: delegates logic to the service layer.
     """
-    return await assessment_service.get_user_history(db, current_user.id)
-
+    return await assessment_service.get_user_history_summaries(db, current_user.id)

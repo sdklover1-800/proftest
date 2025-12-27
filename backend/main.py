@@ -24,4 +24,4 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to Youth Assessment API"}
+    return {"message": "Welcome to proftest API"}

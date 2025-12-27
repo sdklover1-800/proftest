@@ -1,0 +1,93 @@
+{
+    "common": {
+        "loading": "Жүктелуде...",
+        "error": "Қате",
+        "success": "Сәтті",
+        "back": "Артқа",
+        "save": "Сақтау",
+        "cancel": "Болдырмау",
+        "optional": "Міндетті емес"
+    },
+    "tabs": {
+        "home": "Басты",
+        "profile": "Профиль"
+    },
+    "auth": {
+        "login": "Кіру",
+        "register": "Тіркелу",
+        "email": "Электрондық пошта",
+        "password": "Құпия сөз",
+        "age": "Жасы",
+        "logout": "Шығу",
+        "no_account": "Тіркелгіңіз жоқ па?",
+        "have_account": "Тіркелгіңіз бар ма?",
+        "register_here": "Тіркеліңіз",
+        "login_here": "Кіріңіз",
+        "welcome_back_title": "Қайта қош келдіңіз",
+        "login_subtitle": "Жалғастыру үшін кіріңіз",
+        "create_account": "Тіркелгі жасау",
+        "register_subtitle": "Өз әлеуетіңізді ашу үшін бізге қосылыңыз"
+    },
+    "home": {
+        "welcome_back": "Сәлем, {{name}}!",
+        "ready_message": "Өзіңіз туралы көбірек білуге дайынсыз ба?",
+        "start_assessment": "Бағалауды бастау",
+        "start_description": "Өзіңіздің жеке қасиеттеріңіз бен кәсіби қызығушылықтарыңызды біліңіз",
+        "begin_now": "Бастау →",
+        "history_title": "Тарих",
+        "no_history": "Сіз әлі тест тапсырмадыңыз",
+        "no_history_hint": "Бірінші тестіңізді жоғарыдан бастаңыз!",
+        "test_number": "Тест #{{id}}",
+        "completed": "Аяқталды"
+    },
+    "profile": {
+        "title": "Профиль",
+        "user_info": "Пайдаланушы туралы ақпарат",
+        "user_id": "Пайдаланушы ID",
+        "settings": "Баптаулар",
+        "select_language": "Тілді таңдаңыз",
+        "language": "Тіл",
+        "notifications": "Хабарландырулар",
+        "privacy": "Құпиялылық",
+        "about": "Қосымша туралы"
+    },
+    "assessment": {
+        "question_count": "Сұрақ {{current}} / {{total}}",
+        "next": "Келесі",
+        "previous": "Алдыңғы",
+        "finish": "Аяқтау",
+        "loading_questions": "Сұрақтар жүктелуде...",
+        "no_questions": "Сұрақтар жүктелмеді.",
+        "retry": "Қайталау",
+        "exit_confirm": "Шығуға сенімдісіз бе? Прогрессіңіз жоғалады.",
+        "exit_title": "Шығуды растау",
+        "exit_yes": "Иә, шығу",
+        "exit_no": "Болдырмау",
+        "disagree": "Келіспеймін",
+        "agree": "Келісемін"
+    },
+    "results": {
+        "your_result": "Сіздің профиліңіз",
+        "calculating": "Профиліңіз есептелуде...",
+        "not_found": "Нәтижелер табылмады.",
+        "download_pdf": "PDF жүктеу",
+        "generating_pdf": "PDF құрылуда...",
+        "interests": "Қызығушылықтар (RIASEC)",
+        "personality": "Тұлға (Big5)",
+        "career_interests": "Кәсіби қызығушылықтар",
+        "personality_traits": "Тұлға қасиеттері",
+        "top_interests": "Топ қызығушылықтар",
+        "trait_breakdown": "Қасиеттер талдауы",
+        "development_plan": "Даму жоспары",
+        "back_home": "Басты бетке",
+        "error_generating_pdf": "PDF жасау кезінде қате кетті. Қайта көріңіз.",
+        "tag_career": "Мансап",
+        "tag_development": "Даму",
+        "tag_well-being": "Саулық"
+    },
+    "languages": {
+        "ru": "Русский",
+        "kz": "Қазақша",
+        "en": "English"
+    }
+}

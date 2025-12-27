@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     IonPage,
     IonHeader,
@@ -16,6 +17,7 @@ import {
 import { useAuthStore } from '../../store/authStore';
 
 const RegisterPage: React.FC = () => {
+    const { t } = useTranslation();
     const history = useHistory();
     const { register, isLoading, error, clearError } = useAuthStore();
 
@@ -37,19 +39,19 @@ const RegisterPage: React.FC = () => {
         <IonPage>
             <IonHeader>
                 <IonToolbar>
-                    <IonTitle>Register</IonTitle>
+                    <IonTitle>{t('auth.register')}</IonTitle>
                 </IonToolbar>
             </IonHeader>
             <IonContent className="ion-padding">
                 <div className="max-w-md mx-auto mt-8 space-y-6">
                     <div className="text-center mb-8">
-                        <h1 className="text-3xl font-bold text-gray-800 mb-2">Create Account</h1>
-                        <p className="text-gray-500">Join us to discover your potential</p>
+                        <h1 className="text-3xl font-bold text-gray-800 mb-2">{t('auth.create_account')}</h1>
+                        <p className="text-gray-500">{t('auth.register_subtitle')}</p>
                     </div>
 
                     <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
                         <IonItem className="rounded-lg border border-gray-200">
-                            <IonLabel position="floating">Email</IonLabel>
+                            <IonLabel position="floating">{t('auth.email')}</IonLabel>
                             <IonInput
                                 type="email"
                                 value={email}
@@ -59,7 +61,7 @@ const RegisterPage: React.FC = () => {
                         </IonItem>
 
                         <IonItem className="rounded-lg border border-gray-200">
-                            <IonLabel position="floating">Password</IonLabel>
+                            <IonLabel position="floating">{t('auth.password')}</IonLabel>
                             <IonInput
                                 type="password"
                                 value={password}
@@ -69,7 +71,7 @@ const RegisterPage: React.FC = () => {
                         </IonItem>
 
                         <IonItem className="rounded-lg border border-gray-200">
-                            <IonLabel position="floating">Age (Optional)</IonLabel>
+                            <IonLabel position="floating">{t('auth.age')} ({t('common.optional', 'Optional')})</IonLabel>
                             <IonInput
                                 type="number"
                                 value={age}
@@ -87,22 +89,22 @@ const RegisterPage: React.FC = () => {
                             {isLoading ? (
                                 <>
                                     <IonSpinner name="crescent" className="mr-2" />
-                                    Creating account...
+                                    {t('common.loading')}
                                 </>
                             ) : (
-                                'Register'
+                                t('auth.register')
                             )}
                         </IonButton>
 
                         <div className="text-center mt-4">
                             <p className="text-gray-600 text-sm">
-                                Already have an account?{' '}
+                                {t('auth.have_account')}{' '}
                                 <button
                                     onClick={() => history.push('/login')}
                                     className="text-blue-600 font-medium hover:underline"
                                     disabled={isLoading}
                                 >
-                                    Login here
+                                    {t('auth.login_here')}
                                 </button>
                             </p>
                         </div>
@@ -115,7 +117,7 @@ const RegisterPage: React.FC = () => {
                         setShowToast(false);
                         clearError();
                     }}
-                    message={error || 'Registration failed'}
+                    message={error || t('common.error')}
                     duration={3000}
                     color="danger"
                 />

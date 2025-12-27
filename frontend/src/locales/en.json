@@ -1,0 +1,93 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "back": "Back",
+        "save": "Save",
+        "cancel": "Cancel",
+        "optional": "Optional"
+    },
+    "tabs": {
+        "home": "Home",
+        "profile": "Profile"
+    },
+    "auth": {
+        "login": "Login",
+        "register": "Register",
+        "email": "Email",
+        "password": "Password",
+        "age": "Age",
+        "logout": "Logout",
+        "no_account": "Don't have an account?",
+        "have_account": "Already have an account?",
+        "register_here": "Register here",
+        "login_here": "Login here",
+        "welcome_back_title": "Welcome Back",
+        "login_subtitle": "Sign in to continue",
+        "create_account": "Create Account",
+        "register_subtitle": "Join us to discover your potential"
+    },
+    "home": {
+        "welcome_back": "Hello, {{name}}!",
+        "ready_message": "Ready to discover more about yourself?",
+        "start_assessment": "Start Assessment",
+        "start_description": "Discover your personality traits and career interests",
+        "begin_now": "Begin Now →",
+        "history_title": "History",
+        "no_history": "You haven't taken any tests yet",
+        "no_history_hint": "Start your first test above!",
+        "test_number": "Test #{{id}}",
+        "completed": "Completed"
+    },
+    "profile": {
+        "title": "Profile",
+        "user_info": "User Information",
+        "user_id": "User ID",
+        "settings": "Settings",
+        "select_language": "Select Language",
+        "language": "Language",
+        "notifications": "Notifications",
+        "privacy": "Privacy",
+        "about": "About"
+    },
+    "assessment": {
+        "question_count": "Question {{current}} of {{total}}",
+        "next": "Next",
+        "previous": "Previous",
+        "finish": "Finish",
+        "loading_questions": "Loading questions...",
+        "no_questions": "No questions loaded.",
+        "retry": "Retry",
+        "exit_confirm": "Are you sure you want to exit? Your progress will be lost.",
+        "exit_title": "Confirm Exit",
+        "exit_yes": "Yes, exit",
+        "exit_no": "Cancel",
+        "disagree": "Disagree",
+        "agree": "Agree"
+    },
+    "results": {
+        "your_result": "Your Profile",
+        "calculating": "Calculating your profile...",
+        "not_found": "No results found.",
+        "download_pdf": "Download PDF",
+        "generating_pdf": "Generating PDF...",
+        "interests": "Interests (RIASEC)",
+        "personality": "Personality (Big5)",
+        "career_interests": "Career Interests",
+        "personality_traits": "Personality Traits",
+        "top_interests": "Top Interests",
+        "trait_breakdown": "Trait Breakdown",
+        "development_plan": "Development Plan",
+        "back_home": "Back to Home",
+        "error_generating_pdf": "Error creating PDF. Please try again.",
+        "tag_career": "Career",
+        "tag_development": "Development",
+        "tag_well-being": "Well-being"
+    },
+    "languages": {
+        "ru": "Русский",
+        "kz": "Қазақша",
+        "en": "English"
+    }
+}

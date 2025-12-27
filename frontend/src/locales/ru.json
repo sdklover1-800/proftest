@@ -1,0 +1,93 @@
+{
+    "common": {
+        "loading": "Загрузка...",
+        "error": "Ошибка",
+        "success": "Успешно",
+        "back": "Назад",
+        "save": "Сохранить",
+        "cancel": "Отмена",
+        "optional": "Необязательно"
+    },
+    "tabs": {
+        "home": "Главная",
+        "profile": "Профиль"
+    },
+    "auth": {
+        "login": "Войти",
+        "register": "Регистрация",
+        "email": "Электронная почта",
+        "password": "Пароль",
+        "age": "Возраст",
+        "logout": "Выйти",
+        "no_account": "Нет аккаунта?",
+        "have_account": "Уже есть аккаунт?",
+        "register_here": "Зарегистрируйтесь",
+        "login_here": "Войдите",
+        "welcome_back_title": "С возвращением",
+        "login_subtitle": "Войдите, чтобы продолжить",
+        "create_account": "Создать аккаунт",
+        "register_subtitle": "Присоединяйтесь к нам, чтобы раскрыть свой потенциал"
+    },
+    "home": {
+        "welcome_back": "Привет, {{name}}!",
+        "ready_message": "Готовы узнать больше о себе?",
+        "start_assessment": "Начать тестирование",
+        "start_description": "Узнайте свои личностные качества и профессиональные интересы",
+        "begin_now": "Начать →",
+        "history_title": "История",
+        "no_history": "Вы еще не проходили тесты",
+        "no_history_hint": "Начните свой первый тест выше!",
+        "test_number": "Тест #{{id}}",
+        "completed": "Завершён"
+    },
+    "profile": {
+        "title": "Профиль",
+        "user_info": "Информация о пользователе",
+        "user_id": "ID пользователя",
+        "settings": "Настройки",
+        "select_language": "Выберите язык",
+        "language": "Язык",
+        "notifications": "Уведомления",
+        "privacy": "Конфиденциальность",
+        "about": "О приложении"
+    },
+    "assessment": {
+        "question_count": "Вопрос {{current}} из {{total}}",
+        "next": "Далее",
+        "previous": "Назад",
+        "finish": "Завершить",
+        "loading_questions": "Загрузка вопросов...",
+        "no_questions": "Вопросы не загружены.",
+        "retry": "Повторить",
+        "exit_confirm": "Вы уверены, что хотите выйти? Ваш прогресс будет потерян.",
+        "exit_title": "Подтверждение выхода",
+        "exit_yes": "Да, выйти",
+        "exit_no": "Отмена",
+        "disagree": "Не согласен",
+        "agree": "Согласен"
+    },
+    "results": {
+        "your_result": "Ваш профиль",
+        "calculating": "Расчёт вашего профиля...",
+        "not_found": "Результаты не найдены.",
+        "download_pdf": "Скачать PDF",
+        "generating_pdf": "Создание PDF...",
+        "interests": "Интересы (RIASEC)",
+        "personality": "Личность (Big5)",
+        "career_interests": "Профессиональные интересы",
+        "personality_traits": "Черты личности",
+        "top_interests": "Топ интересы",
+        "trait_breakdown": "Анализ черт",
+        "development_plan": "План развития",
+        "back_home": "На главную",
+        "error_generating_pdf": "Ошибка при создании PDF. Попробуйте ещё раз.",
+        "tag_career": "Карьера",
+        "tag_development": "Развитие",
+        "tag_well-being": "Благополучие"
+    },
+    "languages": {
+        "ru": "Русский",
+        "kz": "Қазақша",
+        "en": "English"
+    }
+}

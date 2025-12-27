@@ -39,3 +39,17 @@ class AnswerCreate(BaseModel):
 class UserResponse(AnswerCreate):
     id: int
     model_config = ConfigDict(from_attributes=True)
+
+
+class SessionSummary(BaseModel):
+    """
+    Summary schema for assessment history list.
+    Provides key information for displaying past sessions.
+    """
+    id: int
+    date: datetime
+    status: AssessmentStatusEnum
+    top_result: Optional[str] = None  # e.g., "Realistic - 25"
+    
+    model_config = ConfigDict(from_attributes=True)
+

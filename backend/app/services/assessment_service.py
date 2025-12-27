@@ -1,14 +1,13 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from typing import List
+from typing import List, Optional
 
 from app.models.assessment import AssessmentSession, UserResponse as DBUserResponse
 from app.models.question import Question
-from app.schemas.assessment import AssessmentSessionCreate, AnswerCreate, QuestionDTO
+from app.schemas.assessment import AssessmentSessionCreate, AnswerCreate, QuestionDTO, SessionSummary
 from app.repositories.assessment_repository import assessment_repository
 from app.services.scoring_service import calculate_score
-
-# repository removed as it is now imported
+from app.services.recommendation_service import recommendation_service
 
 class AssessmentService:
     """
@@ -46,9 +45,6 @@ class AssessmentService:
         """
         Saves a single user answer.
         """
-        # We could use a generic repository or direct DB add here.
-        # Since it's a simple create, we'll do it directly or add a method.
-        # Let's keep it simple and safe.
         db_answer = DBUserResponse(
             session_id=answer_in.session_id,
             question_id=answer_in.question_id,
@@ -69,5 +65,64 @@ class AssessmentService:
         ).order_by(AssessmentSession.start_time.desc())
         result = await db.execute(query)
         return result.scalars().all()
+
+    async def get_user_history_summaries(self, db: AsyncSession, user_id: int) -> List[SessionSummary]:
+        """
+        Fetches user history and transforms it into SessionSummary objects.
+        This follows the 'Thin Router' pattern by moving transformation logic here.
+        """
+        sessions = await self.get_user_history(db, user_id)
+        
+        summaries = []
+        for session in sessions:
+            summary = SessionSummary(
+                id=session.id,
+                date=session.start_time,
+                status=session.status,
+                top_result=self._get_top_result(session.raw_scores)
+            )
+            summaries.append(summary)
+        
+        return summaries
+
+    def _get_top_result(self, raw_scores: Optional[dict]) -> Optional[str]:
+        """
+        Internal helper to extract the top scoring category from raw_scores.
+        """
+        if not raw_scores:
+            return None
+        
+        # Check RIASEC first (primary interest type), then Big5
+        riasec_scores = raw_scores.get("RIASEC", {})
+        if riasec_scores:
+            top_category = max(riasec_scores.items(), key=lambda x: x[1])
+            return f"{top_category[0]} - {top_category[1]}"
+        
+        big5_scores = raw_scores.get("BIG5", {})
+        if big5_scores:
+            top_category = max(big5_scores.items(), key=lambda x: x[1])
+            return f"{top_category[0]} - {top_category[1]}"
+        
+        return None
+
+    async def get_session_results_with_recommendations(self, db: AsyncSession, session_id: int) -> dict:
+        """
+        Retrieves session results and generates recommendations in one go.
+        This thins the router by moving orchestration to the service.
+        """
+        session = await self.get_session(db, session_id)
+        if not session:
+            return None
+            
+        if not session.raw_scores:
+            return {"scores": None, "recommendations": [], "user_id": session.user_id}
+            
+        recommendations = recommendation_service.generate_recommendations(session.raw_scores)
+        
+        return {
+            "scores": session.raw_scores,
+            "recommendations": recommendations,
+            "user_id": session.user_id
+        }
 
 assessment_service = AssessmentService()

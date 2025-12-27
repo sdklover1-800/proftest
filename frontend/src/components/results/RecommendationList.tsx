@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Recommendation } from '../../types/assessment';
 
 interface Props {
@@ -6,10 +7,12 @@ interface Props {
 }
 
 const RecommendationList: React.FC<Props> = ({ recommendations }) => {
+    const { t } = useTranslation();
+
     if (!recommendations || recommendations.length === 0) {
         return (
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 text-center text-gray-500 italic">
-                No specific recommendations found based on your profile yet.
+                {t('results.no_recommendations', 'No specific recommendations found based on your profile yet.')}
             </div>
         );
     }
@@ -31,7 +34,7 @@ const RecommendationList: React.FC<Props> = ({ recommendations }) => {
                                 {tag === 'Career' && <span className="mr-1">💼</span>}
                                 {tag === 'Development' && <span className="mr-1">🧠</span>}
                                 {tag === 'Well-being' && <span className="mr-1">🌱</span>}
-                                {tag}
+                                {t(`results.tag_${tag.toLowerCase()}`, tag)}
                             </span>
                         ))}
                     </div>

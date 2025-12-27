@@ -2,6 +2,7 @@ import { Redirect, Route, useLocation } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { homeOutline, personOutline } from 'ionicons/icons';
+import { useTranslation } from 'react-i18next';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -35,6 +36,7 @@ setupIonicReact();
 
 // Component that contains the tab bar with conditional visibility
 const AuthenticatedApp: React.FC = () => {
+  const { t } = useTranslation();
   const location = useLocation();
 
   // Hide tabs on assessment and results pages for full-screen experience
@@ -55,11 +57,11 @@ const AuthenticatedApp: React.FC = () => {
       <IonTabBar slot="bottom" style={{ display: hideTabBar ? 'none' : 'flex' }}>
         <IonTabButton tab="home" href="/home">
           <IonIcon icon={homeOutline} />
-          <IonLabel>Home</IonLabel>
+          <IonLabel>{t('tabs.home')}</IonLabel>
         </IonTabButton>
         <IonTabButton tab="profile" href="/profile">
           <IonIcon icon={personOutline} />
-          <IonLabel>Profile</IonLabel>
+          <IonLabel>{t('tabs.profile')}</IonLabel>
         </IonTabButton>
       </IonTabBar>
     </IonTabs>

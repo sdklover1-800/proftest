@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     IonPage,
     IonHeader,
@@ -16,6 +17,7 @@ import {
 import { useAuthStore } from '../../store/authStore';
 
 const LoginPage: React.FC = () => {
+    const { t } = useTranslation();
     const history = useHistory();
     const { login, isLoading, error, clearError } = useAuthStore();
 
@@ -36,19 +38,19 @@ const LoginPage: React.FC = () => {
         <IonPage>
             <IonHeader>
                 <IonToolbar>
-                    <IonTitle>Login</IonTitle>
+                    <IonTitle>{t('auth.login')}</IonTitle>
                 </IonToolbar>
             </IonHeader>
             <IonContent className="ion-padding">
                 <div className="max-w-md mx-auto mt-8 space-y-6">
                     <div className="text-center mb-8">
-                        <h1 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h1>
-                        <p className="text-gray-500">Sign in to continue your assessment</p>
+                        <h1 className="text-3xl font-bold text-gray-800 mb-2">{t('auth.welcome_back_title')}</h1>
+                        <p className="text-gray-500">{t('auth.login_subtitle')}</p>
                     </div>
 
                     <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
                         <IonItem className="rounded-lg border border-gray-200">
-                            <IonLabel position="floating">Email</IonLabel>
+                            <IonLabel position="floating">{t('auth.email')}</IonLabel>
                             <IonInput
                                 type="email"
                                 value={email}
@@ -58,7 +60,7 @@ const LoginPage: React.FC = () => {
                         </IonItem>
 
                         <IonItem className="rounded-lg border border-gray-200">
-                            <IonLabel position="floating">Password</IonLabel>
+                            <IonLabel position="floating">{t('auth.password')}</IonLabel>
                             <IonInput
                                 type="password"
                                 value={password}
@@ -76,22 +78,22 @@ const LoginPage: React.FC = () => {
                             {isLoading ? (
                                 <>
                                     <IonSpinner name="crescent" className="mr-2" />
-                                    Logging in...
+                                    {t('common.loading')}
                                 </>
                             ) : (
-                                'Login'
+                                t('auth.login')
                             )}
                         </IonButton>
 
                         <div className="text-center mt-4">
                             <p className="text-gray-600 text-sm">
-                                Don't have an account?{' '}
+                                {t('auth.no_account')}{' '}
                                 <button
                                     onClick={() => history.push('/register')}
                                     className="text-blue-600 font-medium hover:underline"
                                     disabled={isLoading}
                                 >
-                                    Register here
+                                    {t('auth.register_here')}
                                 </button>
                             </p>
                         </div>
@@ -104,7 +106,7 @@ const LoginPage: React.FC = () => {
                         setShowToast(false);
                         clearError();
                     }}
-                    message={error || 'Login failed'}
+                    message={error || t('common.error')}
                     duration={3000}
                     color="danger"
                 />

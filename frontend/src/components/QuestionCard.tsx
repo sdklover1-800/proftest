@@ -1,6 +1,7 @@
 import React from 'react';
-// import { IonCard, IonCardContent, IonCardHeader } from '@ionic/react';
+import { useTranslation } from 'react-i18next';
 import type { Question } from '../store/assessmentStore';
+import { getLocalizedText } from '../utils/langUtils';
 import classNames from 'classnames';
 
 interface Props {
@@ -10,6 +11,8 @@ interface Props {
 }
 
 const QuestionCard: React.FC<Props> = ({ question, selectedValue, onSelect }) => {
+    const { t, i18n } = useTranslation();
+
     return (
         <div className="flex flex-col items-center justify-center flex-grow p-6 animate-fade-in">
             {/* Module Badge */}
@@ -17,9 +20,9 @@ const QuestionCard: React.FC<Props> = ({ question, selectedValue, onSelect }) =>
                 {question.module}
             </div>
 
-            {/* Question Text */}
+            {/* Question Text - Localized */}
             <h2 className="text-2xl font-bold text-center text-gray-900 mb-12 leading-relaxed">
-                {question.text_ru}
+                {getLocalizedText(question, i18n.language)}
             </h2>
 
             {/* Scale Options */}
@@ -70,11 +73,11 @@ const QuestionCard: React.FC<Props> = ({ question, selectedValue, onSelect }) =>
                 </div>
             )}
 
-            {/* Scale Labels (Optional) */}
+            {/* Scale Labels (Localized) */}
             {question.type === 'scale' && (
                 <div className="flex justify-between w-full max-w-sm px-2 mt-4 text-xs text-gray-400 font-medium uppercase tracking-wide">
-                    <span>Disagree</span>
-                    <span>Agree</span>
+                    <span>{t('assessment.disagree', 'Disagree')}</span>
+                    <span>{t('assessment.agree', 'Agree')}</span>
                 </div>
             )}
         </div>
