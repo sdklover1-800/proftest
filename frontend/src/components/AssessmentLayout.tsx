@@ -1,5 +1,7 @@
 import React, { type ReactNode } from 'react';
-import { IonPage, IonHeader, IonContent, IonProgressBar, IonToolbar, IonTitle, IonButtons, IonBackButton } from '@ionic/react';
+import { IonPage, IonHeader, IonContent, IonProgressBar, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon } from '@ionic/react';
+import { close } from 'ionicons/icons';
+import { useHistory } from 'react-router-dom';
 
 interface Props {
     children: ReactNode;
@@ -8,12 +10,22 @@ interface Props {
 }
 
 const AssessmentLayout: React.FC<Props> = ({ children, title, progress }) => {
+    const history = useHistory();
+
+    const handleClose = () => {
+        if (window.confirm('Are you sure you want to exit the assessment? Your progress will be lost.')) {
+            history.push('/home');
+        }
+    };
+
     return (
         <IonPage>
             <IonHeader className="ion-no-border shadow-none">
                 <IonToolbar color="light">
-                    <IonButtons slot="start">
-                        <IonBackButton defaultHref="/" />
+                    <IonButtons slot="end">
+                        <IonButton onClick={handleClose}>
+                            <IonIcon icon={close} slot="icon-only" />
+                        </IonButton>
                     </IonButtons>
                     <IonTitle className="text-sm font-semibold text-gray-800">{title}</IonTitle>
                 </IonToolbar>

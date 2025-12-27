@@ -12,12 +12,15 @@ class UserService:
     
     async def create_user(self, db: AsyncSession, user_in: UserCreate) -> User:
         """
-        Creates a new user.
-        TODO: Add password hashing here when implementing auth.
+        Creates a new user with hashed password.
         """
-        # We assume validation happens in the API layer or here if needed
-        # For now, just passing data to repo
-        return await user_repository.create(db, user_in.model_dump())
+        from app.core.security import get_password_hash
+        
+        user_data = user_in.model_dump()
+        user_data["hashed_password"] = get_password_hash(user_in.password)
+        del user_data["password"] # Remove plain password
+        
+        return await user_repository.create(db, user_data)
 
     async def get_user_by_email(self, db: AsyncSession, email: str) -> Optional[User]:
         """

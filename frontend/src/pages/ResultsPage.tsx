@@ -1,20 +1,47 @@
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { IonContent, IonPage, IonHeader, IonToolbar, IonTitle, IonSpinner, IonButton } from '@ionic/react';
 import { useAssessmentStore } from '../store/assessmentStore';
 import { useResults } from '../hooks/useResults';
 import PsychometricRadar from '../components/charts/PsychometricRadar';
+import RecommendationList from '../components/results/RecommendationList';
 
 const ResultsPage: React.FC = () => {
     const history = useHistory();
-    const sessionId = useAssessmentStore((state) => state.sessionId);
+    const location = useLocation();
+    const storeSessionId = useAssessmentStore((state) => state.sessionId);
     const reset = useAssessmentStore((state) => state.reset);
-    const { results, loading, error } = useResults(sessionId);
+
+    // Get session ID from multiple sources:
+    // 1. URL query params (e.g., /results?session=123)
+    // 2. LocalStorage (viewSessionId set from Home page)
+    // 3. Assessment store (current active session)
+    const getSessionId = (): number | null => {
+        // Check URL params first
+        const params = new URLSearchParams(location.search);
+        const urlSessionId = params.get('session');
+        if (urlSessionId) {
+            return parseInt(urlSessionId, 10);
+        }
+
+        // Check localStorage for viewSessionId (set when clicking history item)
+        const viewSessionId = localStorage.getItem('viewSessionId');
+        if (viewSessionId) {
+            localStorage.removeItem('viewSessionId'); // Clean up after reading
+            return parseInt(viewSessionId, 10);
+        }
+
+        // Fallback to store
+        return storeSessionId;
+    };
+
+    const [sessionId] = useState<number | null>(getSessionId);
+    const { results, recommendations, loading, error } = useResults(sessionId);
     const [activeTab, setActiveTab] = useState<'RIASEC' | 'BIG5'>('RIASEC');
 
     const handleHome = () => {
         reset();
-        history.push('/');
+        history.push('/home');
     };
 
     if (loading) {
@@ -119,6 +146,25 @@ const ResultsPage: React.FC = () => {
                             </div>
                         )}
                     </div>
+
+                    {/* Recommendations Section */}
+                    {results && (
+                        <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-xl border border-indigo-100 shadow-sm animate-fade-in">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-bold text-indigo-900 flex items-center gap-2">
+                                    <span>🚀</span> Development Plan
+                                </h3>
+                                <button
+                                    onClick={() => alert("Save as PDF is coming soon!")}
+                                    className="text-sm text-indigo-600 font-medium hover:text-indigo-800 hover:underline"
+                                >
+                                    ⬇ Save as PDF
+                                </button>
+                            </div>
+
+                            <RecommendationList recommendations={recommendations} />
+                        </div>
+                    )}
 
                     <div className="pt-6">
                         <IonButton expand="block" shape="round" onClick={handleHome} className="h-12 font-medium">

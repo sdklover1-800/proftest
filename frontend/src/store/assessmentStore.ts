@@ -20,6 +20,7 @@ interface AssessmentState {
     isFinished: boolean;
 
     initSession: () => Promise<void>;
+    startAssessment: () => Promise<number>;
     fetchQuestions: () => Promise<void>;
     setAnswer: (questionId: number, value: number) => Promise<void>;
     nextQuestion: () => void;
@@ -43,6 +44,22 @@ export const useAssessmentStore = create<AssessmentState>()(
                     set({ sessionId: session.id });
                 } catch (error) {
                     console.error("Failed to start session", error);
+                }
+            },
+
+            startAssessment: async () => {
+                try {
+                    const session = await assessmentApi.startSession();
+                    set({
+                        sessionId: session.id,
+                        currentIndex: 0,
+                        responses: {},
+                        isFinished: false
+                    });
+                    return session.id;
+                } catch (error) {
+                    console.error("Failed to start assessment", error);
+                    throw error;
                 }
             },
 

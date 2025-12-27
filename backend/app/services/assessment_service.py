@@ -25,8 +25,11 @@ class AssessmentService:
         session = await assessment_repository.update_results(db, session_id, results)
         return session
 
-    async def create_session(self, db: AsyncSession, session_in: AssessmentSessionCreate) -> AssessmentSession:
-        return await assessment_repository.create(db, session_in.model_dump(exclude_unset=True))
+    async def create_session(self, db: AsyncSession, session_in: AssessmentSessionCreate, user_id: int | None = None) -> AssessmentSession:
+        data = session_in.model_dump(exclude_unset=True)
+        if user_id:
+            data["user_id"] = user_id
+        return await assessment_repository.create(db, data)
 
     async def get_session(self, db: AsyncSession, session_id: int) -> AssessmentSession:
         return await assessment_repository.get_by_id(db, session_id)
@@ -56,5 +59,15 @@ class AssessmentService:
         await db.commit()
         await db.refresh(db_answer)
         return db_answer
+    
+    async def get_user_history(self, db: AsyncSession, user_id: int) -> List[AssessmentSession]:
+        """
+        Fetches all assessment sessions for a specific user, ordered by most recent.
+        """
+        query = select(AssessmentSession).filter(
+            AssessmentSession.user_id == user_id
+        ).order_by(AssessmentSession.start_time.desc())
+        result = await db.execute(query)
+        return result.scalars().all()
 
 assessment_service = AssessmentService()

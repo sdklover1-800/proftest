@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.services.user_service import user_service
-from app.api.v1.endpoints import questions, assessment, results
+from app.api.v1.endpoints import questions, assessment, results, auth
 
 # We import models to ensure Alembic/SQLAlchemy sees them if we were using it here, 
 # although main.py usually doesn't need models directly.
@@ -20,6 +20,7 @@ app.add_middleware(
 app.include_router(questions.router, tags=["questions"]) # Deprecated or kept for backward compatibility if needed
 app.include_router(assessment.router, prefix="/api/v1/assessment", tags=["assessment"])
 app.include_router(results.router, prefix="/api/v1", tags=["results"])
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 
 @app.get("/")
 def read_root():

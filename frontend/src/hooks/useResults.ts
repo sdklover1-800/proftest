@@ -14,6 +14,7 @@ interface ResultsData {
 
 export const useResults = (sessionId: number | null) => {
     const [results, setResults] = useState<ResultsData | null>(null);
+    const [recommendations, setRecommendations] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -27,12 +28,17 @@ export const useResults = (sessionId: number | null) => {
             try {
                 // Try to get existing results first
                 try {
-                    const data = await assessmentApi.getResults(sessionId);
-                    setResults(formatData(data));
+                    const response = await assessmentApi.getResults(sessionId);
+                    setResults(formatData(response.scores));
+                    setRecommendations(response.recommendations || []);
                 } catch (e) {
-                    // If not found, try to finish the assessment
-                    const data = await assessmentApi.finishAssessment(sessionId);
-                    setResults(formatData(data));
+                    // It might be that the assessment exists but results are not calculated ?? 
+                    // Actually getResults throws 400 if not completed.
+
+                    // If not found or not completed, try to finish the assessment
+                    const response = await assessmentApi.finishAssessment(sessionId);
+                    setResults(formatData(response.scores));
+                    setRecommendations(response.recommendations || []);
                 }
             } catch (err) {
                 console.error("Failed to fetch results", err);
@@ -45,20 +51,20 @@ export const useResults = (sessionId: number | null) => {
         fetchResults();
     }, [sessionId]);
 
-    const formatData = (apiData: any): ResultsData => {
-        const formatSection = (sectionData: Record<string, number>): ChartData[] => {
-            return Object.entries(sectionData).map(([key, value]) => ({
-                subject: key,
-                A: value,
-                fullMark: 30 // Approx max score per category
-            }));
-        };
+    return { results, recommendations, loading, error };
+};
 
-        return {
-            RIASEC: apiData.RIASEC ? formatSection(apiData.RIASEC) : [],
-            BIG5: apiData.BIG5 ? formatSection(apiData.BIG5) : []
-        };
+const formatData = (apiData: any): ResultsData => {
+    const formatSection = (sectionData: Record<string, number>): ChartData[] => {
+        return Object.entries(sectionData).map(([key, value]) => ({
+            subject: key,
+            A: value,
+            fullMark: 30 // Approx max score per category
+        }));
     };
 
-    return { results, loading, error };
+    return {
+        RIASEC: apiData.RIASEC ? formatSection(apiData.RIASEC) : [],
+        BIG5: apiData.BIG5 ? formatSection(apiData.BIG5) : []
+    };
 };

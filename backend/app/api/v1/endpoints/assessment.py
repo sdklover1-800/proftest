@@ -14,12 +14,19 @@ async def get_questions(db: AsyncSession = Depends(get_db)):
     """
     return await assessment_service.get_all_questions(db)
 
+from app.models.user import User
+from app.api import deps
+
 @router.post("/start", response_model=AssessmentSession)
-async def start_assessment(session_in: AssessmentSessionCreate, db: AsyncSession = Depends(get_db)):
+async def start_assessment(
+    session_in: AssessmentSessionCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user)
+):
     """
-    Starts a new assessment session.
+    Starts a new assessment session for the logged-in user.
     """
-    return await assessment_service.create_session(db, session_in)
+    return await assessment_service.create_session(db, session_in, user_id=current_user.id)
 
 @router.post("/submit", response_model=UserResponse)
 async def submit_answer(answer_in: AnswerCreate, db: AsyncSession = Depends(get_db)):
@@ -27,3 +34,14 @@ async def submit_answer(answer_in: AnswerCreate, db: AsyncSession = Depends(get_
     Saves a user answer.
     """
     return await assessment_service.save_answer(db, answer_in)
+
+@router.get("/history", response_model=List[AssessmentSession])
+async def get_assessment_history(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user)
+):
+    """
+    Returns the current user's assessment history.
+    """
+    return await assessment_service.get_user_history(db, current_user.id)
+
