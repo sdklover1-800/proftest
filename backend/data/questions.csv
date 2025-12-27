@@ -1,0 +1,4 @@
+code,module,category,text_ru,text_kz,text_en,type,is_reverse
+R1,RIASEC,Realistic,Russian text 1,Kazakh text 1,English text 1,scale,False
+O5,BIG5,Openness,Russian text 2,Kazakh text 2,English text 2,scale,True
+C1,COGNITIVE,General,Russian text 3,Kazakh text 3,English text 3,choice,False
