@@ -39,15 +39,19 @@ export const useAssessmentStore = create<AssessmentState>()(
             isFinished: false,
 
             initSession: async () => {
+                set({ isLoading: true });
                 try {
                     const session = await assessmentApi.startSession();
                     set({ sessionId: session.id });
                 } catch (error) {
                     console.error("Failed to start session", error);
+                } finally {
+                    set({ isLoading: false });
                 }
             },
 
             startAssessment: async () => {
+                set({ isLoading: true });
                 try {
                     const session = await assessmentApi.startSession();
                     set({
@@ -60,13 +64,17 @@ export const useAssessmentStore = create<AssessmentState>()(
                 } catch (error) {
                     console.error("Failed to start assessment", error);
                     throw error;
+                } finally {
+                    set({ isLoading: false });
                 }
             },
 
             fetchQuestions: async () => {
                 set({ isLoading: true });
+                console.log('Fetching questions from API...');
                 try {
                     const questions = await assessmentApi.getQuestions();
+                    console.log('API Response Questions:', questions);
                     set({ questions });
                 } catch (error) {
                     console.error("Failed to fetch questions", error);
@@ -114,6 +122,19 @@ export const useAssessmentStore = create<AssessmentState>()(
         {
             name: 'assessment-storage',
             storage: createJSONStorage(() => localStorage),
+            version: 2, // Bump to 2 to force clear questions
+            migrate: (persistedState: any, version: number) => {
+                // If version is old, we want to clear questions so they are re-fetched
+                if (version < 2) {
+                    return {
+                        ...persistedState,
+                        questions: [], // FORCE CLEAR QUESTIONS
+                        isLoading: false
+                    };
+                }
+                return persistedState;
+            },
+            // partialization: (state) => ({ ... }), // Optional: if we want to pick what to persist
         }
     )
 );

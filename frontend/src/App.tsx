@@ -21,16 +21,16 @@ import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
 
 /* Theme variables */
-import './index.css'; // Tailwind
+import './index.css';
 
+/* Feature-Sliced Design Imports */
+import { HomePage } from '@features/home';
+import { ProfilePage } from '@features/profile';
+import { AssessmentPage } from '@features/assessment';
+import { ResultsPage } from '@features/results';
+import { LoginPage, RegisterPage } from '@features/auth';
 import Welcome from './pages/Welcome';
-import AssessmentPage from './pages/AssessmentPage';
-import ResultsPage from './pages/ResultsPage';
-import LoginPage from './pages/auth/LoginPage';
-import RegisterPage from './pages/auth/RegisterPage';
-import Home from './pages/Home';
-import ProfilePage from './pages/ProfilePage';
-import { useAuthStore } from './store/authStore';
+import { useAuthStore } from '@/store/authStore';
 
 setupIonicReact();
 
@@ -45,7 +45,7 @@ const AuthenticatedApp: React.FC = () => {
   return (
     <IonTabs>
       <IonRouterOutlet>
-        <Route exact path="/home" component={Home} />
+        <Route exact path="/home" component={HomePage} />
         <Route exact path="/profile" component={ProfilePage} />
         <Route exact path="/assessment" component={AssessmentPage} />
         <Route exact path="/results" component={ResultsPage} />
@@ -71,7 +71,6 @@ const AuthenticatedApp: React.FC = () => {
 const App: React.FC = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  // Simple routing without complex nesting
   if (!isAuthenticated) {
     return (
       <IonApp>
@@ -92,7 +91,6 @@ const App: React.FC = () => {
     );
   }
 
-  // Authenticated layout with tabs
   return (
     <IonApp>
       <IonReactRouter>

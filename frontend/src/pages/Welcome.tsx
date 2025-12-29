@@ -2,7 +2,7 @@ import React from 'react';
 import { IonButton } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import AssessmentLayout from '../components/AssessmentLayout';
+import { AssessmentLayout } from '@features/assessment';
 
 const Welcome: React.FC = () => {
     const { t } = useTranslation();
@@ -24,9 +24,9 @@ const Welcome: React.FC = () => {
                     shape="round"
                     size="large"
                     className="w-full max-w-xs font-bold"
-                    onClick={() => history.push('/assessment')}
+                    onClick={() => history.push('/login')}
                 >
-                    {t('home.start_assessment')}
+                    {t('home.begin_now')}
                 </IonButton>
 
                 <div className="absolute bottom-6 text-xs text-gray-400">
