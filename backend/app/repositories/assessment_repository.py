@@ -1,12 +1,16 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.assessment import AssessmentSession, AssessmentStatusEnum
 from app.repositories.base import BaseRepository
+
 
 class AssessmentRepository(BaseRepository[AssessmentSession]):
     def __init__(self):
         super().__init__(AssessmentSession)
 
-    async def update_results(self, db: AsyncSession, session_id: int, results: dict) -> AssessmentSession:
+    async def update_results(
+        self, db: AsyncSession, session_id: int, results: dict
+    ) -> AssessmentSession:
         """
         Updates the session with calculated results and marks it as completed.
         """
@@ -17,5 +21,6 @@ class AssessmentRepository(BaseRepository[AssessmentSession]):
             await db.commit()
             await db.refresh(session)
         return session
+
 
 assessment_repository = AssessmentRepository()

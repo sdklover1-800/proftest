@@ -1,8 +1,11 @@
-from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-from typing import Optional, Dict, Any, List
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict
+
 from app.models.assessment import AssessmentStatusEnum
-from app.models.question import QuestionTypeEnum, ModuleEnum
+from app.models.question import ModuleEnum, QuestionTypeEnum
+
 
 # Question DTO
 class QuestionDTO(BaseModel):
@@ -11,30 +14,35 @@ class QuestionDTO(BaseModel):
     text_ru: str
     type: QuestionTypeEnum
     module: ModuleEnum
-    category: Optional[str] = None
-    
+    category: str | None = None
+
     model_config = ConfigDict(from_attributes=True)
+
 
 # Session Schemas
 class AssessmentSessionBase(BaseModel):
-    user_id: Optional[int] = None # Optional for MVP as requested
+    user_id: int | None = None  # Optional for MVP as requested
     status: AssessmentStatusEnum = AssessmentStatusEnum.started
-    raw_scores: Dict[str, Any] = {}
+    raw_scores: dict[str, Any] = {}
+
 
 class AssessmentSessionCreate(AssessmentSessionBase):
     pass
+
 
 class AssessmentSession(AssessmentSessionBase):
     id: int
     start_time: datetime
     model_config = ConfigDict(from_attributes=True)
 
+
 # Answer/Response Schemas
 class AnswerCreate(BaseModel):
     session_id: int
     question_id: int
     value: int
-    reaction_time_ms: Optional[int] = None
+    reaction_time_ms: int | None = None
+
 
 class UserResponse(AnswerCreate):
     id: int
@@ -46,10 +54,10 @@ class SessionSummary(BaseModel):
     Summary schema for assessment history list.
     Provides key information for displaying past sessions.
     """
+
     id: int
     date: datetime
     status: AssessmentStatusEnum
-    top_result: Optional[str] = None  # e.g., "Realistic - 25"
-    
-    model_config = ConfigDict(from_attributes=True)
+    top_result: str | None = None  # e.g., "Realistic - 25"
 
+    model_config = ConfigDict(from_attributes=True)

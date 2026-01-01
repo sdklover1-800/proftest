@@ -1,19 +1,23 @@
+
 from pydantic import BaseModel, ConfigDict
+
 from app.models.question import ModuleEnum, QuestionTypeEnum
-from typing import Optional
+
 
 class QuestionBase(BaseModel):
     code: str
     module: ModuleEnum
-    category: Optional[str] = None
-    text_ru: Optional[str] = None
-    text_kz: Optional[str] = None
-    text_en: Optional[str] = None
+    category: str | None = None
+    text_ru: str | None = None
+    text_kz: str | None = None
+    text_en: str | None = None
     type: QuestionTypeEnum
     is_reverse: bool = False
 
+
 class QuestionCreate(QuestionBase):
     pass
+
 
 class Question(QuestionBase):
     id: int

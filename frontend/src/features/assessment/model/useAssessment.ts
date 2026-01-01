@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useAssessmentStore } from '@/store/assessmentStore';
+import { useAssessmentQuestions, useStartSession, useSubmitAnswer } from '../api/queries';
 
 interface Question {
     id: number;
@@ -24,58 +25,80 @@ interface UseAssessmentReturn {
 }
 
 /**
- * Custom hook for assessment flow logic.
- * Manages session initialization, question fetching, and answer handling.
+ * Custom hook for assessment flow logic using TanStack Query.
  */
 export const useAssessment = (): UseAssessmentReturn => {
+    // 1. Store State (UI)
     const {
-        questions,
         currentIndex,
         responses,
-        fetchQuestions,
-        initSession,
         setAnswer,
         nextQuestion,
-        isLoading,
         isFinished,
-        sessionId
+        sessionId,
+        setSessionId
     } = useAssessmentStore();
 
+    // 2. Queries (Data)
+    const {
+        data: questions = [],
+        isLoading: isQuestionsLoading,
+        refetch: refetchQuestions
+    } = useAssessmentQuestions();
+
+    // 3. Mutations
+    const startSessionMutation = useStartSession();
+    const submitAnswerMutation = useSubmitAnswer();
+
+    // Initialize session if needed
     useEffect(() => {
-        // Init session if not exists
-        if (!sessionId) {
-            initSession();
+        if (!sessionId && !startSessionMutation.isPending && !startSessionMutation.isSuccess) {
+            startSessionMutation.mutate(undefined, {
+                onSuccess: (data) => {
+                    setSessionId(data.id);
+                },
+                onError: (error) => {
+                    console.error("Failed to start session:", error);
+                }
+            });
         }
-        // Fetch questions if empty
-        if (questions.length === 0) {
-            fetchQuestions();
-        }
-        console.log('Current questions in store:', questions);
-    }, [fetchQuestions, initSession, sessionId, questions, questions.length]);
+    }, [sessionId, startSessionMutation.isPending, startSessionMutation.isSuccess, setSessionId]);
 
     const currentQuestion = questions[currentIndex];
-    const progress = questions.length > 0 ? (currentIndex + 1) / questions.length : 0;
+    const totalQuestions = questions.length;
+    const progress = totalQuestions > 0 ? (currentIndex + 1) / totalQuestions : 0;
 
     const handleSelect = (value: number): void => {
-        if (currentQuestion) {
+        if (currentQuestion && sessionId) {
+            // Optimistic update in UI
             setAnswer(currentQuestion.id, value);
 
-            // Auto advance after short delay for UX
+            // Sync with backend
+            submitAnswerMutation.mutate({
+                sessionId,
+                questionId: currentQuestion.id,
+                value
+            });
+
+            // Auto advance
             setTimeout(() => {
-                nextQuestion();
+                nextQuestion(totalQuestions);
             }, 300);
         }
     };
 
+    // Derived loading state
+    const isLoading = isQuestionsLoading || (sessionId === null && startSessionMutation.isPending);
+
     return {
         isLoading,
         isFinished,
-        currentQuestion,
+        currentQuestion: currentQuestion as Question | undefined,
         currentIndex,
-        totalQuestions: questions.length,
+        totalQuestions,
         responses,
         progress,
         handleSelect,
-        retry: fetchQuestions
+        retry: refetchQuestions
     };
 };

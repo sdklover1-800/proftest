@@ -2,6 +2,7 @@ import { Redirect, Route, useLocation } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { homeOutline, personOutline } from 'ionicons/icons';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 /* Core CSS required for Ionic components to work properly */
@@ -68,35 +69,31 @@ const AuthenticatedApp: React.FC = () => {
   );
 };
 
+const queryClient = new QueryClient();
+
 const App: React.FC = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  if (!isAuthenticated) {
-    return (
+  return (
+    <QueryClientProvider client={queryClient}>
       <IonApp>
         <IonReactRouter>
-          <IonRouterOutlet>
-            <Route exact path="/login" component={LoginPage} />
-            <Route exact path="/register" component={RegisterPage} />
-            <Route exact path="/welcome" component={Welcome} />
-            <Route exact path="/">
-              <Redirect to="/welcome" />
-            </Route>
-            <Route>
-              <Redirect to="/login" />
-            </Route>
-          </IonRouterOutlet>
+          {isAuthenticated ? <AuthenticatedApp /> : (
+            <IonRouterOutlet>
+              <Route exact path="/login" component={LoginPage} />
+              <Route exact path="/register" component={RegisterPage} />
+              <Route exact path="/welcome" component={Welcome} />
+              <Route exact path="/">
+                <Redirect to="/welcome" />
+              </Route>
+              <Route>
+                <Redirect to="/login" />
+              </Route>
+            </IonRouterOutlet>
+          )}
         </IonReactRouter>
       </IonApp>
-    );
-  }
-
-  return (
-    <IonApp>
-      <IonReactRouter>
-        <AuthenticatedApp />
-      </IonReactRouter>
-    </IonApp>
+    </QueryClientProvider>
   );
 };
 

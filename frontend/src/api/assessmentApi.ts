@@ -3,9 +3,7 @@ import type { Question } from '../store/assessmentStore';
 
 export const assessmentApi = {
     getQuestions: async (): Promise<Question[]> => {
-        console.log(`[API] Requesting: ${client.getUri()}/api/v1/assessment/questions`);
         const response = await client.get<Question[]>('/api/v1/assessment/questions');
-        console.log(`[API] Response data:`, response.data);
         return response.data;
     },
 
@@ -33,6 +31,11 @@ export const assessmentApi = {
 
     getResults: async (sessionId: number): Promise<any> => {
         const response = await client.get(`/api/v1/assessment/${sessionId}/results`);
+        return response.data;
+    },
+
+    getHistory: async (): Promise<any[]> => {
+        const response = await client.get('/api/v1/assessment/history');
         return response.data;
     }
 };

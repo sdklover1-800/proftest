@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useAssessmentStore } from '@/store/assessmentStore';
-import { client } from '@/api/client';
+import { assessmentApi } from '@/api/assessmentApi';
+import { useStartSession } from '@/features/assessment/api/queries';
 
 export interface SessionSummary {
     id: number;
@@ -27,18 +28,21 @@ interface UseHomeReturn {
 export const useHome = (): UseHomeReturn => {
     const history = useHistory();
     const user = useAuthStore((state) => state.user);
-    const { startAssessment } = useAssessmentStore();
+    const setSessionId = useAssessmentStore((state) => state.setSessionId);
+
+    // React Query Mutation
+    const startSessionMutation = useStartSession();
 
     const [sessions, setSessions] = useState<SessionSummary[]>([]);
     const [loading, setLoading] = useState(true);
-    const [starting, setStarting] = useState(false);
 
-    const fetchHistory = async (): Promise<void> => {
+    const fetchHistory = async () => {
+        setLoading(true);
         try {
-            const response = await client.get('/api/v1/assessment/history');
-            setSessions(response.data);
+            const historyData = await assessmentApi.getHistory();
+            setSessions(historyData);
         } catch (error) {
-            console.error('Failed to fetch history', error);
+            console.error("Failed to load history", error);
         } finally {
             setLoading(false);
         }
@@ -56,15 +60,15 @@ export const useHome = (): UseHomeReturn => {
     };
 
     const handleStartAssessment = async (): Promise<void> => {
-        setStarting(true);
-        try {
-            await startAssessment();
-            history.push('/assessment');
-        } catch (error) {
-            console.error('Failed to start assessment:', error);
-        } finally {
-            setStarting(false);
-        }
+        startSessionMutation.mutate(undefined, {
+            onSuccess: (data) => {
+                setSessionId(data.id);
+                history.push('/assessment');
+            },
+            onError: (error) => {
+                console.error("Failed to start assessment", error);
+            }
+        });
     };
 
     const viewSessionResults = (sessionId: number): void => {
@@ -73,13 +77,13 @@ export const useHome = (): UseHomeReturn => {
     };
 
     const userName = user?.email.split('@')[0] || 'User';
-    const completedSessions = sessions.filter(s => s.status === 'completed');
+    // const completedSessions = sessions.filter(s => s.status === 'completed');
 
     return {
         userName,
-        sessions: completedSessions,
+        sessions,
         loading,
-        starting,
+        starting: startSessionMutation.isPending,
         handleRefresh,
         handleStartAssessment,
         viewSessionResults

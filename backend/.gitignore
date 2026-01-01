@@ -64,3 +64,6 @@ coverage.xml
 # Local development
 .DS_Store
 Thumbs.db
+
+# Ruff
+.ruff_cache/
