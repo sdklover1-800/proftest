@@ -1,5 +1,6 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { assessmentApi } from '@/api/assessmentApi';
+import type { ContextData } from '@/api/assessmentApi';
 
 export const ASSESSMENT_KEYS = {
     all: ['assessment'] as const,
@@ -17,7 +18,7 @@ export const useAssessmentQuestions = () => {
 
 export const useStartSession = () => {
     return useMutation({
-        mutationFn: assessmentApi.startSession,
+        mutationFn: (contextData?: ContextData) => assessmentApi.startSession(contextData),
     });
 };
 
