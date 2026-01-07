@@ -6,7 +6,8 @@
         "back": "Back",
         "save": "Save",
         "cancel": "Cancel",
-        "optional": "Optional"
+        "optional": "Optional",
+        "user": "User"
     },
     "tabs": {
         "home": "Home",
@@ -66,8 +67,27 @@
         "disagree": "Disagree",
         "agree": "Agree"
     },
+    "context": {
+        "title": "Before We Start",
+        "header": "How are you feeling?",
+        "subtitle": "This data helps us better understand your results",
+        "sleep_question": "How much did you sleep?",
+        "sleep_hint": "in the last 24 hours",
+        "hours": "hours",
+        "hours_short": "h",
+        "stress_question": "Stress Level",
+        "stress_low": "Low",
+        "stress_medium": "Medium",
+        "stress_high": "High",
+        "mood_question": "Current Mood",
+        "mood_sad": "Sad",
+        "mood_neutral": "Neutral",
+        "mood_happy": "Happy",
+        "start_test": "Start Test →"
+    },
     "results": {
         "your_result": "Your Profile",
+        "your_archetype": "Your Archetype",
         "calculating": "Calculating your profile...",
         "not_found": "No results found.",
         "download_pdf": "Download PDF",
@@ -78,16 +98,88 @@
         "personality_traits": "Personality Traits",
         "top_interests": "Top Interests",
         "trait_breakdown": "Trait Breakdown",
-        "development_plan": "Development Plan",
+        "development_plan": "4-Week Development Plan",
         "back_home": "Back to Home",
         "error_generating_pdf": "Error creating PDF. Please try again.",
         "tag_career": "Career",
         "tag_development": "Development",
-        "tag_well-being": "Well-being"
+        "tag_well-being": "Well-being",
+        "week1_title": "Week 1: Exploration",
+        "week2_title": "Week 2: Practice",
+        "week3_title": "Week 3: Networking",
+        "week4_title": "Week 4: Planning",
+        "tasks": "tasks",
+        "no_recommendations": "No recommendations found",
+        "context_warning": "⚠️ Note: You reported low sleep or high stress. This might affect your cognitive profile.",
+        "sjt_title": "Soft Skills (SJT)"
     },
     "languages": {
         "ru": "Русский",
         "kz": "Қазақша",
         "en": "English"
+    },
+    "archetypes": {
+        "riasec": {
+            "realistic": {
+                "title": "Practitioner",
+                "description": "You like working with hands and technology"
+            },
+            "investigative": {
+                "title": "Analyst",
+                "description": "You like investigating and solving problems"
+            },
+            "artistic": {
+                "title": "Creator",
+                "description": "You value freedom and self-expression"
+            },
+            "social": {
+                "title": "Mentor",
+                "description": "You like helping and teaching people"
+            },
+            "enterprising": {
+                "title": "Leader",
+                "description": "You are good at persuading and managing"
+            },
+            "conventional": {
+                "title": "Organizer",
+                "description": "You like order and clear rules"
+            }
+        },
+        "big5": {
+            "openness": {
+                "title": "Innovator",
+                "description": "Open to new experiences and ideas"
+            },
+            "conscientiousness": {
+                "title": "Planner",
+                "description": "Disciplined and reliable"
+            },
+            "extraversion": {
+                "title": "Communicator",
+                "description": "Energetic and sociable"
+            },
+            "agreeableness": {
+                "title": "Diplomat",
+                "description": "Friendly and ready to compromise"
+            },
+            "neuroticism": {
+                "title": "Sensitive",
+                "description": "You react emotionally to stress"
+            }
+        },
+        "default": {
+            "title": "Unique Trait",
+            "description": "Unique characteristic"
+        }
+    },
+    "admin": {
+        "title": "Admin Panel",
+        "tabs": {
+            "dashboard": "Dashboard",
+            "users": "Users",
+            "questions": "Questions",
+            "sessions": "Sessions",
+            "analytics": "Analytics"
+        }
     }
 }

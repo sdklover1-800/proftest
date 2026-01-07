@@ -6,7 +6,8 @@
         "back": "Артқа",
         "save": "Сақтау",
         "cancel": "Болдырмау",
-        "optional": "Міндетті емес"
+        "optional": "Міндетті емес",
+        "user": "Қолданушы"
     },
     "tabs": {
         "home": "Басты",
@@ -19,8 +20,8 @@
         "password": "Құпия сөз",
         "age": "Жасы",
         "logout": "Шығу",
-        "no_account": "Тіркелгіңіз жоқ па?",
-        "have_account": "Тіркелгіңіз бар ма?",
+        "no_account": "Тіркелген жоқсіз ба?",
+        "have_account": "Тіркелгіңсіз ба?",
         "register_here": "Тіркеліңіз",
         "login_here": "Кіріңіз",
         "welcome_back_title": "Қайта қош келдіңіз",
@@ -66,8 +67,27 @@
         "disagree": "Келіспеймін",
         "agree": "Келісемін"
     },
+    "context": {
+        "title": "Бастамас бұрын",
+        "header": "Өзіңізді қалай сезінесіз?",
+        "subtitle": "Бұл деректер нәтижелеріңізді жақсы түсінуге көмектеседі",
+        "sleep_question": "Қанша уйықтадыңыз?",
+        "sleep_hint": "соңғы 24 сағатта",
+        "hours": "сағат",
+        "hours_short": "с",
+        "stress_question": "Стресс деңгейі",
+        "stress_low": "Төмен",
+        "stress_medium": "Орташа",
+        "stress_high": "Жоғары",
+        "mood_question": "Қазіргі көңіл-күй",
+        "mood_sad": "Мұңды",
+        "mood_neutral": "Қалыпты",
+        "mood_happy": "Жақсы",
+        "start_test": "Тестті бастау →"
+    },
     "results": {
         "your_result": "Сіздің профиліңіз",
+        "your_archetype": "Сіздің архетипіңіз",
         "calculating": "Профиліңіз есептелуде...",
         "not_found": "Нәтижелер табылмады.",
         "download_pdf": "PDF жүктеу",
@@ -78,16 +98,88 @@
         "personality_traits": "Тұлға қасиеттері",
         "top_interests": "Топ қызығушылықтар",
         "trait_breakdown": "Қасиеттер талдауы",
-        "development_plan": "Даму жоспары",
+        "development_plan": "4 апталық даму жоспары",
         "back_home": "Басты бетке",
         "error_generating_pdf": "PDF жасау кезінде қате кетті. Қайта көріңіз.",
         "tag_career": "Мансап",
         "tag_development": "Даму",
-        "tag_well-being": "Саулық"
+        "tag_well-being": "Саулық",
+        "week1_title": "1-апта: Зерттеу",
+        "week2_title": "2-апта: Тәжірибе",
+        "week3_title": "3-апта: Нетворкинг",
+        "week4_title": "4-апта: Жоспарлау",
+        "tasks": "тапсырма",
+        "no_recommendations": "Ұсыныстар табылмады",
+        "context_warning": "⚠️ Ескертпе: Сіз ұйқыңыз аз немесе күйзеліс жоғары екенін көрсеттіңіз. Нәтижелер дәл болмауы мүмкін.",
+        "sjt_title": "Soft Skills (Ситуациялық тапсырмалар)"
     },
     "languages": {
         "ru": "Русский",
         "kz": "Қазақша",
         "en": "English"
+    },
+    "archetypes": {
+        "riasec": {
+            "realistic": {
+                "title": "Практик",
+                "description": "Сіз қолмен және техникамен жұмыс істегенді ұнатасыз"
+            },
+            "investigative": {
+                "title": "Талдаушы",
+                "description": "Сіз зерттеуді және есептерді шешуді ұнатасыз"
+            },
+            "artistic": {
+                "title": "Жасампаз",
+                "description": "Сіз еркіндік пен шығармашылықты бағалайсыз"
+            },
+            "social": {
+                "title": "Тәлімгер",
+                "description": "Сіз адамдарға көмектесуді және оқытуды ұнатасыз"
+            },
+            "enterprising": {
+                "title": "Көшбасшы",
+                "description": "Сіз адамдарды сендіре және басқара аласыз"
+            },
+            "conventional": {
+                "title": "Жүйелеуші",
+                "description": "Сіз тәртіп пен нақты ережелерді ұнатасыз"
+            }
+        },
+        "big5": {
+            "openness": {
+                "title": "Жаңашыл",
+                "description": "Жаңа тәжірибе мен идеяларға ашықсыз"
+            },
+            "conscientiousness": {
+                "title": "Ұйымдастырушы",
+                "description": "Тәртіпті және сенімдісіз"
+            },
+            "extraversion": {
+                "title": "Байланысшы",
+                "description": "Жігерлі және көпшілсіз"
+            },
+            "agreeableness": {
+                "title": "Дипломат",
+                "description": "Мейірімді және ымыраға келуге дайынсыз"
+            },
+            "neuroticism": {
+                "title": "Сезімтал",
+                "description": "Стресске эмоционалды түрде жауап бересіз"
+            }
+        },
+        "default": {
+            "title": "Бірегей қасиет",
+            "description": "Бірегей сипаттама"
+        }
+    },
+    "admin": {
+        "title": "Админ панелі",
+        "tabs": {
+            "dashboard": "Дашборд",
+            "users": "Пайдаланушылар",
+            "questions": "Сұрақтар",
+            "sessions": "Сессиялар",
+            "analytics": "Аналитика"
+        }
     }
 }

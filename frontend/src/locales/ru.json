@@ -6,7 +6,8 @@
         "back": "Назад",
         "save": "Сохранить",
         "cancel": "Отмена",
-        "optional": "Необязательно"
+        "optional": "Необязательно",
+        "user": "Пользователь"
     },
     "tabs": {
         "home": "Главная",
@@ -66,8 +67,27 @@
         "disagree": "Не согласен",
         "agree": "Согласен"
     },
+    "context": {
+        "title": "Перед началом",
+        "header": "Как вы себя чувствуете?",
+        "subtitle": "Эти данные помогут нам лучше понять ваши результаты",
+        "sleep_question": "Сколько вы спали?",
+        "sleep_hint": "за последние 24 часа",
+        "hours": "часов",
+        "hours_short": "ч",
+        "stress_question": "Уровень стресса",
+        "stress_low": "Низкий",
+        "stress_medium": "Средний",
+        "stress_high": "Высокий",
+        "mood_question": "Текущее настроение",
+        "mood_sad": "Грустно",
+        "mood_neutral": "Нормально",
+        "mood_happy": "Отлично",
+        "start_test": "Начать тест →"
+    },
     "results": {
         "your_result": "Ваш профиль",
+        "your_archetype": "Ваш архетип",
         "calculating": "Расчёт вашего профиля...",
         "not_found": "Результаты не найдены.",
         "download_pdf": "Скачать PDF",
@@ -78,16 +98,88 @@
         "personality_traits": "Черты личности",
         "top_interests": "Топ интересы",
         "trait_breakdown": "Анализ черт",
-        "development_plan": "План развития",
+        "development_plan": "План развития на 4 недели",
         "back_home": "На главную",
         "error_generating_pdf": "Ошибка при создании PDF. Попробуйте ещё раз.",
         "tag_career": "Карьера",
         "tag_development": "Развитие",
-        "tag_well-being": "Благополучие"
+        "tag_well-being": "Благополучие",
+        "week1_title": "Неделя 1: Исследование",
+        "week2_title": "Неделя 2: Практика",
+        "week3_title": "Неделя 3: Нетворкинг",
+        "week4_title": "Неделя 4: Планирование",
+        "tasks": "задач",
+        "no_recommendations": "Рекомендации не найдены",
+        "context_warning": "⚠️ Примечание: Вы сообщили о низком качестве сна или высоком стрессе. Результаты могут быть неточными.",
+        "sjt_title": "Soft Skills (Ситуационные задачи)"
     },
     "languages": {
         "ru": "Русский",
         "kz": "Қазақша",
         "en": "English"
+    },
+    "archetypes": {
+        "riasec": {
+            "realistic": {
+                "title": "Практик",
+                "description": "Любишь работать руками и с техникой"
+            },
+            "investigative": {
+                "title": "Аналитик",
+                "description": "Любишь исследовать и решать задачи"
+            },
+            "artistic": {
+                "title": "Творец",
+                "description": "Ценишь свободу и самовыражение"
+            },
+            "social": {
+                "title": "Наставник",
+                "description": "Любишь помогать и обучать людей"
+            },
+            "enterprising": {
+                "title": "Лидер",
+                "description": "Умеешь убеждать и управлять"
+            },
+            "conventional": {
+                "title": "Систематизатор",
+                "description": "Любишь порядок и четкие правила"
+            }
+        },
+        "big5": {
+            "openness": {
+                "title": "Новатор",
+                "description": "Открыт новому опыту и идеям"
+            },
+            "conscientiousness": {
+                "title": "Организатор",
+                "description": "Дисциплинирован и надежен"
+            },
+            "extraversion": {
+                "title": "Коммуникатор",
+                "description": "Энергичен и общителен"
+            },
+            "agreeableness": {
+                "title": "Дипломат",
+                "description": "Доброжелателен и готов к компромиссам"
+            },
+            "neuroticism": {
+                "title": "Чувствительный",
+                "description": "Эмоционально реагируешь на стресс"
+            }
+        },
+        "default": {
+            "title": "Твоя уникальная черта",
+            "description": "Уникальная характеристика"
+        }
+    },
+    "admin": {
+        "title": "Панель администратора",
+        "tabs": {
+            "dashboard": "Дашборд",
+            "users": "Пользователи",
+            "questions": "Вопросы",
+            "sessions": "Сессии",
+            "analytics": "Аналитика"
+        }
     }
 }
