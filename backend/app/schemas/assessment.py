@@ -7,14 +7,24 @@ from app.models.assessment import AssessmentStatusEnum
 from app.models.question import ModuleEnum, QuestionTypeEnum
 
 
+class QuestionOptionDTO(BaseModel):
+    """Single option for choice-type questions."""
+
+    text: str
+    value: int
+
+
 # Question DTO
 class QuestionDTO(BaseModel):
     id: int
     code: str
     text_ru: str
+    text_kz: str | None = None
+    text_en: str | None = None
     type: QuestionTypeEnum
     module: ModuleEnum
     category: str | None = None
+    options: list[QuestionOptionDTO] | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -27,7 +37,7 @@ class AssessmentSessionBase(BaseModel):
 
 
 class AssessmentSessionCreate(AssessmentSessionBase):
-    pass
+    context_data: dict | None = None  # Pre-assessment context (sleep, mood, stress)
 
 
 class AssessmentSession(AssessmentSessionBase):

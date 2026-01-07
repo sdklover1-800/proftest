@@ -102,5 +102,79 @@ def seed_questions():
             session.rollback()
 
 
+def seed_sjt_questions():
+    """
+    Seed SJT (Situational Judgment Test) questions with choice options.
+    These cannot be easily stored in CSV due to JSON structure.
+    """
+    engine = create_engine(settings.SYNC_DATABASE_URL)
+    SessionLocal = sessionmaker(bind=engine)
+
+    sjt_questions = [
+        {
+            "code": "SJT_01",
+            "module": "SJT",
+            "category": "integrity",
+            "text_ru": "Вы видите, как коллега берёт офисные принадлежности домой. Что вы сделаете?",
+            "text_kz": "Әріптесіңіздің кеңсе заттарын үйге алып кетіп жатқанын көрдіңіз. Не істейсіз?",
+            "text_en": "You see a colleague taking office supplies home. What do you do?",
+            "type": "choice",
+            "is_reverse": False,
+            "options": [
+                {"text": "Сообщить руководителю немедленно", "value": 2},
+                {"text": "Поговорить с коллегой напрямую", "value": 1},
+                {"text": "Проигнорировать ситуацию", "value": 0},
+            ],
+        },
+        {
+            "code": "SJT_02",
+            "module": "SJT",
+            "category": "time_management",
+            "text_ru": "Дедлайн приближается, а вы отстаёте от графика. Что вы сделаете?",
+            "text_kz": "Мерзім жақындап қалды, бірақ сіз кешігіп жатырсыз. Не істейсіз?",
+            "text_en": "The deadline is approaching, and you are behind schedule. What do you do?",
+            "type": "choice",
+            "is_reverse": False,
+            "options": [
+                {"text": "Попросить помощи у коллег или руководителя", "value": 2},
+                {"text": "Работать сверхурочно, чтобы успеть", "value": 1},
+                {"text": "Сдать работу как есть", "value": 0},
+            ],
+        },
+    ]
+
+    with SessionLocal() as session:
+        print("Seeding SJT questions...")
+        for q_data in sjt_questions:
+            insert_statement = insert(Question).values(q_data)
+            upsert_statement = insert_statement.on_conflict_do_update(
+                index_elements=[Question.code],
+                set_={
+                    "module": insert_statement.excluded.module,
+                    "category": insert_statement.excluded.category,
+                    "text_ru": insert_statement.excluded.text_ru,
+                    "text_kz": insert_statement.excluded.text_kz,
+                    "text_en": insert_statement.excluded.text_en,
+                    "type": insert_statement.excluded.type,
+                    "is_reverse": insert_statement.excluded.is_reverse,
+                    "options": insert_statement.excluded.options,
+                },
+            )
+            try:
+                session.execute(upsert_statement)
+            except Exception as e:
+                print(f"Error processing SJT question {q_data['code']}: {e}")
+                session.rollback()
+                continue
+
+        try:
+            session.commit()
+            print("SJT questions seeded successfully.")
+        except Exception as e:
+            print(f"Error committing SJT questions: {e}")
+            session.rollback()
+
+
 if __name__ == "__main__":
     seed_questions()
+    seed_sjt_questions()

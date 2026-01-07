@@ -42,3 +42,18 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+
+async def get_current_superuser(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    """
+    Dependency that ensures current user is a superuser.
+    Use this to protect admin-only routes.
+    """
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough privileges. Superuser access required.",
+        )
+    return current_user

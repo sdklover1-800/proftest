@@ -18,12 +18,18 @@ from app.services.assessment_service import assessment_service
 router = APIRouter()
 
 
+import random
+
 @router.get("/questions", response_model=list[QuestionDTO])
 async def get_questions(db: AsyncSession = Depends(get_db)):
     """
-    Returns list of questions.
+    Returns list of questions in random order.
     """
-    return await assessment_service.get_all_questions(db)
+    questions = await assessment_service.get_all_questions(db)
+    # Convert to list ensuring mutability and shuffle
+    questions_list = list(questions)
+    random.shuffle(questions_list)
+    return questions_list
 
 
 @router.post("/start", response_model=AssessmentSession)

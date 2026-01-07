@@ -1,11 +1,14 @@
+"""
+Main FastAPI application entry point.
+Follows the Thin Router pattern - only sets up middleware and routes.
+"""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1.endpoints import assessment, auth, questions, results
+from app.api.v1.endpoints import admin, assessment, auth, questions, results
 from app.core.config import settings
 
-# We import models to ensure Alembic/SQLAlchemy sees them if we were using it here,
-# although main.py usually doesn't need models directly.
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
@@ -17,12 +20,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(
-    questions.router, tags=["questions"]
-)  # Deprecated or kept for backward compatibility if needed
+# API Routes
+app.include_router(questions.router, tags=["questions"])
 app.include_router(assessment.router, prefix="/api/v1/assessment", tags=["assessment"])
 app.include_router(results.router, prefix="/api/v1", tags=["results"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(admin.router, prefix="/api/v1/admin", tags=["admin"])
 
 
 @app.get("/")
