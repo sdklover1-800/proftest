@@ -19,7 +19,7 @@ import { useAssessmentStore } from '@/store/assessmentStore';
 import { useResultsPage } from '../model/useResultsPage';
 import { usePdfExport } from '../model/usePdfExport';
 import ResultCharts from './ResultCharts';
-import RecommendationList from './RecommendationList';
+import DevelopmentPlan from './DevelopmentPlan';
 import LoadingOverlay from '@/shared/ui/LoadingOverlay';
 
 /**
@@ -29,7 +29,7 @@ import LoadingOverlay from '@/shared/ui/LoadingOverlay';
 const ResultsPage: React.FC = () => {
     const { t } = useTranslation();
     const history = useHistory();
-    const reset = useAssessmentStore((state) => state.reset);
+    const reset = useAssessmentStore((state) => state.resetAssessment);
 
     const contentRef = useRef<HTMLDivElement>(null);
     const { isPdfGenerating, downloadPDF } = usePdfExport(contentRef as React.RefObject<HTMLDivElement>);
@@ -104,13 +104,48 @@ const ResultsPage: React.FC = () => {
                         </button>
                     </div>
 
+                    {/* Context Warning */}
+                    {results.contextData && (results.contextData.sleep < 6 || results.contextData.stress === 'high') && (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-start gap-3">
+                            <span className="text-2xl">⚠️</span>
+                            <div>
+                                <p className="text-sm text-yellow-800 font-medium">
+                                    {t('results.context_warning')}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     <ResultCharts activeTab={activeTab} results={results} />
+
+                    {/* SJT / Soft Skills Section */}
+                    {results.SJT && results.SJT.length > 0 && (
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                            <h3 className="text-lg font-bold text-gray-800 mb-4">{t('results.sjt_title')}</h3>
+                            <div className="space-y-4">
+                                {results.SJT.map((item) => (
+                                    <div key={item.subject}>
+                                        <div className="flex justify-between text-sm mb-1">
+                                            <span className="font-medium text-gray-700 capitalize">{item.subject}</span>
+                                            <span className="font-bold text-indigo-600">{item.A}%</span>
+                                        </div>
+                                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-indigo-500 rounded-full"
+                                                style={{ width: `${item.A}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-xl border border-indigo-100 shadow-sm">
                         <h3 className="text-lg font-bold text-indigo-900 flex items-center gap-2 mb-4">
                             <span>🚀</span> {t('results.development_plan')}
                         </h3>
-                        <RecommendationList recommendations={recommendations} />
+                        <DevelopmentPlan recommendations={recommendations} />
                     </div>
 
                     <div className="pt-4">
