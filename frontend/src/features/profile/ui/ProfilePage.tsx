@@ -1,14 +1,9 @@
 import React from 'react';
 import {
     IonPage,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
     IonContent,
-    IonButton,
 } from '@ionic/react';
 import { useProfile } from '../model/useProfile';
-import ProfileUserInfo from './ProfileUserInfo';
 import ProfileSettings from './ProfileSettings';
 
 /**
@@ -17,30 +12,55 @@ import ProfileSettings from './ProfileSettings';
 const ProfilePage: React.FC = () => {
     const { user, t, i18n, handleLogout, handleLanguageChange } = useProfile();
 
+    // Generate initials
+    const initials = user?.email
+        ? user.email.substring(0, 2).toUpperCase()
+        : '??';
+
     return (
-        <IonPage>
-            <IonHeader>
-                <IonToolbar>
-                    <IonTitle>{t('tabs.profile')}</IonTitle>
-                </IonToolbar>
-            </IonHeader>
-            <IonContent className="ion-padding">
-                <div className="max-w-md mx-auto space-y-6 mt-6">
-                    <ProfileUserInfo user={user} />
+        <IonPage className="bg-gray-50">
+            <IonContent>
+                <div className="p-6">
+                    {/* Header Profile Section */}
+                    <div className="flex flex-col items-center mt-8 mb-8">
+                        <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center text-gray-400 font-bold text-2xl mb-4 shadow-md border-4 border-white">
+                            {initials}
+                        </div>
+                        <h1 className="text-2xl font-bold text-gray-900">
+                            {user?.email.split('@')[0]}
+                        </h1>
+                        <p className="text-gray-500 text-sm mt-1">{user?.email}</p>
+                    </div>
 
-                    <ProfileSettings
-                        language={i18n.language}
-                        onLanguageChange={handleLanguageChange}
-                    />
+                    {/* Stats Row */}
+                    <div className="grid grid-cols-3 gap-3 mb-8">
+                        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 text-center">
+                            <div className="text-xs text-gray-400 font-medium uppercase tracking-wide">Тесты</div>
+                            <div className="text-lg font-bold text-gray-900 mt-1">15</div>
+                        </div>
+                        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 text-center">
+                            <div className="text-xs text-gray-400 font-medium uppercase tracking-wide">Топ</div>
+                            <div className="text-lg font-bold text-indigo-600 mt-1">Real</div>
+                        </div>
+                        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 text-center">
+                            <div className="text-xs text-gray-400 font-medium uppercase tracking-wide">Уровень</div>
+                            <div className="text-lg font-bold text-green-600 mt-1">Pro</div>
+                        </div>
+                    </div>
 
-                    <IonButton
-                        expand="block"
-                        color="danger"
-                        onClick={handleLogout}
-                        className="mt-6"
-                    >
-                        {t('auth.logout')}
-                    </IonButton>
+                    <div className="space-y-6">
+                        <ProfileSettings
+                            language={i18n.language}
+                            onLanguageChange={handleLanguageChange}
+                        />
+
+                        <button
+                            onClick={handleLogout}
+                            className="w-full text-gray-400 text-sm font-medium py-4 hover:text-red-500 transition-colors"
+                        >
+                            {t('auth.logout')}
+                        </button>
+                    </div>
                 </div>
             </IonContent>
         </IonPage>

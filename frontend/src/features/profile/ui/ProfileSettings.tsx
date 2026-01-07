@@ -4,14 +4,16 @@ import {
     IonList,
     IonItem,
     IonLabel,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
     IonIcon,
     IonSelect,
     IonSelectOption
 } from '@ionic/react';
-import { globeOutline } from 'ionicons/icons';
+import {
+    globeOutline,
+    notificationsOutline,
+    shieldCheckmarkOutline,
+    informationCircleOutline
+} from 'ionicons/icons';
 import { AVAILABLE_LANGUAGES } from '@/utils/langUtils';
 
 interface Props {
@@ -23,19 +25,17 @@ const ProfileSettings: React.FC<Props> = ({ language, onLanguageChange }) => {
     const { t } = useTranslation();
 
     return (
-        <IonCard className="shadow-sm">
-            <IonCardHeader>
-                <IonCardTitle>{t('profile.settings')}</IonCardTitle>
-            </IonCardHeader>
-            <IonList>
-                <IonItem>
-                    <IonIcon icon={globeOutline} slot="start" color="primary" />
-                    <IonLabel>{t('profile.language')}</IonLabel>
+        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+            <IonList inset={false} lines="full" className="m-0 p-0">
+                <IonItem className="--padding-start-0">
+                    <IonIcon icon={globeOutline} slot="start" className="text-blue-500 ml-4" />
+                    <IonLabel className="font-medium text-gray-700">{t('profile.language')}</IonLabel>
                     <IonSelect
                         value={language}
                         interface="action-sheet"
                         onIonChange={(e) => onLanguageChange(e.detail.value)}
                         placeholder={t('profile.select_language')}
+                        className="max-w-[fit-content]"
                     >
                         {AVAILABLE_LANGUAGES.map((lang) => (
                             <IonSelectOption key={lang.code} value={lang.code}>
@@ -44,17 +44,26 @@ const ProfileSettings: React.FC<Props> = ({ language, onLanguageChange }) => {
                         ))}
                     </IonSelect>
                 </IonItem>
-                <IonItem button detail>
-                    <IonLabel>{t('profile.notifications')}</IonLabel>
-                </IonItem>
-                <IonItem button detail>
-                    <IonLabel>{t('profile.privacy')}</IonLabel>
-                </IonItem>
-                <IonItem button detail>
-                    <IonLabel>{t('profile.about')}</IonLabel>
-                </IonItem>
+
+                {['notifications', 'privacy', 'about'].map((item) => (
+                    <IonItem key={item} button detail className="--padding-start-0">
+                        <IonIcon
+                            icon={
+                                item === 'notifications' ? notificationsOutline :
+                                    item === 'privacy' ? shieldCheckmarkOutline :
+                                        informationCircleOutline
+                            }
+                            slot="start"
+                            className={`ml-4 ${item === 'notifications' ? 'text-yellow-500' :
+                                item === 'privacy' ? 'text-green-500' :
+                                    'text-gray-500'
+                                }`}
+                        />
+                        <IonLabel className="font-medium text-gray-700">{t(`profile.${item}`)}</IonLabel>
+                    </IonItem>
+                ))}
             </IonList>
-        </IonCard>
+        </div>
     );
 };
 
