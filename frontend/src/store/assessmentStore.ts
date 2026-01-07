@@ -1,13 +1,21 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
+export interface QuestionOption {
+    text: string;
+    value: number;
+}
+
 export interface Question {
     id: number;
     code: string;
     text_ru: string;
+    text_kz?: string;
+    text_en?: string;
     type: 'scale' | 'choice';
     module: string;
     category?: string;
+    options?: QuestionOption[];
 }
 
 interface AssessmentState {
@@ -15,12 +23,13 @@ interface AssessmentState {
     responses: Record<number, number>; // questionId -> value
     currentIndex: number;
     isFinished: boolean;
+    results: any | null; // Added results to state
 
     setSessionId: (id: number) => void;
     setAnswer: (questionId: number, value: number) => void;
     nextQuestion: (totalQuestions: number) => void;
     prevQuestion: () => void;
-    reset: () => void;
+    resetAssessment: () => void;
 }
 
 export const useAssessmentStore = create<AssessmentState>()(
@@ -30,6 +39,7 @@ export const useAssessmentStore = create<AssessmentState>()(
             responses: {},
             currentIndex: 0,
             isFinished: false,
+            results: null,
 
             setSessionId: (id: number) => set({ sessionId: id }),
 
@@ -53,11 +63,12 @@ export const useAssessmentStore = create<AssessmentState>()(
                 currentIndex: Math.max(state.currentIndex - 1, 0)
             })),
 
-            reset: () => set({
+            resetAssessment: () => set({
+                sessionId: null,
                 responses: {},
                 currentIndex: 0,
                 isFinished: false,
-                sessionId: null
+                results: null
             })
         }),
         {
