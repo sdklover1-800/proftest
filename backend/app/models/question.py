@@ -1,6 +1,7 @@
 import enum
 
 from sqlalchemy import Boolean, Enum, Integer, String
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -10,6 +11,7 @@ class ModuleEnum(str, enum.Enum):
     RIASEC = "RIASEC"
     BIG5 = "BIG5"
     COGNITIVE = "COGNITIVE"
+    SJT = "SJT"
 
 
 class QuestionTypeEnum(str, enum.Enum):
@@ -20,7 +22,7 @@ class QuestionTypeEnum(str, enum.Enum):
 class Question(Base):
     """
     Represents a single assessment question.
-    Can be part of RIASEC, BIG5, or COGNITIVE modules.
+    Can be part of RIASEC, BIG5, COGNITIVE, or SJT modules.
     """
 
     __tablename__ = "questions"
@@ -37,3 +39,5 @@ class Question(Base):
         Enum(QuestionTypeEnum), nullable=False
     )
     is_reverse: Mapped[bool] = mapped_column(Boolean, default=False)
+    # JSON options for choice-type questions: [{"text": "...", "value": 1}, ...]
+    options: Mapped[list | None] = mapped_column(JSON, nullable=True)

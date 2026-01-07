@@ -1,5 +1,5 @@
-from sqlalchemy import DateTime, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Boolean, DateTime, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from app.db.base import Base
@@ -18,6 +18,16 @@ class User(Base):
     # Age is optional but helpful for demographic analysis
     age: Mapped[int] = mapped_column(Integer, nullable=True)
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)
+    # Admin flag - only superusers can access /admin routes
+    is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+
+    # Relationship to sessions - use lazy="raise" to prevent async DetachedInstanceError
+    # Always use explicit eager loading (selectinload) when needed
+    sessions = relationship("AssessmentSession", back_populates="user", lazy="raise")
+
+    def __str__(self) -> str:
+        """Return email for display in SQLAdmin dropdowns and lists."""
+        return self.email

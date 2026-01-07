@@ -13,6 +13,10 @@ class AssessmentStatusEnum(str, enum.Enum):
 
 
 class AssessmentSession(Base):
+    """
+    Represents a single test-taking session.
+    Contains raw scores and links to user responses.
+    """
     __tablename__ = "assessment_sessions"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -23,13 +27,17 @@ class AssessmentSession(Base):
     start_time: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+    context_data: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     raw_scores: Mapped[dict] = mapped_column(JSON, default={})
 
-    user = relationship("User")
-    responses = relationship("UserResponse", back_populates="session")
+    # Relationships with lazy="raise" to prevent async DetachedInstanceError
+    # Use selectinload() explicitly when eager loading is needed
+    user = relationship("User", back_populates="sessions", lazy="raise")
+    responses = relationship("UserResponse", back_populates="session", lazy="raise")
 
 
 class UserResponse(Base):
+    """Individual answer to a question within a session."""
     __tablename__ = "user_responses"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -40,5 +48,6 @@ class UserResponse(Base):
     value: Mapped[int] = mapped_column(Integer, nullable=False)
     reaction_time_ms: Mapped[int] = mapped_column(Integer, nullable=True)
 
-    session = relationship("AssessmentSession", back_populates="responses")
-    question = relationship("Question")
+    # Relationships with lazy="raise" for async safety
+    session = relationship("AssessmentSession", back_populates="responses", lazy="raise")
+    question = relationship("Question", lazy="raise")
