@@ -1,0 +1,63 @@
+/**
+ * Type definitions for Admin Dashboard.
+ * Shared between hook and components.
+ */
+
+export interface DashboardStats {
+    total_users: number;
+    total_sessions: number;
+    completed_sessions: number;
+    avg_score_riasec: number;
+}
+
+export interface User {
+    id: number;
+    email: string;
+    full_name?: string;
+    is_active: boolean;
+    is_superuser: boolean;
+    created_at: string;
+}
+
+export interface Question {
+    id: number;
+    code: string;
+    module: string;
+    category: string;
+    type: string;
+    text_ru: string;
+    text_kz?: string;
+    text_en?: string;
+    is_reverse: boolean;
+}
+
+export interface Session {
+    id: number;
+    user_id?: number;
+    user_email?: string;
+    status: string;
+    start_time: string;
+    has_results: boolean;
+}
+
+export interface NewQuestion {
+    code: string;
+    text_ru: string;
+    text_kz: string;
+    text_en: string;
+    module: string;
+    category: string;
+    type: string;
+}
+
+export interface AnalyticsData {
+    daily_activity: { date: string; count: number }[];
+    drop_off: { range: string; count: number }[];
+    conversion: {
+        total_sessions: number;
+        completed_sessions: number;
+        conversion_rate: number;
+    };
+}
+
+export type TabType = 'dashboard' | 'users' | 'questions' | 'sessions' | 'analytics';
