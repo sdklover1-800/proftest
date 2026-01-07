@@ -9,9 +9,17 @@ interface ChartData {
     fullMark: number;
 }
 
+export interface ContextData {
+    sleep: number;
+    stress: 'low' | 'medium' | 'high';
+    mood: 'sad' | 'neutral' | 'happy';
+}
+
 interface ResultsData {
     RIASEC: ChartData[];
     BIG5: ChartData[];
+    SJT: ChartData[]; // Added SJT
+    contextData?: ContextData | null; // Added contextData
 }
 
 interface UseResultsPageReturn {
@@ -68,12 +76,12 @@ export const useResultsPage = (): UseResultsPageReturn => {
                 // Try to get existing results first
                 try {
                     const response = await assessmentApi.getResults(sessionId);
-                    setResults(formatData(response.scores));
+                    setResults(formatData(response.scores, response.context_data));
                     setRecommendations(response.recommendations || []);
                 } catch {
                     // If not found, try to finish the assessment
                     const response = await assessmentApi.finishAssessment(sessionId);
-                    setResults(formatData(response.scores));
+                    setResults(formatData(response.scores, response.context_data));
                     setRecommendations(response.recommendations || []);
                 }
             } catch (err) {
@@ -93,17 +101,19 @@ export const useResultsPage = (): UseResultsPageReturn => {
 /**
  * Format raw API scores into chart-friendly data.
  */
-const formatData = (apiData: any): ResultsData => {
+const formatData = (apiData: any, contextData?: any): ResultsData => {
     const formatSection = (sectionData: Record<string, number>): ChartData[] => {
         return Object.entries(sectionData).map(([key, value]) => ({
             subject: key,
             A: value,
-            fullMark: 30
+            fullMark: 100
         }));
     };
 
     return {
         RIASEC: apiData.RIASEC ? formatSection(apiData.RIASEC) : [],
-        BIG5: apiData.BIG5 ? formatSection(apiData.BIG5) : []
+        BIG5: apiData.BIG5 ? formatSection(apiData.BIG5) : [],
+        SJT: apiData.SJT ? formatSection(apiData.SJT) : [],
+        contextData: contextData || null
     };
 };

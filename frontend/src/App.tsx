@@ -27,10 +27,11 @@ import './index.css';
 /* Feature-Sliced Design Imports */
 import { HomePage } from '@features/home';
 import { ProfilePage } from '@features/profile';
-import { AssessmentPage } from '@features/assessment';
+import { AssessmentPage, ContextSetupPage } from '@features/assessment';
 import { ResultsPage } from '@features/results';
 import { LoginPage, RegisterPage } from '@features/auth';
 import Welcome from './pages/Welcome';
+import AdminDashboard from './pages/AdminDashboard';
 import { useAuthStore } from '@/store/authStore';
 
 setupIonicReact();
@@ -48,6 +49,7 @@ const AuthenticatedApp: React.FC = () => {
       <IonRouterOutlet>
         <Route exact path="/home" component={HomePage} />
         <Route exact path="/profile" component={ProfilePage} />
+        <Route exact path="/assessment/context" component={ContextSetupPage} />
         <Route exact path="/assessment" component={AssessmentPage} />
         <Route exact path="/results" component={ResultsPage} />
         <Route exact path="/">
@@ -73,28 +75,54 @@ const queryClient = new QueryClient();
 
 const App: React.FC = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const location = useLocation();
+
+  // Admin panel is rendered completely outside IonTabs to avoid z-index issues
+  const isAdminPanel = location.pathname === '/admin-panel';
+
+  if (isAdminPanel) {
+    // Render admin panel without IonTabs wrapper
+    return (
+      <QueryClientProvider client={queryClient}>
+        <AdminDashboard />
+      </QueryClientProvider>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
-      <IonApp>
-        <IonReactRouter>
-          {isAuthenticated ? <AuthenticatedApp /> : (
-            <IonRouterOutlet>
-              <Route exact path="/login" component={LoginPage} />
-              <Route exact path="/register" component={RegisterPage} />
-              <Route exact path="/welcome" component={Welcome} />
-              <Route exact path="/">
-                <Redirect to="/welcome" />
-              </Route>
-              <Route>
-                <Redirect to="/login" />
-              </Route>
-            </IonRouterOutlet>
-          )}
-        </IonReactRouter>
-      </IonApp>
+      <div className="bg-gray-200 min-h-screen flex justify-center">
+        <div className="max-w-md w-full h-full min-h-screen bg-gray-50 shadow-2xl overflow-hidden relative">
+          <IonApp>
+            {isAuthenticated ? <AuthenticatedApp /> : (
+              <IonRouterOutlet>
+                <Route exact path="/login" component={LoginPage} />
+                <Route exact path="/register" component={RegisterPage} />
+                <Route exact path="/welcome" component={Welcome} />
+                <Route exact path="/">
+                  <Redirect to="/welcome" />
+                </Route>
+                <Route>
+                  <Redirect to="/login" />
+                </Route>
+              </IonRouterOutlet>
+            )}
+          </IonApp>
+        </div>
+      </div>
     </QueryClientProvider>
   );
 };
 
-export default App;
+// Wrapper to access useLocation
+const AppWrapper: React.FC = () => (
+  <QueryClientProvider client={queryClient}>
+    <IonApp>
+      <IonReactRouter>
+        <App />
+      </IonReactRouter>
+    </IonApp>
+  </QueryClientProvider>
+);
+
+export default AppWrapper;

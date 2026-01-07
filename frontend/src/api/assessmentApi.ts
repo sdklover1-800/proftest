@@ -1,15 +1,21 @@
 import client from './client';
 import type { Question } from '../store/assessmentStore';
 
+export interface ContextData {
+    sleep: number;
+    stress: 'low' | 'medium' | 'high';
+    mood: 'sad' | 'neutral' | 'happy';
+}
+
 export const assessmentApi = {
     getQuestions: async (): Promise<Question[]> => {
         const response = await client.get<Question[]>('/api/v1/assessment/questions');
         return response.data;
     },
 
-    startSession: async (): Promise<{ id: number; start_time: string }> => {
+    startSession: async (contextData?: ContextData): Promise<{ id: number; start_time: string }> => {
         const response = await client.post('/api/v1/assessment/start', {
-            // user_id: 1, // Optional: if we implemented auth
+            context_data: contextData || null,
         });
         return response.data;
     },

@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
-import { useAssessmentStore } from '@/store/assessmentStore';
 import { assessmentApi } from '@/api/assessmentApi';
-import { useStartSession } from '@/features/assessment/api/queries';
 
 export interface SessionSummary {
     id: number;
@@ -18,7 +16,7 @@ interface UseHomeReturn {
     loading: boolean;
     starting: boolean;
     handleRefresh: (event: any) => Promise<void>;
-    handleStartAssessment: () => Promise<void>;
+    handleStartAssessment: () => void;
     viewSessionResults: (sessionId: number) => void;
 }
 
@@ -28,10 +26,6 @@ interface UseHomeReturn {
 export const useHome = (): UseHomeReturn => {
     const history = useHistory();
     const user = useAuthStore((state) => state.user);
-    const setSessionId = useAssessmentStore((state) => state.setSessionId);
-
-    // React Query Mutation
-    const startSessionMutation = useStartSession();
 
     const [sessions, setSessions] = useState<SessionSummary[]>([]);
     const [loading, setLoading] = useState(true);
@@ -59,16 +53,9 @@ export const useHome = (): UseHomeReturn => {
         }
     };
 
-    const handleStartAssessment = async (): Promise<void> => {
-        startSessionMutation.mutate(undefined, {
-            onSuccess: (data) => {
-                setSessionId(data.id);
-                history.push('/assessment');
-            },
-            onError: (error) => {
-                console.error("Failed to start assessment", error);
-            }
-        });
+    const handleStartAssessment = (): void => {
+        // Navigate to context setup page first
+        history.push('/assessment/context');
     };
 
     const viewSessionResults = (sessionId: number): void => {
@@ -77,13 +64,12 @@ export const useHome = (): UseHomeReturn => {
     };
 
     const userName = user?.email.split('@')[0] || 'User';
-    // const completedSessions = sessions.filter(s => s.status === 'completed');
 
     return {
         userName,
         sessions,
         loading,
-        starting: startSessionMutation.isPending,
+        starting: false, // No longer needed, context page handles this
         handleRefresh,
         handleStartAssessment,
         viewSessionResults
