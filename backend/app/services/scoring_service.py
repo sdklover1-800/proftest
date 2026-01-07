@@ -33,16 +33,22 @@ async def calculate_score(session_id: int, db: AsyncSession) -> dict:
     rows = result.all()
 
     scores = {}
+    counts = {}  # Track max possible score (question count * 5)
+
+    print(f"--- CALCULATING FOR SESSION {session_id} ---")
+    print(f"Found {len(rows)} answers in DB")
 
     for response, question in rows:
         # Initialize module dict if not exists
         if question.module.value not in scores:
             scores[question.module.value] = {}
+            counts[question.module.value] = {}
 
         # Initialize category score if not exists
         category = question.category
         if category not in scores[question.module.value]:
             scores[question.module.value][category] = 0
+            counts[question.module.value][category] = 0
 
         # 2. Apply reverse scoring logic
         # Constraint: Values are 1-5 (Likert scale)
@@ -51,7 +57,22 @@ async def calculate_score(session_id: int, db: AsyncSession) -> dict:
         else:
             final_value = response.value
 
-        # 3. Sum scores
+        # 3. Sum scores and track counts
         scores[question.module.value][category] += final_value
+        counts[question.module.value][category] += 5  # Max score per question is 5
+
+    # 4. Normalize to 0-100 scale
+    for module in scores:
+        for category in scores[module]:
+            raw_score = scores[module][category]
+            max_possible = counts[module][category]
+            
+            if max_possible > 0:
+                percentage = (raw_score / max_possible) * 100
+                scores[module][category] = int(round(percentage))
+                print(f"Category {category}: Raw Score = {raw_score}/{max_possible} ({scores[module][category]}%)")
+            else:
+                scores[module][category] = 0
+                print(f"Category {category}: NO DATA (0%)")
 
     return scores

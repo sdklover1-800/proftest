@@ -149,6 +149,7 @@ class AssessmentService:
             "scores": session.raw_scores,
             "recommendations": recommendations,
             "user_id": session.user_id,
+            "context_data": session.context_data,
         }
 
 
