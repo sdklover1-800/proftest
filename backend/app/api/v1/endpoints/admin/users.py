@@ -4,6 +4,7 @@ Protected by superuser authentication.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +14,10 @@ from app.models.assessment import AssessmentSession, UserResponse
 from app.models.user import User
 
 router = APIRouter()
+
+
+class BulkDeleteRequest(BaseModel):
+    ids: list[int]
 
 
 @router.get("/users")
@@ -79,3 +84,39 @@ async def delete_user(
     await db.commit()
 
     return {"message": f"User {user.email} deleted successfully"}
+
+
+@router.post("/users/bulk-delete")
+async def bulk_delete_users(
+    payload: BulkDeleteRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_superuser),
+):
+    """Bulk delete users and all their sessions/responses, excluding superusers and self."""
+    if not payload.ids:
+        return {"deleted": 0}
+
+    ids = [user_id for user_id in payload.ids if user_id != current_user.id]
+    if not ids:
+        return {"deleted": 0}
+
+    superuser_result = await db.execute(
+        select(User.id).where(User.id.in_(ids), User.is_superuser == True)
+    )
+    superuser_ids = {row.id for row in superuser_result.fetchall()}
+    delete_ids = [user_id for user_id in ids if user_id not in superuser_ids]
+    if not delete_ids:
+        return {"deleted": 0}
+
+    await db.execute(
+        delete(UserResponse).where(
+            UserResponse.session_id.in_(
+                select(AssessmentSession.id).where(AssessmentSession.user_id.in_(delete_ids))
+            )
+        )
+    )
+    await db.execute(delete(AssessmentSession).where(AssessmentSession.user_id.in_(delete_ids)))
+    result = await db.execute(delete(User).where(User.id.in_(delete_ids)))
+    await db.commit()
+
+    return {"deleted": result.rowcount or 0}

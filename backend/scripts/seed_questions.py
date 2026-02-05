@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 
@@ -48,6 +49,13 @@ def seed_questions():
         # We iterate through the CSV to upsert questions.
         # UPSERT is used to allow updating question text without creating duplicates.
         for index, current_question_row in df.iterrows():
+            options = None
+            if "options" in current_question_row and pd.notna(current_question_row["options"]):
+                try:
+                    options = json.loads(current_question_row["options"])
+                except Exception:
+                    options = None
+
             question_data = {
                 "code": current_question_row["code"],
                 "module": current_question_row["module"],
@@ -67,6 +75,7 @@ def seed_questions():
                 "is_reverse": bool(current_question_row["is_reverse"])
                 if pd.notna(current_question_row["is_reverse"])
                 else False,
+                "options": options,
             }
 
             # Prepare the INSERT statement
@@ -84,6 +93,7 @@ def seed_questions():
                     "text_en": insert_statement.excluded.text_en,
                     "type": insert_statement.excluded.type,
                     "is_reverse": insert_statement.excluded.is_reverse,
+                    "options": insert_statement.excluded.options,
                 },
             )
 

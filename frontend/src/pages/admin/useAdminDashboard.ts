@@ -6,13 +6,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { client } from '@/api/client';
 import { useAuthStore } from '@/store/authStore';
-import type { DashboardStats, User, Question, Session, NewQuestion, TabType, AnalyticsData } from './types';
+import type { DashboardStats, User, Question, Session, NewQuestion, TabType, AnalyticsData, TestConfig } from './types';
 
 // Re-export types for convenience
-export type { DashboardStats, User, Question, Session, NewQuestion, TabType, AnalyticsData };
+export type { DashboardStats, User, Question, Session, NewQuestion, TabType, AnalyticsData, TestConfig };
 
 const EMPTY_QUESTION: NewQuestion = {
     code: '',
@@ -24,9 +25,17 @@ const EMPTY_QUESTION: NewQuestion = {
     type: 'likert',
 };
 
+const DEFAULT_TEST_CONFIG: TestConfig = {
+    riasec_limit: 20,
+    big5_limit: 20,
+    sjt_limit: 20,
+    cognitive_limit: 20,
+};
+
 export const useAdminDashboard = () => {
     const history = useHistory();
     const token = useAuthStore((s) => s.token);
+    const { t } = useTranslation();
 
     // UI States
     const [activeTab, setActiveTab] = useState<TabType>('dashboard');
@@ -40,6 +49,9 @@ export const useAdminDashboard = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [sessions, setSessions] = useState<Session[]>([]);
     const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+    const [testConfig, setTestConfig] = useState<TestConfig | null>(null);
+    const [configForm, setConfigForm] = useState<TestConfig>(DEFAULT_TEST_CONFIG);
+    const [isSavingConfig, setIsSavingConfig] = useState(false);
     const [newQuestion, setNewQuestion] = useState<NewQuestion>(EMPTY_QUESTION);
     const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
 
@@ -48,12 +60,12 @@ export const useAdminDashboard = () => {
     // Error handler - redirect on 403 Forbidden
     const handleApiError = useCallback((err: any) => {
         if (err.response?.status === 403) {
-            alert('Доступ запрещён. Требуются права администратора.');
+            alert(t('admin.errors.access_denied'));
             history.push('/home');
         } else {
-            setError('Ошибка загрузки данных');
+            setError(t('admin.errors.load_error'));
         }
-    }, [history]);
+    }, [history, t]);
 
     // API: Fetch dashboard stats
     const fetchDashboard = useCallback(async () => {
@@ -107,44 +119,124 @@ export const useAdminDashboard = () => {
         }
     }, [authHeaders, handleApiError]);
 
+    // API: Fetch test configuration
+    const fetchConfig = useCallback(async () => {
+        try {
+            const response = await client.get('/api/v1/admin/config', { headers: authHeaders });
+            setTestConfig(response.data);
+            setConfigForm({
+                riasec_limit: response.data.riasec_limit,
+                big5_limit: response.data.big5_limit,
+                sjt_limit: response.data.sjt_limit,
+                cognitive_limit: response.data.cognitive_limit,
+            });
+        } catch (err: any) {
+            handleApiError(err);
+        }
+    }, [authHeaders, handleApiError]);
+
+    const updateConfigField = (field: keyof TestConfig, value: number) => {
+        setConfigForm((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const saveConfig = useCallback(async () => {
+        try {
+            setIsSavingConfig(true);
+            const response = await client.post('/api/v1/admin/config', configForm, { headers: authHeaders });
+            setTestConfig(response.data);
+            setConfigForm({
+                riasec_limit: response.data.riasec_limit,
+                big5_limit: response.data.big5_limit,
+                sjt_limit: response.data.sjt_limit,
+                cognitive_limit: response.data.cognitive_limit,
+            });
+        } catch (err: any) {
+            alert(t('admin.errors.update_error') + ': ' + (err.response?.data?.detail || err.message));
+        } finally {
+            setIsSavingConfig(false);
+        }
+    }, [authHeaders, configForm, t]);
+
     // API: Delete user
     const deleteUser = useCallback(async (userId: number, userEmail: string) => {
-        const isConfirmed = confirm(`Удалить пользователя ${userEmail}? Это действие необратимо.`);
+        const isConfirmed = confirm(t('admin.users.delete_confirm', { email: userEmail }));
         if (!isConfirmed) return;
 
         try {
             await client.delete(`/api/v1/admin/users/${userId}`, { headers: authHeaders });
             setUsers((prevUsers) => prevUsers.filter((u) => u.id !== userId));
         } catch (err: any) {
-            alert('Ошибка удаления: ' + (err.response?.data?.detail || err.message));
+            alert(t('admin.errors.delete_error') + ': ' + (err.response?.data?.detail || err.message));
         }
-    }, [authHeaders]);
+    }, [authHeaders, t]);
 
     // API: Delete question
     const deleteQuestion = useCallback(async (questionId: number, questionCode: string) => {
-        const isConfirmed = confirm(`Удалить вопрос ${questionCode}?`);
+        const isConfirmed = confirm(t('admin.questions.delete_confirm', { code: questionCode }));
         if (!isConfirmed) return;
 
         try {
             await client.delete(`/api/v1/admin/questions/${questionId}`, { headers: authHeaders });
             setQuestions((prev) => prev.filter((q) => q.id !== questionId));
         } catch (err: any) {
-            alert('Ошибка удаления: ' + (err.response?.data?.detail || err.message));
+            alert(t('admin.errors.delete_error') + ': ' + (err.response?.data?.detail || err.message));
         }
-    }, [authHeaders]);
+    }, [authHeaders, t]);
 
     // API: Delete session
     const deleteSession = useCallback(async (sessionId: number) => {
-        const isConfirmed = confirm(`Удалить сессию #${sessionId}? Это действие необратимо.`);
+        const isConfirmed = confirm(t('admin.sessions.delete_confirm', { id: sessionId }));
         if (!isConfirmed) return;
 
         try {
             await client.delete(`/api/v1/admin/sessions/${sessionId}`, { headers: authHeaders });
             setSessions((prev) => prev.filter((s) => s.id !== sessionId));
         } catch (err: any) {
-            alert('Ошибка удаления: ' + (err.response?.data?.detail || err.message));
+            alert(t('admin.errors.delete_error') + ': ' + (err.response?.data?.detail || err.message));
         }
-    }, [authHeaders]);
+    }, [authHeaders, t]);
+
+    // API: Bulk delete users
+    const bulkDeleteUsers = useCallback(async (userIds: number[]) => {
+        if (userIds.length === 0) return;
+        const isConfirmed = confirm(t('admin.bulk_delete_confirm', { count: userIds.length }));
+        if (!isConfirmed) return;
+
+        try {
+            await client.post('/api/v1/admin/users/bulk-delete', { ids: userIds }, { headers: authHeaders });
+            setUsers((prev) => prev.filter((u) => !userIds.includes(u.id)));
+        } catch (err: any) {
+            alert(t('admin.errors.delete_error') + ': ' + (err.response?.data?.detail || err.message));
+        }
+    }, [authHeaders, t]);
+
+    // API: Bulk delete questions
+    const bulkDeleteQuestions = useCallback(async (questionIds: number[]) => {
+        if (questionIds.length === 0) return;
+        const isConfirmed = confirm(t('admin.bulk_delete_confirm', { count: questionIds.length }));
+        if (!isConfirmed) return;
+
+        try {
+            await client.post('/api/v1/admin/questions/bulk-delete', { ids: questionIds }, { headers: authHeaders });
+            setQuestions((prev) => prev.filter((q) => !questionIds.includes(q.id)));
+        } catch (err: any) {
+            alert(t('admin.errors.delete_error') + ': ' + (err.response?.data?.detail || err.message));
+        }
+    }, [authHeaders, t]);
+
+    // API: Bulk delete sessions
+    const bulkDeleteSessions = useCallback(async (sessionIds: number[]) => {
+        if (sessionIds.length === 0) return;
+        const isConfirmed = confirm(t('admin.bulk_delete_confirm', { count: sessionIds.length }));
+        if (!isConfirmed) return;
+
+        try {
+            await client.post('/api/v1/admin/sessions/bulk-delete', { ids: sessionIds }, { headers: authHeaders });
+            setSessions((prev) => prev.filter((s) => !sessionIds.includes(s.id)));
+        } catch (err: any) {
+            alert(t('admin.errors.delete_error') + ': ' + (err.response?.data?.detail || err.message));
+        }
+    }, [authHeaders, t]);
 
     // API: Create question
     const createQuestion = useCallback(async () => {
@@ -154,9 +246,9 @@ export const useAdminDashboard = () => {
             setNewQuestion(EMPTY_QUESTION);
             fetchQuestions();
         } catch (err: any) {
-            alert('Ошибка создания: ' + (err.response?.data?.detail || err.message));
+            alert(t('admin.errors.create_error') + ': ' + (err.response?.data?.detail || err.message));
         }
-    }, [authHeaders, newQuestion, fetchQuestions]);
+    }, [authHeaders, newQuestion, fetchQuestions, t]);
 
     // API: Update question
     const updateQuestion = useCallback(async () => {
@@ -170,9 +262,9 @@ export const useAdminDashboard = () => {
             setEditingQuestionId(null);
             fetchQuestions();
         } catch (err: any) {
-            alert('Ошибка обновления: ' + (err.response?.data?.detail || err.message));
+            alert(t('admin.errors.update_error') + ': ' + (err.response?.data?.detail || err.message));
         }
-    }, [authHeaders, newQuestion, editingQuestionId, fetchQuestions]);
+    }, [authHeaders, newQuestion, editingQuestionId, fetchQuestions, t]);
 
     // Modal handlers
     const openQuestionModal = (questionToEdit?: Question) => {
@@ -220,6 +312,9 @@ export const useAdminDashboard = () => {
                 case 'analytics':
                     await fetchAnalytics();
                     break;
+                case 'settings':
+                    await fetchConfig();
+                    break;
             }
             setIsLoading(false);
         };
@@ -241,6 +336,9 @@ export const useAdminDashboard = () => {
         questions,
         sessions,
         analytics,
+        testConfig,
+        configForm,
+        isSavingConfig,
         newQuestion,
 
         // Actions
@@ -249,9 +347,15 @@ export const useAdminDashboard = () => {
         fetchQuestions,
         fetchSessions,
         fetchAnalytics,
+        fetchConfig,
+        updateConfigField,
+        saveConfig,
         deleteUser,
         deleteQuestion,
         deleteSession,
+        bulkDeleteUsers,
+        bulkDeleteQuestions,
+        bulkDeleteSessions,
         createQuestion,
         updateQuestion,
         openQuestionModal,

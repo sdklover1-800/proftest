@@ -32,13 +32,22 @@ const ContextSetupPage: React.FC = () => {
         stress,
         mood,
         isLoading,
+        testMode,
+        startModule,
+        singleModule,
         setSleep,
         setStress,
         setMood,
+        setTestMode,
+        setStartModule,
+        setSingleModule,
         handleStartTest,
         moodEmojis,
         stressLevels,
+        moduleOptions,
     } = useContextSetup();
+
+    const activeModule = testMode === 'single' ? singleModule : startModule;
 
     return (
         <IonPage>
@@ -146,6 +155,65 @@ const ContextSetupPage: React.FC = () => {
                                     <span className="text-xs text-gray-600">{m.label}</span>
                                 </button>
                             ))}
+                        </div>
+                    </div>
+
+                    {/* Test Mode */}
+                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                <span className="text-blue-600 text-lg font-bold">T</span>
+                            </div>
+                            <h3 className="font-semibold text-gray-800">
+                                {t('context.test_mode_title')}
+                            </h3>
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setTestMode('full')}
+                                className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all ${testMode === 'full'
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                {t('context.test_mode_full')}
+                            </button>
+                            <button
+                                onClick={() => setTestMode('single')}
+                                className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium transition-all ${testMode === 'single'
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                {t('context.test_mode_single')}
+                            </button>
+                        </div>
+                        <div className="mt-4">
+                            <p className="text-sm text-gray-500 mb-2">
+                                {testMode === 'single'
+                                    ? t('context.choose_module')
+                                    : t('context.start_from')}
+                            </p>
+                            <div className="grid grid-cols-2 gap-2">
+                                {moduleOptions.map((module) => (
+                                    <button
+                                        key={module.value}
+                                        onClick={() => {
+                                            if (testMode === 'single') {
+                                                setSingleModule(module.value);
+                                            } else {
+                                                setStartModule(module.value);
+                                            }
+                                        }}
+                                        className={`py-2 px-3 rounded-lg text-sm font-semibold transition-all ${activeModule === module.value
+                                            ? 'bg-indigo-600 text-white'
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            }`}
+                                    >
+                                        {module.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
 

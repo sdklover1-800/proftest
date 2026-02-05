@@ -34,8 +34,8 @@ const HomePage: React.FC = () => {
         : '??';
 
     return (
-        <IonPage className="bg-gray-50">
-            <IonContent>
+        <IonPage className="bg-gray-50 dark:bg-gray-900 dark:text-gray-100 transition-colors animate-fade-in">
+            <IonContent className="ion-padding bg-gray-50 dark:bg-gray-900 transition-colors">
                 <IonRefresher slot="fixed" onIonRefresh={handleRefresh} className="z-50">
                     <IonRefresherContent />
                 </IonRefresher>
@@ -44,12 +44,12 @@ const HomePage: React.FC = () => {
                     {/* Custom Mobile Header */}
                     <div className="flex justify-between items-center mb-8 pt-4">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900">
+                            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                                 {t('home.welcome_back', { name: userName ? userName.split(' ')[0] : t('common.user', 'User') })} 👋
                             </h1>
-                            <p className="text-gray-500 text-sm font-medium mt-1">{t('home.ready_message')}</p>
+                            <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mt-1">{t('home.ready_message')}</p>
                         </div>
-                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-bold border-2 border-white shadow-sm">
+                        <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-100 font-bold border-2 border-white dark:border-gray-800 shadow-sm">
                             {initials}
                         </div>
                     </div>
@@ -61,14 +61,14 @@ const HomePage: React.FC = () => {
                         />
 
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2 px-1">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2 px-1">
                                 <IonIcon icon={calendarOutline} className="text-indigo-600" />
                                 {t('home.history_title')}
                             </h3>
 
                             <HomeHistoryList
-                                sessions={sessions}
                                 loading={loading}
+                                sessions={sessions}
                                 onViewResults={viewSessionResults}
                             />
                         </div>

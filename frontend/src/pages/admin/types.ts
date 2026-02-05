@@ -60,4 +60,11 @@ export interface AnalyticsData {
     };
 }
 
-export type TabType = 'dashboard' | 'users' | 'questions' | 'sessions' | 'analytics';
+export interface TestConfig {
+    riasec_limit: number;
+    big5_limit: number;
+    sjt_limit: number;
+    cognitive_limit: number;
+}
+
+export type TabType = 'dashboard' | 'users' | 'questions' | 'sessions' | 'analytics' | 'settings';

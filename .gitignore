@@ -1,2 +1,4 @@
 /.agent
 /.venv
+/backend/venv_py311
+/backend/venv

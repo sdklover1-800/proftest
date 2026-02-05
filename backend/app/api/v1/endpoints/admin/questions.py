@@ -44,6 +44,10 @@ class QuestionUpdate(BaseModel):
     options: dict | None = None
 
 
+class BulkDeleteRequest(BaseModel):
+    ids: list[int]
+
+
 # --- Endpoints ---
 @router.get("/questions")
 async def list_questions(
@@ -168,3 +172,18 @@ async def delete_question(
     await db.commit()
 
     return {"message": f"Question '{question.code}' deleted successfully"}
+
+
+@router.post("/questions/bulk-delete")
+async def bulk_delete_questions(
+    payload: BulkDeleteRequest,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_current_superuser),
+):
+    """Bulk delete questions by IDs."""
+    if not payload.ids:
+        return {"deleted": 0}
+
+    result = await db.execute(delete(Question).where(Question.id.in_(payload.ids)))
+    await db.commit()
+    return {"deleted": result.rowcount or 0}

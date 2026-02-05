@@ -93,4 +93,88 @@ RECOMMENDATION_RULES = {
         "tags": ["Planning", "Goals"],
         "week": 4,
     },
+    # --- SJT (Soft Skills) Rules ---
+    "SJT_TEAMWORK_LOW": {
+        "condition": lambda s: s.get("SJT", {}).get("teamwork", 100) <= 45,
+        "text": "Strengthen collaboration: schedule a weekly team check-in and practice active listening techniques.",
+        "tags": ["SoftSkills", "Teamwork"],
+        "week": 3,
+    },
+    "SJT_STRESS_LOW": {
+        "condition": lambda s: s.get("SJT", {}).get("stress", 100) <= 45,
+        "text": "Stress management: use short breathing routines before deadlines and plan buffer time in your tasks.",
+        "tags": ["SoftSkills", "Stress"],
+        "week": 4,
+    },
+    "SJT_INITIATIVE_LOW": {
+        "condition": lambda s: s.get("SJT", {}).get("initiative", 100) <= 45,
+        "text": "Build initiative: choose one small improvement to propose each week in your projects.",
+        "tags": ["SoftSkills", "Initiative"],
+        "week": 2,
+    },
+    "SJT_SELF_ORG_LOW": {
+        "condition": lambda s: s.get("SJT", {}).get("self_organization", 100) <= 45,
+        "text": "Improve self-organization: break tasks into 3 daily priorities and review them each morning.",
+        "tags": ["SoftSkills", "Self-Organization"],
+        "week": 2,
+    },
+    # --- COGNITIVE Rules ---
+    "COG_SPEED_LOW": {
+        "condition": lambda s: s.get("COGNITIVE", {}).get("details", {}).get("processing_speed", 100) <= 45,
+        "text": "Boost processing speed: practice timed pattern tasks for 10 minutes daily.",
+        "tags": ["Cognitive", "Speed"],
+        "week": 1,
+    },
+    "COG_MEMORY_LOW": {
+        "condition": lambda s: s.get("COGNITIVE", {}).get("details", {}).get("working_memory", 100) <= 45,
+        "text": "Strengthen memory: use short recall exercises (lists, sequences) for 5 minutes daily.",
+        "tags": ["Cognitive", "Memory"],
+        "week": 1,
+    },
+    "COG_ATTENTION_LOW": {
+        "condition": lambda s: s.get("COGNITIVE", {}).get("details", {}).get("attention", 100) <= 45,
+        "text": "Improve attention: reduce distractions and use 15-minute focus blocks with short breaks.",
+        "tags": ["Cognitive", "Attention"],
+        "week": 2,
+    },
+    "COG_LOGIC_LOW": {
+        "condition": lambda s: s.get("COGNITIVE", {}).get("details", {}).get("logic", 100) <= 45,
+        "text": "Enhance logic: solve short reasoning puzzles 2-3 times per week.",
+        "tags": ["Cognitive", "Logic"],
+        "week": 2,
+    },
+    # --- Combined career recommendations (all blocks) ---
+    "CAREER_TECH_ANALYST": {
+        "condition": lambda s: (
+            s.get("RIASEC", {}).get("Investigative", 0) >= 60
+            and s.get("BIG5", {}).get("Conscientiousness", 0) >= 55
+            and s.get("SJT", {}).get("self_organization", 0) >= 50
+            and s.get("COGNITIVE", {}).get("details", {}).get("logic", 0) >= 55
+        ),
+        "text": "You show a strong analytical profile. Consider careers like Data Analyst, QA Analyst, or Business Intelligence Specialist.",
+        "tags": ["Career", "Analytical"],
+        "week": 1,
+    },
+    "CAREER_ENGINEERING": {
+        "condition": lambda s: (
+            s.get("RIASEC", {}).get("Realistic", 0) >= 60
+            and s.get("BIG5", {}).get("Conscientiousness", 0) >= 55
+            and s.get("SJT", {}).get("initiative", 0) >= 50
+            and s.get("COGNITIVE", {}).get("details", {}).get("processing_speed", 0) >= 55
+        ),
+        "text": "Your profile aligns with applied technical roles. Explore Engineering, Automation, or Technical Operations.",
+        "tags": ["Career", "Technical"],
+        "week": 1,
+    },
+    "CAREER_CREATIVE": {
+        "condition": lambda s: (
+            s.get("RIASEC", {}).get("Artistic", 0) >= 60
+            and s.get("BIG5", {}).get("Openness", 0) >= 60
+            and s.get("SJT", {}).get("teamwork", 0) >= 45
+            and s.get("COGNITIVE", {}).get("details", {}).get("working_memory", 0) >= 45
+        ),
+        "text": "You lean toward creative and flexible work. Consider UX/UI, Content Design, or Creative Strategy roles.",
+        "tags": ["Career", "Creative"],
+        "week": 1,
+    },
 }

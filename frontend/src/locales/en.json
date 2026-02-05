@@ -50,6 +50,7 @@
         "language": "Language",
         "notifications": "Notifications",
         "privacy": "Privacy",
+        "dark_mode": "Dark theme",
         "about": "About"
     },
     "assessment": {
@@ -65,7 +66,72 @@
         "exit_yes": "Yes, exit",
         "exit_no": "Cancel",
         "disagree": "Disagree",
-        "agree": "Agree"
+        "agree": "Agree",
+        "timer": "{{seconds}}s left",
+        "reaction_time": "Reaction time: {{ms}}ms",
+        "module_progress": "Module {{current}} / {{total}}",
+        "module_names": {
+            "riasec": "RIASEC",
+            "big5": "Big5",
+            "sjt": "SJT",
+            "cognitive": "Cognitive"
+        },
+        "module_end": {
+            "title": "Module completed",
+            "question": "Finish the test or continue with {{nextModule}}?",
+            "finish": "Finish test",
+            "continue": "Continue"
+        },
+        "break": {
+            "title": "Break",
+            "description": "Take a short pause before the next block.",
+            "countdown": "Continuing in {{seconds}}s",
+            "continue": "Continue"
+        },
+        "practice": {
+            "title": "Practice",
+            "step": "Example {{current}} of {{total}}",
+            "items": {
+                "speed": {
+                    "text": "Compare symbols: ▲ and ▲",
+                    "options": {
+                        "match": "Match",
+                        "different": "Different"
+                    }
+                },
+                "memory": {
+                    "text": "Sequence: ● ▲. Current: ■. Was this symbol present?",
+                    "options": {
+                        "yes": "Yes",
+                        "no": "No"
+                    }
+                },
+                "go": {
+                    "text": "Stimulus: 🟢. Press on green, skip on red.",
+                    "options": {
+                        "press": "PRESS",
+                        "skip": "SKIP"
+                    }
+                }
+            }
+        },
+        "instructions": {
+            "title": "Instruction",
+            "countdown": "Starting in {{seconds}}s",
+            "default": "Follow the on-screen instructions and respond as quickly and accurately as possible.",
+            "riasec": "Rate how much you agree with the statement.",
+            "big5": "Rate how much this describes you. No time limit.",
+            "sjt": "Choose the most appropriate action for the situation.",
+            "cognitive": "Answer quickly and accurately. Use keys or taps."
+        },
+        "cognitive": {
+            "pressSpace": "Press SPACE to respond",
+            "dontPress": "Do NOT press - wait",
+            "findTarget": "Find:",
+            "matchTarget": "Match:",
+            "remember": "Remember the sequence",
+            "continuePattern": "Continue the pattern"
+        }
     },
     "context": {
         "title": "Before We Start",
@@ -83,7 +149,12 @@
         "mood_sad": "Sad",
         "mood_neutral": "Neutral",
         "mood_happy": "Happy",
-        "start_test": "Start Test →"
+        "start_test": "Start Test →",
+        "test_mode_title": "Test Mode",
+        "test_mode_full": "Full Test",
+        "test_mode_single": "Single Module",
+        "start_from": "Start from",
+        "choose_module": "Choose a module"
     },
     "results": {
         "your_result": "Your Profile",
@@ -104,6 +175,11 @@
         "tag_career": "Career",
         "tag_development": "Development",
         "tag_well-being": "Well-being",
+        "percentile_riasec": "RIASEC Percentile",
+        "percentile_big5": "Big5 Percentile",
+        "percentile_cognitive": "Cognitive %",
+        "history_title": "Progress History",
+        "history_empty": "No history yet",
         "week1_title": "Week 1: Exploration",
         "week2_title": "Week 2: Practice",
         "week3_title": "Week 3: Networking",
@@ -111,7 +187,20 @@
         "tasks": "tasks",
         "no_recommendations": "No recommendations found",
         "context_warning": "⚠️ Note: You reported low sleep or high stress. This might affect your cognitive profile.",
-        "sjt_title": "Soft Skills (SJT)"
+        "sjt_title": "Soft Skills (SJT)",
+        "soft_skills_title": "Soft Skills",
+        "cognitive_title": "Cognitive Skills",
+        "logic_label": "Logic & Reasoning",
+        "sjt_teamwork": "Teamwork",
+        "sjt_stress": "Stress Management",
+        "sjt_initiative": "Initiative",
+        "sjt_self_organization": "Self-Organization",
+        "sjt_learning_strategy": "Learning Strategies",
+        "cognitive_processing_speed": "Processing Speed",
+        "cognitive_working_memory": "Working Memory",
+        "cognitive_attention": "Attention (Go/No-Go)",
+        "cognitive_logic": "Logical Thinking",
+        "cognitive_math": "Math"
     },
     "languages": {
         "ru": "Русский",
@@ -174,12 +263,83 @@
     },
     "admin": {
         "title": "Admin Panel",
+        "open_panel": "Open Admin Panel",
         "tabs": {
             "dashboard": "Dashboard",
             "users": "Users",
             "questions": "Questions",
             "sessions": "Sessions",
-            "analytics": "Analytics"
+            "analytics": "Analytics",
+            "settings": "Settings"
+        },
+        "bulk_delete": "Delete selected",
+        "bulk_delete_confirm": "Delete {{count}} items?",
+        "settings": {
+            "title": "Test Configuration",
+            "riasec_count": "RIASEC Questions Count",
+            "big5_count": "Big5 Questions Count",
+            "sjt_count": "SJT Scenarios Count",
+            "cognitive_count": "Cognitive Tasks Count",
+            "save": "Save",
+            "saving": "Saving...",
+            "loading": "Loading settings..."
+        },
+        "users": {
+            "title": "Users",
+            "email": "Email",
+            "name": "Name",
+            "role": "Role",
+            "date": "Date",
+            "actions": "Actions",
+            "delete": "Delete",
+            "delete_confirm": "Delete user {{email}}? This action is irreversible.",
+            "admin_role": "Admin",
+            "user_role": "User"
+        },
+        "sessions": {
+            "title": "Sessions",
+            "user": "User",
+            "status": "Status",
+            "date": "Date",
+            "actions": "Actions",
+            "completed": "Completed",
+            "in_progress": "In Progress",
+            "delete": "Delete",
+            "delete_confirm": "Delete session #{{id}}? This action is irreversible."
+        },
+        "questions": {
+            "title": "Questions",
+            "code": "Code",
+            "text": "Text",
+            "module": "Module",
+            "type": "Type",
+            "actions": "Actions",
+            "add": "Add",
+            "edit": "Edit",
+            "delete": "Delete",
+            "delete_confirm": "Delete question {{code}}?"
+        },
+        "modal": {
+            "new_question": "New Question",
+            "edit_question": "Edit Question",
+            "code_label": "Question Code",
+            "text_ru": "Text (RU)",
+            "text_kz": "Text (KZ)",
+            "text_en": "Text (EN)",
+            "module": "Module",
+            "type": "Type",
+            "category": "Category",
+            "placeholder": "I like working with my hands",
+            "save": "Save",
+            "create": "Create",
+            "cancel": "Cancel"
+        },
+        "errors": {
+            "access_denied": "Access denied. Administrator rights required.",
+            "load_error": "Error loading data",
+            "delete_error": "Delete error",
+            "create_error": "Create error",
+            "update_error": "Update error"
         }
     }
 }

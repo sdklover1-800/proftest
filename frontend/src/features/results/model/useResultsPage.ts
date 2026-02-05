@@ -18,8 +18,19 @@ export interface ContextData {
 interface ResultsData {
     RIASEC: ChartData[];
     BIG5: ChartData[];
-    SJT: ChartData[]; // Added SJT
+    SJT?: Record<string, number>;
+    COGNITIVE?: {
+        total_score?: number;
+        details?: Record<string, number>;
+    };
     contextData?: ContextData | null; // Added contextData
+}
+
+export interface SessionSummary {
+    id: number;
+    date: string;
+    status: string;
+    top_result: string | null;
 }
 
 interface UseResultsPageReturn {
@@ -30,6 +41,8 @@ interface UseResultsPageReturn {
     activeTab: 'RIASEC' | 'BIG5';
     setActiveTab: (tab: 'RIASEC' | 'BIG5') => void;
     sessionId: number | null;
+    history: SessionSummary[];
+    historyLoading: boolean;
 }
 
 /**
@@ -64,6 +77,8 @@ export const useResultsPage = (): UseResultsPageReturn => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'RIASEC' | 'BIG5'>('RIASEC');
+    const [history, setHistory] = useState<SessionSummary[]>([]);
+    const [historyLoading, setHistoryLoading] = useState(true);
 
     useEffect(() => {
         const fetchResults = async () => {
@@ -95,7 +110,24 @@ export const useResultsPage = (): UseResultsPageReturn => {
         fetchResults();
     }, [sessionId]);
 
-    return { results, recommendations, loading, error, activeTab, setActiveTab, sessionId };
+    useEffect(() => {
+        const fetchHistory = async () => {
+            try {
+                setHistoryLoading(true);
+                const historyData = await assessmentApi.getHistory();
+                setHistory(historyData || []);
+            } catch (err) {
+                console.error('Failed to fetch history', err);
+                setHistory([]);
+            } finally {
+                setHistoryLoading(false);
+            }
+        };
+
+        fetchHistory();
+    }, []);
+
+    return { results, recommendations, loading, error, activeTab, setActiveTab, sessionId, history, historyLoading };
 };
 
 /**
@@ -113,7 +145,8 @@ const formatData = (apiData: any, contextData?: any): ResultsData => {
     return {
         RIASEC: apiData.RIASEC ? formatSection(apiData.RIASEC) : [],
         BIG5: apiData.BIG5 ? formatSection(apiData.BIG5) : [],
-        SJT: apiData.SJT ? formatSection(apiData.SJT) : [],
+        SJT: apiData.SJT || undefined,
+        COGNITIVE: apiData.COGNITIVE || undefined,
         contextData: contextData || null
     };
 };

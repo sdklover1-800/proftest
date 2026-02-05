@@ -50,6 +50,7 @@
         "language": "Язык",
         "notifications": "Уведомления",
         "privacy": "Конфиденциальность",
+        "dark_mode": "Темная тема",
         "about": "О приложении"
     },
     "assessment": {
@@ -65,7 +66,72 @@
         "exit_yes": "Да, выйти",
         "exit_no": "Отмена",
         "disagree": "Не согласен",
-        "agree": "Согласен"
+        "agree": "Согласен",
+        "timer": "Осталось {{seconds}}с",
+        "reaction_time": "Время реакции: {{ms}}мс",
+        "module_progress": "Блок {{current}} / {{total}}",
+        "module_names": {
+            "riasec": "RIASEC",
+            "big5": "Big5",
+            "sjt": "SJT",
+            "cognitive": "Когнитивные"
+        },
+        "module_end": {
+            "title": "Блок завершен",
+            "question": "Завершить тест или продолжить блок {{nextModule}}?",
+            "finish": "Завершить тест",
+            "continue": "Продолжить"
+        },
+        "break": {
+            "title": "Пауза",
+            "description": "Сделайте короткий перерыв перед следующим блоком.",
+            "countdown": "Продолжим через {{seconds}}с",
+            "continue": "Продолжить"
+        },
+        "practice": {
+            "title": "Тренировка",
+            "step": "Пример {{current}} из {{total}}",
+            "items": {
+                "speed": {
+                    "text": "Сравните символы: ▲ и ▲",
+                    "options": {
+                        "match": "Совпадают",
+                        "different": "Не совпадают"
+                    }
+                },
+                "memory": {
+                    "text": "Цепочка: ● ▲. Текущий: ■. Был ли этот символ?",
+                    "options": {
+                        "yes": "Да",
+                        "no": "Нет"
+                    }
+                },
+                "go": {
+                    "text": "Стимул: 🟢. Нажмите при зелёном, пропустите при красном.",
+                    "options": {
+                        "press": "НАЖАТЬ",
+                        "skip": "ПРОПУСТИТЬ"
+                    }
+                }
+            }
+        },
+        "instructions": {
+            "title": "Инструкция",
+            "countdown": "Начало через {{seconds}}с",
+            "default": "Следуйте инструкции на экране и отвечайте максимально быстро и точно.",
+            "riasec": "Оцените, насколько вы согласны с утверждением.",
+            "big5": "Оцените, насколько это про вас. Время не ограничено.",
+            "sjt": "Выберите наиболее подходящее действие в ситуации.",
+            "cognitive": "Отвечайте быстро и точно. Используйте клавиши или клики."
+        },
+        "cognitive": {
+            "pressSpace": "Нажмите ПРОБЕЛ чтобы ответить",
+            "dontPress": "НЕ нажимайте - ждите",
+            "findTarget": "Найдите:",
+            "matchTarget": "Найдите пару:",
+            "remember": "Запомните последовательность",
+            "continuePattern": "Продолжите закономерность"
+        }
     },
     "context": {
         "title": "Перед началом",
@@ -83,7 +149,12 @@
         "mood_sad": "Грустно",
         "mood_neutral": "Нормально",
         "mood_happy": "Отлично",
-        "start_test": "Начать тест →"
+        "start_test": "Начать тест →",
+        "test_mode_title": "Режим теста",
+        "test_mode_full": "Полный тест",
+        "test_mode_single": "Один модуль",
+        "start_from": "Начать с",
+        "choose_module": "Выберите модуль"
     },
     "results": {
         "your_result": "Ваш профиль",
@@ -104,6 +175,11 @@
         "tag_career": "Карьера",
         "tag_development": "Развитие",
         "tag_well-being": "Благополучие",
+        "percentile_riasec": "Процентиль RIASEC",
+        "percentile_big5": "Процентиль Big5",
+        "percentile_cognitive": "Процентиль Когн.",
+        "history_title": "История прогресса",
+        "history_empty": "История пока пуста",
         "week1_title": "Неделя 1: Исследование",
         "week2_title": "Неделя 2: Практика",
         "week3_title": "Неделя 3: Нетворкинг",
@@ -111,7 +187,20 @@
         "tasks": "задач",
         "no_recommendations": "Рекомендации не найдены",
         "context_warning": "⚠️ Примечание: Вы сообщили о низком качестве сна или высоком стрессе. Результаты могут быть неточными.",
-        "sjt_title": "Soft Skills (Ситуационные задачи)"
+        "sjt_title": "Soft Skills (Ситуационные задачи)",
+        "soft_skills_title": "Гибкие навыки",
+        "cognitive_title": "Когнитивные навыки",
+        "logic_label": "Логика и рассуждение",
+        "sjt_teamwork": "Командность",
+        "sjt_stress": "Управление стрессом",
+        "sjt_initiative": "Инициативность",
+        "sjt_self_organization": "Самоорганизация",
+        "sjt_learning_strategy": "Стратегии обучения",
+        "cognitive_processing_speed": "Скорость обработки",
+        "cognitive_working_memory": "Рабочая память",
+        "cognitive_attention": "Внимание (Go/No-Go)",
+        "cognitive_logic": "Логическое мышление",
+        "cognitive_math": "Математика"
     },
     "languages": {
         "ru": "Русский",
@@ -174,12 +263,83 @@
     },
     "admin": {
         "title": "Панель администратора",
+        "open_panel": "Войти в админ панель",
         "tabs": {
             "dashboard": "Дашборд",
             "users": "Пользователи",
             "questions": "Вопросы",
             "sessions": "Сессии",
-            "analytics": "Аналитика"
+            "analytics": "Аналитика",
+            "settings": "Настройки"
+        },
+        "bulk_delete": "Удалить выбранные",
+        "bulk_delete_confirm": "Удалить {{count}} элементов?",
+        "settings": {
+            "title": "Конфигурация теста",
+            "riasec_count": "Количество вопросов RIASEC",
+            "big5_count": "Количество вопросов Big5",
+            "sjt_count": "Количество сценариев SJT",
+            "cognitive_count": "Количество когнитивных задач",
+            "save": "Сохранить",
+            "saving": "Сохранение...",
+            "loading": "Загрузка настроек..."
+        },
+        "users": {
+            "title": "Пользователи",
+            "email": "Email",
+            "name": "Имя",
+            "role": "Роль",
+            "date": "Дата",
+            "actions": "Действия",
+            "delete": "Удалить",
+            "delete_confirm": "Удалить пользователя {{email}}? Это действие необратимо.",
+            "admin_role": "Админ",
+            "user_role": "Пользователь"
+        },
+        "sessions": {
+            "title": "Сессии",
+            "user": "Пользователь",
+            "status": "Статус",
+            "date": "Дата",
+            "actions": "Действия",
+            "completed": "Завершён",
+            "in_progress": "В процессе",
+            "delete": "Удалить",
+            "delete_confirm": "Удалить сессию #{{id}}? Это действие необратимо."
+        },
+        "questions": {
+            "title": "Вопросы",
+            "code": "Код",
+            "text": "Текст",
+            "module": "Модуль",
+            "type": "Тип",
+            "actions": "Действия",
+            "add": "Добавить",
+            "edit": "Редактировать",
+            "delete": "Удалить",
+            "delete_confirm": "Удалить вопрос {{code}}?"
+        },
+        "modal": {
+            "new_question": "Новый вопрос",
+            "edit_question": "Редактировать вопрос",
+            "code_label": "Код вопроса",
+            "text_ru": "Текст (RU)",
+            "text_kz": "Текст (KZ)",
+            "text_en": "Текст (EN)",
+            "module": "Модуль",
+            "type": "Тип",
+            "category": "Категория",
+            "placeholder": "Мне нравится работать руками",
+            "save": "Сохранить",
+            "create": "Создать",
+            "cancel": "Отмена"
+        },
+        "errors": {
+            "access_denied": "Доступ запрещён. Требуются права администратора.",
+            "load_error": "Ошибка загрузки данных",
+            "delete_error": "Ошибка удаления",
+            "create_error": "Ошибка создания",
+            "update_error": "Ошибка обновления"
         }
     }
 }

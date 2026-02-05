@@ -4,6 +4,7 @@ import { IonReactRouter } from '@ionic/react-router';
 import { homeOutline, personOutline } from 'ionicons/icons';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -33,6 +34,7 @@ import { LoginPage, RegisterPage } from '@features/auth';
 import Welcome from './pages/Welcome';
 import AdminDashboard from './pages/AdminDashboard';
 import { useAuthStore } from '@/store/authStore';
+import { useThemeStore } from '@/store/themeStore';
 
 setupIonicReact();
 
@@ -76,6 +78,11 @@ const queryClient = new QueryClient();
 const App: React.FC = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const location = useLocation();
+  const theme = useThemeStore((state) => state.theme);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
 
   // Admin panel is rendered completely outside IonTabs to avoid z-index issues
   const isAdminPanel = location.pathname === '/admin-panel';
@@ -91,8 +98,8 @@ const App: React.FC = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="bg-gray-200 min-h-screen flex justify-center">
-        <div className="max-w-md w-full h-full min-h-screen bg-gray-50 shadow-2xl overflow-hidden relative">
+      <div className="bg-gray-200 dark:bg-gray-900 min-h-screen flex justify-center transition-colors">
+        <div className="max-w-md w-full h-full min-h-screen bg-gray-50 dark:bg-gray-900 shadow-2xl overflow-hidden relative transition-colors">
           <IonApp>
             {isAuthenticated ? <AuthenticatedApp /> : (
               <IonRouterOutlet>

@@ -19,6 +19,7 @@ import { QuestionsTab } from './admin/QuestionsTab';
 import { SessionsTab } from './admin/SessionsTab';
 import { QuestionModal } from './admin/QuestionModal';
 import { AnalyticsTab } from './admin/AnalyticsTab';
+import SettingsTab from './admin/SettingsTab';
 
 const TABS: { id: TabType; icon: string; labelKey: string }[] = [
     { id: 'dashboard', icon: '📊', labelKey: 'admin.tabs.dashboard' },
@@ -26,6 +27,7 @@ const TABS: { id: TabType; icon: string; labelKey: string }[] = [
     { id: 'questions', icon: '❓', labelKey: 'admin.tabs.questions' },
     { id: 'sessions', icon: '📝', labelKey: 'admin.tabs.sessions' },
     { id: 'analytics', icon: '📈', labelKey: 'admin.tabs.analytics' },
+    { id: 'settings', icon: '⚙️', labelKey: 'admin.tabs.settings' },
 ];
 
 const AdminDashboard: React.FC = () => {
@@ -41,13 +43,21 @@ const AdminDashboard: React.FC = () => {
         questions,
         sessions,
         analytics,
+        testConfig,
+        configForm,
+        isSavingConfig,
         newQuestion,
+        updateConfigField,
+        saveConfig,
         fetchUsers,
         fetchQuestions,
         fetchSessions,
         deleteUser,
         deleteQuestion,
         deleteSession,
+        bulkDeleteUsers,
+        bulkDeleteQuestions,
+        bulkDeleteSessions,
         createQuestion,
         updateQuestion,
         openQuestionModal,
@@ -103,12 +113,18 @@ const AdminDashboard: React.FC = () => {
                         <>
                             {activeTab === 'dashboard' && <DashboardTab stats={stats} />}
                             {activeTab === 'users' && (
-                                <UsersTab users={users} onDelete={deleteUser} onRefresh={fetchUsers} />
+                                <UsersTab
+                                    users={users}
+                                    onDelete={deleteUser}
+                                    onBulkDelete={bulkDeleteUsers}
+                                    onRefresh={fetchUsers}
+                                />
                             )}
                             {activeTab === 'questions' && (
                                 <QuestionsTab
                                     questions={questions}
                                     onDelete={deleteQuestion}
+                                    onBulkDelete={bulkDeleteQuestions}
                                     onRefresh={fetchQuestions}
                                     onAdd={() => openQuestionModal()}
                                     onEdit={openQuestionModal}
@@ -119,9 +135,18 @@ const AdminDashboard: React.FC = () => {
                                     sessions={sessions}
                                     onRefresh={fetchSessions}
                                     onDelete={deleteSession}
+                                    onBulkDelete={bulkDeleteSessions}
                                 />
                             )}
                             {activeTab === 'analytics' && <AnalyticsTab data={analytics} />}
+                            {activeTab === 'settings' && (
+                                <SettingsTab
+                                    config={configForm || testConfig}
+                                    onFieldChange={updateConfigField}
+                                    onSave={saveConfig}
+                                    isSaving={isSavingConfig}
+                                />
+                            )}
                         </>
                     )}
                 </main>

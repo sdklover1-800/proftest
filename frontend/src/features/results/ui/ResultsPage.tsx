@@ -1,6 +1,8 @@
 import React, { useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
 import {
     IonContent,
     IonPage,
@@ -28,22 +30,54 @@ import LoadingOverlay from '@/shared/ui/LoadingOverlay';
  */
 const ResultsPage: React.FC = () => {
     const { t } = useTranslation();
-    const history = useHistory();
+    const historyNav = useHistory();
     const reset = useAssessmentStore((state) => state.resetAssessment);
 
     const contentRef = useRef<HTMLDivElement>(null);
     const { isPdfGenerating, downloadPDF } = usePdfExport(contentRef as React.RefObject<HTMLDivElement>);
-    const { results, recommendations, loading, error, activeTab, setActiveTab } = useResultsPage();
+    const { results, recommendations, loading, error, activeTab, setActiveTab, history, historyLoading } = useResultsPage();
+
+    const cognitiveScore = results?.COGNITIVE?.total_score ?? 0;
+    const avgScore = (data: { A: number }[]) => data.length > 0
+        ? Math.round(data.reduce((sum, item) => sum + item.A, 0) / data.length)
+        : 0;
+    const toPercentile = (score: number) => Math.max(1, Math.min(99, Math.round(score)));
+    const riasecAvg = results ? avgScore(results.RIASEC) : 0;
+    const big5Avg = results ? avgScore(results.BIG5) : 0;
+    const formatSkillLabel = (key: string): string =>
+        key.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+    const sjtLabelMap: Record<string, string> = {
+        teamwork: t('results.sjt_teamwork'),
+        stress: t('results.sjt_stress'),
+        initiative: t('results.sjt_initiative'),
+        self_organization: t('results.sjt_self_organization'),
+        learning_strategy: t('results.sjt_learning_strategy'),
+    };
+    const cognitiveLabelMap: Record<string, string> = {
+        processing_speed: t('results.cognitive_processing_speed'),
+        working_memory: t('results.cognitive_working_memory'),
+        attention: t('results.cognitive_attention'),
+        logic: t('results.cognitive_logic'),
+        math: t('results.cognitive_math'),
+    };
 
     const handleHome = (): void => {
         reset();
-        history.push('/home');
+        historyNav.push('/home');
+    };
+
+    const formatDate = (dateString: string): string => {
+        try {
+            return format(new Date(dateString), 'd MMM, HH:mm', { locale: ru });
+        } catch {
+            return dateString;
+        }
     };
 
     if (loading) {
         return (
-            <IonPage>
-                <IonContent className="ion-padding flex items-center justify-center h-full">
+            <IonPage className="bg-gray-50 dark:bg-gray-900 dark:text-gray-100 transition-colors animate-fade-in">
+                <IonContent className="ion-padding flex items-center justify-center h-full bg-gray-50 dark:bg-gray-900 transition-colors">
                     <div className="flex flex-col items-center justify-center h-full space-y-4">
                         <IonSpinner name="crescent" />
                         <p className="text-gray-500">{t('results.calculating')}</p>
@@ -55,8 +89,8 @@ const ResultsPage: React.FC = () => {
 
     if (error || !results) {
         return (
-            <IonPage>
-                <IonContent className="ion-padding">
+            <IonPage className="bg-gray-50 dark:bg-gray-900 dark:text-gray-100 transition-colors animate-fade-in">
+                <IonContent className="ion-padding bg-gray-50 dark:bg-gray-900 transition-colors">
                     <div className="flex flex-col items-center justify-center h-full text-center">
                         <h2 className="text-xl font-bold text-red-500 mb-2">{t('common.error')}</h2>
                         <p className="text-gray-600 mb-6">{error || t('results.not_found')}</p>
@@ -68,7 +102,7 @@ const ResultsPage: React.FC = () => {
     }
 
     return (
-        <IonPage>
+        <IonPage className="bg-gray-50 dark:bg-gray-900 dark:text-gray-100 transition-colors animate-fade-in">
             <IonHeader>
                 <IonToolbar>
                     <IonButtons slot="start">
@@ -85,8 +119,8 @@ const ResultsPage: React.FC = () => {
 
             <LoadingOverlay isOpen={isPdfGenerating} message={t('results.generating_pdf')} />
 
-            <IonContent className="ion-padding bg-gray-50">
-                <div ref={contentRef} className="max-w-md mx-auto space-y-6 pb-24 bg-gray-50">
+            <IonContent className="ion-padding bg-gray-50 dark:bg-gray-900 transition-colors">
+                <div ref={contentRef} className="max-w-md mx-auto space-y-6 pb-24 bg-gray-50 dark:bg-gray-900 transition-colors">
 
                     {/* Tab Switcher */}
                     <div className="flex rounded-lg bg-gray-200 p-1">
@@ -104,6 +138,22 @@ const ResultsPage: React.FC = () => {
                         </button>
                     </div>
 
+                    {/* Percentile Summary */}
+                    <div className="grid grid-cols-3 gap-3">
+                        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
+                            <div className="text-[10px] text-gray-400 uppercase tracking-widest">{t('results.percentile_riasec')}</div>
+                            <div className="text-lg font-bold text-indigo-600 mt-1">{toPercentile(riasecAvg)}%</div>
+                        </div>
+                        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
+                            <div className="text-[10px] text-gray-400 uppercase tracking-widest">{t('results.percentile_big5')}</div>
+                            <div className="text-lg font-bold text-emerald-600 mt-1">{toPercentile(big5Avg)}%</div>
+                        </div>
+                        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
+                            <div className="text-[10px] text-gray-400 uppercase tracking-widest">{t('results.percentile_cognitive')}</div>
+                            <div className="text-lg font-bold text-purple-600 mt-1">{toPercentile(cognitiveScore)}%</div>
+                        </div>
+                    </div>
+
                     {/* Context Warning */}
                     {results.contextData && (results.contextData.sleep < 6 || results.contextData.stress === 'high') && (
                         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-start gap-3">
@@ -118,21 +168,66 @@ const ResultsPage: React.FC = () => {
 
                     <ResultCharts activeTab={activeTab} results={results} />
 
-                    {/* SJT / Soft Skills Section */}
-                    {results.SJT && results.SJT.length > 0 && (
+                    {/* Cognitive Skills Section */}
+                    {results.COGNITIVE && typeof results.COGNITIVE.total_score === 'number' && (
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                            <h3 className="text-lg font-bold text-gray-800 mb-4">{t('results.sjt_title')}</h3>
+                            <h3 className="text-lg font-bold text-gray-800 mb-4">{t('results.cognitive_title')}</h3>
                             <div className="space-y-4">
-                                {results.SJT.map((item) => (
-                                    <div key={item.subject}>
+                                <div>
+                                    <div className="flex justify-between text-sm mb-2">
+                                        <span className="font-medium text-gray-700">{t('results.logic_label')}</span>
+                                        <span className="font-bold text-indigo-600 text-lg">{cognitiveScore}%</span>
+                                    </div>
+                                    <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                                            style={{ width: `${cognitiveScore}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Cognitive Sub-Blocks */}
+                    {results.COGNITIVE?.details && Object.keys(results.COGNITIVE.details).length > 0 && (
+                        <div className="space-y-4">
+                            {Object.entries(results.COGNITIVE.details).map(([key, value]) => (
+                                <div key={key} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                                    <div className="flex justify-between text-sm mb-2">
+                                        <span className="font-medium text-gray-700">
+                                            {cognitiveLabelMap[key] || formatSkillLabel(key)}
+                                        </span>
+                                        <span className="font-bold text-indigo-600">{value}%</span>
+                                    </div>
+                                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-indigo-500 rounded-full"
+                                            style={{ width: `${value}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Soft Skills (SJT) Section */}
+                    {results.SJT && Object.keys(results.SJT).length > 0 && (
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                            <h3 className="text-lg font-bold text-gray-800 mb-4">{t('results.soft_skills_title')}</h3>
+                            <div className="space-y-4">
+                                {Object.entries(results.SJT).map(([subject, value]) => (
+                                    <div key={subject}>
                                         <div className="flex justify-between text-sm mb-1">
-                                            <span className="font-medium text-gray-700 capitalize">{item.subject}</span>
-                                            <span className="font-bold text-indigo-600">{item.A}%</span>
+                                            <span className="font-medium text-gray-700 capitalize">
+                                                {sjtLabelMap[subject] || formatSkillLabel(subject)}
+                                            </span>
+                                            <span className="font-bold text-indigo-600">{value}%</span>
                                         </div>
                                         <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                                             <div
                                                 className="h-full bg-indigo-500 rounded-full"
-                                                style={{ width: `${item.A}%` }}
+                                                style={{ width: `${value}%` }}
                                             />
                                         </div>
                                     </div>
@@ -140,6 +235,32 @@ const ResultsPage: React.FC = () => {
                             </div>
                         </div>
                     )}
+
+                    {/* History Section */}
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h3 className="text-lg font-bold text-gray-800 mb-4">{t('results.history_title')}</h3>
+                        {historyLoading ? (
+                            <p className="text-sm text-gray-500">{t('common.loading')}</p>
+                        ) : history.length === 0 ? (
+                            <p className="text-sm text-gray-500">{t('results.history_empty')}</p>
+                        ) : (
+                            <div className="space-y-3">
+                                {history.slice(0, 5).map((item) => (
+                                    <div key={item.id} className="flex items-center justify-between text-sm bg-gray-50 rounded-lg p-3">
+                                        <div>
+                                            <div className="font-semibold text-gray-700">
+                                                {item.top_result || t('home.test_number', { id: item.id })}
+                                            </div>
+                                            <div className="text-xs text-gray-400">{formatDate(item.date)}</div>
+                                        </div>
+                                        <div className="text-xs font-semibold text-indigo-500">
+                                            {item.status}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
                     <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-xl border border-indigo-100 shadow-sm">
                         <h3 className="text-lg font-bold text-indigo-900 flex items-center gap-2 mb-4">

@@ -4,6 +4,7 @@ Protected by superuser authentication.
 """
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +14,10 @@ from app.models.assessment import AssessmentSession, UserResponse
 from app.models.user import User
 
 router = APIRouter()
+
+
+class BulkDeleteRequest(BaseModel):
+    ids: list[int]
 
 
 @router.get("/sessions")
@@ -76,3 +81,19 @@ async def delete_session(
     await db.commit()
 
     return {"message": f"Session #{session_id} deleted successfully"}
+
+
+@router.post("/sessions/bulk-delete")
+async def bulk_delete_sessions(
+    payload: BulkDeleteRequest,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_current_superuser),
+):
+    """Bulk delete sessions and their responses."""
+    if not payload.ids:
+        return {"deleted": 0}
+
+    await db.execute(delete(UserResponse).where(UserResponse.session_id.in_(payload.ids)))
+    result = await db.execute(delete(AssessmentSession).where(AssessmentSession.id.in_(payload.ids)))
+    await db.commit()
+    return {"deleted": result.rowcount or 0}

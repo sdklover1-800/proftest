@@ -6,6 +6,10 @@ export interface QuestionOption {
     value: number;
 }
 
+export type AssessmentModule = 'RIASEC' | 'BIG5' | 'COGNITIVE' | 'SJT';
+
+const DEFAULT_MODULES: AssessmentModule[] = ['RIASEC', 'BIG5', 'COGNITIVE', 'SJT'];
+
 export interface Question {
     id: number;
     code: string;
@@ -24,11 +28,16 @@ interface AssessmentState {
     currentIndex: number;
     isFinished: boolean;
     results: any | null; // Added results to state
+    selectedModules: AssessmentModule[];
+    startModule: AssessmentModule;
 
     setSessionId: (id: number) => void;
     setAnswer: (questionId: number, value: number) => void;
     nextQuestion: (totalQuestions: number) => void;
     prevQuestion: () => void;
+    setSelectedModules: (modules: AssessmentModule[]) => void;
+    setStartModule: (module: AssessmentModule) => void;
+    finishAssessment: () => void;
     resetAssessment: () => void;
 }
 
@@ -40,6 +49,8 @@ export const useAssessmentStore = create<AssessmentState>()(
             currentIndex: 0,
             isFinished: false,
             results: null,
+            selectedModules: DEFAULT_MODULES,
+            startModule: 'RIASEC',
 
             setSessionId: (id: number) => set({ sessionId: id }),
 
@@ -63,6 +74,10 @@ export const useAssessmentStore = create<AssessmentState>()(
                 currentIndex: Math.max(state.currentIndex - 1, 0)
             })),
 
+            setSelectedModules: (modules) => set({ selectedModules: modules }),
+            setStartModule: (module) => set({ startModule: module }),
+            finishAssessment: () => set({ isFinished: true }),
+
             resetAssessment: () => set({
                 sessionId: null,
                 responses: {},
@@ -74,18 +89,21 @@ export const useAssessmentStore = create<AssessmentState>()(
         {
             name: 'assessment-storage',
             storage: createJSONStorage(() => localStorage),
-            version: 3, // Bump version to clear potential old stale state structure
+            version: 4, // Bump version to add module selection fields
             migrate: (persistedState: unknown, version: number) => {
-                const state = persistedState as AssessmentState;
-                if (version < 3) {
+                const state = persistedState as Partial<AssessmentState> | undefined;
+                if (version < 4) {
                     return {
                         sessionId: null,
                         responses: {},
                         currentIndex: 0,
-                        isFinished: false
+                        isFinished: false,
+                        results: null,
+                        selectedModules: state?.selectedModules ?? DEFAULT_MODULES,
+                        startModule: state?.startModule ?? 'RIASEC',
                     } as AssessmentState;
                 }
-                return state;
+                return state as AssessmentState;
             },
         }
     )

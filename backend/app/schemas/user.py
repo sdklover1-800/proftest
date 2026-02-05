@@ -27,5 +27,6 @@ class UserResponse(UserBase):
     """
 
     id: int
+    is_superuser: bool = False
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)

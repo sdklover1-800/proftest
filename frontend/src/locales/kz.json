@@ -50,6 +50,7 @@
         "language": "Тіл",
         "notifications": "Хабарландырулар",
         "privacy": "Құпиялылық",
+        "dark_mode": "Қараңғы тақырып",
         "about": "Қосымша туралы"
     },
     "assessment": {
@@ -65,7 +66,72 @@
         "exit_yes": "Иә, шығу",
         "exit_no": "Болдырмау",
         "disagree": "Келіспеймін",
-        "agree": "Келісемін"
+        "agree": "Келісемін",
+        "timer": "Қалды {{seconds}}с",
+        "reaction_time": "Реакция уақыты: {{ms}}мс",
+        "module_progress": "Блок {{current}} / {{total}}",
+        "module_names": {
+            "riasec": "RIASEC",
+            "big5": "Big5",
+            "sjt": "SJT",
+            "cognitive": "Когнитивті"
+        },
+        "module_end": {
+            "title": "Блок аяқталды",
+            "question": "Тесті аяқтайсыз ба, әлде {{nextModule}} блогын жалғастырасыз ба?",
+            "finish": "Тесті аяқтау",
+            "continue": "Жалғастыру"
+        },
+        "break": {
+            "title": "Үзіліс",
+            "description": "Келесі блокқа дейін қысқа үзіліс жасаңыз.",
+            "countdown": "{{seconds}}с кейін жалғасады",
+            "continue": "Жалғастыру"
+        },
+        "practice": {
+            "title": "Жаттығу",
+            "step": "{{current}} / {{total}} мысал",
+            "items": {
+                "speed": {
+                    "text": "Белгілерді салыстырыңыз: ▲ және ▲",
+                    "options": {
+                        "match": "Сәйкес",
+                        "different": "Сәйкес емес"
+                    }
+                },
+                "memory": {
+                    "text": "Тізбек: ● ▲. Ағымдағы: ■. Бұл таңба болды ма?",
+                    "options": {
+                        "yes": "Иә",
+                        "no": "Жоқ"
+                    }
+                },
+                "go": {
+                    "text": "Стимул: 🟢. Жасылда басыңыз, қызылда өткізіңіз.",
+                    "options": {
+                        "press": "БАСУ",
+                        "skip": "ӨТКІЗУ"
+                    }
+                }
+            }
+        },
+        "instructions": {
+            "title": "Нұсқаулық",
+            "countdown": "{{seconds}}с кейін басталады",
+            "default": "Экрандағы нұсқауларды орындаңыз, мүмкіндігінше тез және дәл жауап беріңіз.",
+            "riasec": "Мәлімдемемен қаншалықты келісетініңізді бағалаңыз.",
+            "big5": "Бұл сіз туралы қаншалықты екенін бағалаңыз. Уақыт шектеулі емес.",
+            "sjt": "Жағдайға ең қолайлы әрекетті таңдаңыз.",
+            "cognitive": "Тез әрі дәл жауап беріңіз. Пернелерді немесе басуды қолданыңыз."
+        },
+        "cognitive": {
+            "pressSpace": "Жауап беру үшін БОСЛЫҚ басыңыз",
+            "dontPress": "БАСПАҢЫЗ - күтіңіз",
+            "findTarget": "Табыңыз:",
+            "matchTarget": "Жұпты табыңыз:",
+            "remember": "Тізбекті есте сақтаңыз",
+            "continuePattern": "Заңдылықты жалғастырыңыз"
+        }
     },
     "context": {
         "title": "Бастамас бұрын",
@@ -83,7 +149,12 @@
         "mood_sad": "Мұңды",
         "mood_neutral": "Қалыпты",
         "mood_happy": "Жақсы",
-        "start_test": "Тестті бастау →"
+        "start_test": "Тестті бастау →",
+        "test_mode_title": "Тест режимі",
+        "test_mode_full": "Толық тест",
+        "test_mode_single": "Бір модуль",
+        "start_from": "Бастау",
+        "choose_module": "Модульді таңдаңыз"
     },
     "results": {
         "your_result": "Сіздің профиліңіз",
@@ -104,6 +175,11 @@
         "tag_career": "Мансап",
         "tag_development": "Даму",
         "tag_well-being": "Саулық",
+        "percentile_riasec": "RIASEC пайыздық",
+        "percentile_big5": "Big5 пайыздық",
+        "percentile_cognitive": "Когн. пайыздық",
+        "history_title": "Прогресс тарихы",
+        "history_empty": "Әзірге тарих жоқ",
         "week1_title": "1-апта: Зерттеу",
         "week2_title": "2-апта: Тәжірибе",
         "week3_title": "3-апта: Нетворкинг",
@@ -111,7 +187,20 @@
         "tasks": "тапсырма",
         "no_recommendations": "Ұсыныстар табылмады",
         "context_warning": "⚠️ Ескертпе: Сіз ұйқыңыз аз немесе күйзеліс жоғары екенін көрсеттіңіз. Нәтижелер дәл болмауы мүмкін.",
-        "sjt_title": "Soft Skills (Ситуациялық тапсырмалар)"
+        "sjt_title": "Soft Skills (Ситуациялық тапсырмалар)",
+        "soft_skills_title": "Жұмсақ дағдылар",
+        "cognitive_title": "Когнитивті дағдылар",
+        "logic_label": "Логика және пайымдау",
+        "sjt_teamwork": "Командалық жұмыс",
+        "sjt_stress": "Стресті басқару",
+        "sjt_initiative": "Бастамашылық",
+        "sjt_self_organization": "Өзін-өзі ұйымдастыру",
+        "sjt_learning_strategy": "Оқу стратегиялары",
+        "cognitive_processing_speed": "Өңдеу жылдамдығы",
+        "cognitive_working_memory": "Жұмыс жады",
+        "cognitive_attention": "Зейін (Go/No-Go)",
+        "cognitive_logic": "Логикалық ойлау",
+        "cognitive_math": "Математика"
     },
     "languages": {
         "ru": "Русский",
@@ -174,12 +263,83 @@
     },
     "admin": {
         "title": "Админ панелі",
+        "open_panel": "Админ панеліне кіру",
         "tabs": {
             "dashboard": "Дашборд",
             "users": "Пайдаланушылар",
             "questions": "Сұрақтар",
             "sessions": "Сессиялар",
-            "analytics": "Аналитика"
+            "analytics": "Аналитика",
+            "settings": "Баптаулар"
+        },
+        "bulk_delete": "Таңдалғандарды жою",
+        "bulk_delete_confirm": "{{count}} элементті жою керек пе?",
+        "settings": {
+            "title": "Тест конфигурациясы",
+            "riasec_count": "RIASEC сұрақтарының саны",
+            "big5_count": "Big5 сұрақтарының саны",
+            "sjt_count": "SJT сценарийлерінің саны",
+            "cognitive_count": "Когнитивті тапсырмалар саны",
+            "save": "Сақтау",
+            "saving": "Сақталуда...",
+            "loading": "Баптаулар жүктелуде..."
+        },
+        "users": {
+            "title": "Пайдаланушылар",
+            "email": "Email",
+            "name": "Аты",
+            "role": "Рөлі",
+            "date": "Күні",
+            "actions": "Әрекеттер",
+            "delete": "Жою",
+            "delete_confirm": "{{email}} пайдаланушысын жою керек пе? Бұл әрекетті қайтару мүмкін емес.",
+            "admin_role": "Админ",
+            "user_role": "Пайдаланушы"
+        },
+        "sessions": {
+            "title": "Сессиялар",
+            "user": "Пайдаланушы",
+            "status": "Күйі",
+            "date": "Күні",
+            "actions": "Әрекеттер",
+            "completed": "Аяқталды",
+            "in_progress": "Орындалуда",
+            "delete": "Жою",
+            "delete_confirm": "#{{id}} сессиясын жою керек пе? Бұл әрекетті қайтару мүмкін емес."
+        },
+        "questions": {
+            "title": "Сұрақтар",
+            "code": "Код",
+            "text": "Мәтін",
+            "module": "Модуль",
+            "type": "Түрі",
+            "actions": "Әрекеттер",
+            "add": "Қосу",
+            "edit": "Өзгерту",
+            "delete": "Жою",
+            "delete_confirm": "{{code}} сұрағын жою керек пе?"
+        },
+        "modal": {
+            "new_question": "Жаңа сұрақ",
+            "edit_question": "Сұрақты өзгерту",
+            "code_label": "Сұрақ коды",
+            "text_ru": "Мәтін (RU)",
+            "text_kz": "Мәтін (KZ)",
+            "text_en": "Мәтін (EN)",
+            "module": "Модуль",
+            "type": "Түрі",
+            "category": "Санат",
+            "placeholder": "Маған қолмен жұмыс істеу ұнайды",
+            "save": "Сақтау",
+            "create": "Жасау",
+            "cancel": "Болдырмау"
+        },
+        "errors": {
+            "access_denied": "Қол жетімділік жоқ. Әкімші құқықтары қажет.",
+            "load_error": "Деректерді жүктеу қатесі",
+            "delete_error": "Жою қатесі",
+            "create_error": "Жасау қатесі",
+            "update_error": "Жаңарту қатесі"
         }
     }
 }

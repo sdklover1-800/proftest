@@ -6,6 +6,7 @@ interface User {
     id: number;
     email: string;
     age?: number;
+    is_superuser?: boolean;
 }
 
 export interface UseProfileReturn {

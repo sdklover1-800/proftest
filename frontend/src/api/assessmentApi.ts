@@ -1,5 +1,5 @@
 import client from './client';
-import type { Question } from '../store/assessmentStore';
+import type { AssessmentModule, Question } from '../store/assessmentStore';
 
 export interface ContextData {
     sleep: number;
@@ -7,9 +7,21 @@ export interface ContextData {
     mood: 'sad' | 'neutral' | 'happy';
 }
 
+export interface QuestionQueryParams {
+    modules?: AssessmentModule[];
+    startModule?: AssessmentModule;
+    perCategory?: number;
+}
+
 export const assessmentApi = {
-    getQuestions: async (): Promise<Question[]> => {
-        const response = await client.get<Question[]>('/api/v1/assessment/questions');
+    getQuestions: async (params?: QuestionQueryParams): Promise<Question[]> => {
+        const response = await client.get<Question[]>('/api/v1/assessment/questions', {
+            params: {
+                modules: params?.modules?.join(','),
+                start_module: params?.startModule,
+                per_category: params?.perCategory,
+            },
+        });
         return response.data;
     },
 

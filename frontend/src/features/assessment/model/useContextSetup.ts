@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useStartSession } from '../api/queries';
 import { useAssessmentStore } from '@/store/assessmentStore';
+import type { AssessmentModule } from '@/store/assessmentStore';
 import type { ContextData } from '@/api/assessmentApi';
 
 export type StressLevel = 'low' | 'medium' | 'high';
@@ -31,16 +32,23 @@ interface UseContextSetupReturn {
     stress: StressLevel;
     mood: MoodLevel;
     isLoading: boolean;
+    testMode: 'full' | 'single';
+    startModule: AssessmentModule;
+    singleModule: AssessmentModule;
 
     // Handlers
     setSleep: (value: number) => void;
     setStress: (value: StressLevel) => void;
     setMood: (value: MoodLevel) => void;
+    setTestMode: (mode: 'full' | 'single') => void;
+    setStartModule: (module: AssessmentModule) => void;
+    setSingleModule: (module: AssessmentModule) => void;
     handleStartTest: () => void;
 
     // Options for rendering
     moodEmojis: readonly MoodOption[];
     stressLevels: readonly StressOption[];
+    moduleOptions: readonly { value: AssessmentModule; label: string }[];
 }
 
 /**
@@ -52,17 +60,37 @@ export const useContextSetup = (): UseContextSetupReturn => {
     const history = useHistory();
     const setSessionId = useAssessmentStore((state) => state.setSessionId);
     const resetAssessment = useAssessmentStore((state) => state.resetAssessment);
+    const selectedModules = useAssessmentStore((state) => state.selectedModules);
+    const startModuleStore = useAssessmentStore((state) => state.startModule);
+    const setSelectedModules = useAssessmentStore((state) => state.setSelectedModules);
+    const setStartModuleStore = useAssessmentStore((state) => state.setStartModule);
 
     // Local state for context questions
     const [sleep, setSleep] = useState<number>(7);
     const [stress, setStress] = useState<StressLevel>('medium');
     const [mood, setMood] = useState<MoodLevel>('neutral');
+    const [testMode, setTestMode] = useState<'full' | 'single'>(
+        selectedModules.length === 1 ? 'single' : 'full'
+    );
+    const [startModule, setStartModule] = useState<AssessmentModule>(
+        startModuleStore || 'RIASEC'
+    );
+    const [singleModule, setSingleModule] = useState<AssessmentModule>(
+        selectedModules[0] || 'RIASEC'
+    );
 
     const startSessionMutation = useStartSession();
 
     const handleStartTest = () => {
         // Reset any previous session data
         resetAssessment();
+
+        const allModules: AssessmentModule[] = ['RIASEC', 'BIG5', 'COGNITIVE', 'SJT'];
+        const modulesToUse = testMode === 'single' ? [singleModule] : allModules;
+        const startModuleToUse = testMode === 'single' ? singleModule : startModule;
+
+        setSelectedModules(modulesToUse);
+        setStartModuleStore(startModuleToUse);
 
         const contextData: ContextData = {
             sleep,
@@ -94,16 +122,30 @@ export const useContextSetup = (): UseContextSetupReturn => {
         { value: 'high', label: t('context.stress_high') },
     ];
 
+    const moduleOptions: readonly { value: AssessmentModule; label: string }[] = [
+        { value: 'RIASEC', label: t('assessment.module_names.riasec') },
+        { value: 'BIG5', label: t('assessment.module_names.big5') },
+        { value: 'COGNITIVE', label: t('assessment.module_names.cognitive') },
+        { value: 'SJT', label: t('assessment.module_names.sjt') },
+    ];
+
     return {
         sleep,
         stress,
         mood,
         isLoading: startSessionMutation.isPending,
+        testMode,
+        startModule,
+        singleModule,
         setSleep,
         setStress,
         setMood,
+        setTestMode,
+        setStartModule,
+        setSingleModule,
         handleStartTest,
         moodEmojis,
         stressLevels,
+        moduleOptions,
     };
 };
