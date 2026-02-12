@@ -23,7 +23,7 @@ export const getCognitiveTimeLimitMs = (question: TimedQuestion): number | null 
     }
 
     if (code.startsWith('COG_MEM_')) {
-        return 5000;
+        return 15000;
     }
 
     if (code.startsWith('COG_LOG_')) {

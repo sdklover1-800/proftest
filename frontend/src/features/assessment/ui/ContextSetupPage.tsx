@@ -31,6 +31,7 @@ const ContextSetupPage: React.FC = () => {
         sleep,
         stress,
         mood,
+        age,
         isLoading,
         testMode,
         startModule,
@@ -38,6 +39,7 @@ const ContextSetupPage: React.FC = () => {
         setSleep,
         setStress,
         setMood,
+        setAge,
         setTestMode,
         setStartModule,
         setSingleModule,
@@ -155,6 +157,39 @@ const ContextSetupPage: React.FC = () => {
                                     <span className="text-xs text-gray-600">{m.label}</span>
                                 </button>
                             ))}
+                        </div>
+                    </div>
+
+                    {/* Age Question */}
+                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                                <span className="text-purple-600 text-lg font-bold">A</span>
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-gray-800">
+                                    {t('context.age_question')}
+                                </h3>
+                                <p className="text-sm text-gray-500">
+                                    {t('context.age_hint')}
+                                </p>
+                            </div>
+                        </div>
+                        <IonRange
+                            min={1}
+                            max={99}
+                            step={1}
+                            snaps={true}
+                            pin={true}
+                            value={age}
+                            onIonChange={(e) => setAge(e.detail.value as number)}
+                            className="mt-2"
+                        >
+                            <IonLabel slot="start">1</IonLabel>
+                            <IonLabel slot="end">99</IonLabel>
+                        </IonRange>
+                        <div className="text-center text-2xl font-bold text-purple-600 mt-2">
+                            {age} {t('context.years')}
                         </div>
                     </div>
 

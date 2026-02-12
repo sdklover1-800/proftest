@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { assessmentApi } from '@/api/assessmentApi';
 import { useAssessmentStore } from '@/store/assessmentStore';
+import type { AIInsights } from '@/types/assessment';
 
 interface ChartData {
     subject: string;
@@ -36,6 +38,7 @@ export interface SessionSummary {
 interface UseResultsPageReturn {
     results: ResultsData | null;
     recommendations: any[];
+    aiInsights: AIInsights | null;
     loading: boolean;
     error: string | null;
     activeTab: 'RIASEC' | 'BIG5';
@@ -52,6 +55,7 @@ interface UseResultsPageReturn {
 export const useResultsPage = (): UseResultsPageReturn => {
     const location = useLocation();
     const storeSessionId = useAssessmentStore((state) => state.sessionId);
+    const { i18n } = useTranslation();
 
     // Resolve session ID from URL, localStorage, or store
     const resolveSessionId = (): number | null => {
@@ -74,6 +78,7 @@ export const useResultsPage = (): UseResultsPageReturn => {
     const [sessionId] = useState<number | null>(resolveSessionId);
     const [results, setResults] = useState<ResultsData | null>(null);
     const [recommendations, setRecommendations] = useState<any[]>([]);
+    const [aiInsights, setAiInsights] = useState<AIInsights | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'RIASEC' | 'BIG5'>('RIASEC');
@@ -90,14 +95,16 @@ export const useResultsPage = (): UseResultsPageReturn => {
             try {
                 // Try to get existing results first
                 try {
-                    const response = await assessmentApi.getResults(sessionId);
+                    const response = await assessmentApi.getResults(sessionId, i18n.language);
                     setResults(formatData(response.scores, response.context_data));
                     setRecommendations(response.recommendations || []);
+                    setAiInsights(response.ai_insights || null);
                 } catch {
                     // If not found, try to finish the assessment
-                    const response = await assessmentApi.finishAssessment(sessionId);
+                    const response = await assessmentApi.finishAssessment(sessionId, i18n.language);
                     setResults(formatData(response.scores, response.context_data));
                     setRecommendations(response.recommendations || []);
+                    setAiInsights(response.ai_insights || null);
                 }
             } catch (err) {
                 console.error("Failed to fetch results", err);
@@ -108,7 +115,7 @@ export const useResultsPage = (): UseResultsPageReturn => {
         };
 
         fetchResults();
-    }, [sessionId]);
+    }, [sessionId, i18n.language]);
 
     useEffect(() => {
         const fetchHistory = async () => {
@@ -127,7 +134,7 @@ export const useResultsPage = (): UseResultsPageReturn => {
         fetchHistory();
     }, []);
 
-    return { results, recommendations, loading, error, activeTab, setActiveTab, sessionId, history, historyLoading };
+    return { results, recommendations, aiInsights, loading, error, activeTab, setActiveTab, sessionId, history, historyLoading };
 };
 
 /**

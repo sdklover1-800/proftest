@@ -10,3 +10,4 @@ email-validator
 python-jose[cryptography]
 bcrypt
 python-multipart
+httpx

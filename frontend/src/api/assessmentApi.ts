@@ -5,6 +5,7 @@ export interface ContextData {
     sleep: number;
     stress: 'low' | 'medium' | 'high';
     mood: 'sad' | 'neutral' | 'happy';
+    age?: number;
 }
 
 export interface QuestionQueryParams {
@@ -42,13 +43,25 @@ export const assessmentApi = {
         return response.data;
     },
 
-    finishAssessment: async (sessionId: number): Promise<any> => {
-        const response = await client.post(`/api/v1/assessment/${sessionId}/finish`);
+    finishAssessment: async (sessionId: number, lang?: string): Promise<any> => {
+        const response = await client.post(
+            `/api/v1/assessment/${sessionId}/finish`,
+            null,
+            {
+                params: {
+                    lang,
+                },
+            }
+        );
         return response.data;
     },
 
-    getResults: async (sessionId: number): Promise<any> => {
-        const response = await client.get(`/api/v1/assessment/${sessionId}/results`);
+    getResults: async (sessionId: number, lang?: string): Promise<any> => {
+        const response = await client.get(`/api/v1/assessment/${sessionId}/results`, {
+            params: {
+                lang,
+            },
+        });
         return response.data;
     },
 

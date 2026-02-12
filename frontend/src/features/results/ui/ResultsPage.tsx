@@ -35,7 +35,7 @@ const ResultsPage: React.FC = () => {
 
     const contentRef = useRef<HTMLDivElement>(null);
     const { isPdfGenerating, downloadPDF } = usePdfExport(contentRef as React.RefObject<HTMLDivElement>);
-    const { results, recommendations, loading, error, activeTab, setActiveTab, history, historyLoading } = useResultsPage();
+    const { results, recommendations, aiInsights, loading, error, activeTab, setActiveTab, history, historyLoading } = useResultsPage();
 
     const cognitiveScore = results?.COGNITIVE?.total_score ?? 0;
     const avgScore = (data: { A: number }[]) => data.length > 0
@@ -166,6 +166,122 @@ const ResultsPage: React.FC = () => {
                         </div>
                     )}
 
+                    {/* AI Insights */}
+                    {aiInsights && (
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-4">
+                            <h3 className="text-lg font-bold text-gray-800">{t('results.ai_title')}</h3>
+                            {aiInsights.summary && (
+                                <p className="text-sm text-gray-700 leading-relaxed">{aiInsights.summary}</p>
+                            )}
+                            <div className="grid gap-4">
+                                {(aiInsights.strengths || []).length > 0 && (
+                                    <div>
+                                        <div className="text-xs font-semibold text-indigo-500 uppercase tracking-widest mb-2">
+                                            {t('results.ai_strengths')}
+                                        </div>
+                                        <div className="space-y-2">
+                                            {(aiInsights.strengths || []).map((item, idx) => (
+                                                <div key={`ai-strength-${idx}`} className="text-sm text-gray-700 flex items-start gap-2">
+                                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-indigo-400 flex-shrink-0" />
+                                                    <span>{item}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                {(aiInsights.growth_areas || []).length > 0 && (
+                                    <div>
+                                        <div className="text-xs font-semibold text-amber-500 uppercase tracking-widest mb-2">
+                                            {t('results.ai_growth')}
+                                        </div>
+                                        <div className="space-y-2">
+                                            {(aiInsights.growth_areas || []).map((item, idx) => (
+                                                <div key={`ai-growth-${idx}`} className="text-sm text-gray-700 flex items-start gap-2">
+                                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />
+                                                    <span>{item}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                {(aiInsights.recommended_paths || []).length > 0 && (
+                                    <div>
+                                        <div className="text-xs font-semibold text-emerald-500 uppercase tracking-widest mb-2">
+                                            {t('results.ai_paths')}
+                                        </div>
+                                        <div className="space-y-2">
+                                            {(aiInsights.recommended_paths || []).map((item, idx) => (
+                                                <div key={`ai-path-${idx}`} className="text-sm text-gray-700 flex items-start gap-2">
+                                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" />
+                                                    <span>{item}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                {(aiInsights.next_steps || []).length > 0 && (
+                                    <div>
+                                        <div className="text-xs font-semibold text-purple-500 uppercase tracking-widest mb-2">
+                                            {t('results.ai_next_steps')}
+                                        </div>
+                                        <div className="space-y-2">
+                                            {(aiInsights.next_steps || []).map((item, idx) => (
+                                                <div key={`ai-step-${idx}`} className="text-sm text-gray-700 flex items-start gap-2">
+                                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-purple-400 flex-shrink-0" />
+                                                    <span>{item}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* What Results Mean */}
+                    {aiInsights?.module_explanations && Object.keys(aiInsights.module_explanations).length > 0 && (
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-4">
+                            <h3 className="text-lg font-bold text-gray-800">{t('results.explanations_title')}</h3>
+                            <div className="space-y-4">
+                                {(['RIASEC', 'BIG5', 'COGNITIVE', 'SJT'] as const).map((moduleKey) => {
+                                    const info = aiInsights.module_explanations?.[moduleKey];
+                                    if (!info || (!info.meaning && !info.how_to_use)) {
+                                        return null;
+                                    }
+                                    const moduleLabelMap: Record<string, string> = {
+                                        RIASEC: t('assessment.module_names.riasec'),
+                                        BIG5: t('assessment.module_names.big5'),
+                                        COGNITIVE: t('assessment.module_names.cognitive'),
+                                        SJT: t('assessment.module_names.sjt'),
+                                    };
+                                    return (
+                                        <div key={`explain-${moduleKey}`} className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                            <div className="text-sm font-semibold text-gray-800 mb-2">
+                                                {moduleLabelMap[moduleKey] || moduleKey}
+                                            </div>
+                                            {info.meaning && (
+                                                <div className="text-sm text-gray-700 mb-2">
+                                                    <span className="font-semibold text-gray-700">
+                                                        {t('results.explanations_meaning')}:
+                                                    </span>{' '}
+                                                    {info.meaning}
+                                                </div>
+                                            )}
+                                            {info.how_to_use && (
+                                                <div className="text-sm text-gray-700">
+                                                    <span className="font-semibold text-gray-700">
+                                                        {t('results.explanations_how')}:
+                                                    </span>{' '}
+                                                    {info.how_to_use}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
                     <ResultCharts activeTab={activeTab} results={results} />
 
                     {/* Cognitive Skills Section */}
@@ -266,7 +382,7 @@ const ResultsPage: React.FC = () => {
                         <h3 className="text-lg font-bold text-indigo-900 flex items-center gap-2 mb-4">
                             <span>🚀</span> {t('results.development_plan')}
                         </h3>
-                        <DevelopmentPlan recommendations={recommendations} />
+                        <DevelopmentPlan recommendations={recommendations} aiInsights={aiInsights} />
                     </div>
 
                     <div className="pt-4">

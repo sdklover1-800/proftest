@@ -12,13 +12,16 @@ from app.core.config import settings
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+cors_kwargs = {
+    "allow_origins": settings.BACKEND_CORS_ORIGINS,
+    "allow_credentials": settings.BACKEND_CORS_ALLOW_CREDENTIALS,
+    "allow_methods": ["*"],
+    "allow_headers": ["*"],
+}
+if settings.BACKEND_CORS_ORIGIN_REGEX:
+    cors_kwargs["allow_origin_regex"] = settings.BACKEND_CORS_ORIGIN_REGEX
+
+app.add_middleware(CORSMiddleware, **cors_kwargs)
 
 # API Routes
 app.include_router(questions.router, tags=["questions"])

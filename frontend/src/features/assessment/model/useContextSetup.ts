@@ -31,6 +31,7 @@ interface UseContextSetupReturn {
     sleep: number;
     stress: StressLevel;
     mood: MoodLevel;
+    age: number;
     isLoading: boolean;
     testMode: 'full' | 'single';
     startModule: AssessmentModule;
@@ -40,6 +41,7 @@ interface UseContextSetupReturn {
     setSleep: (value: number) => void;
     setStress: (value: StressLevel) => void;
     setMood: (value: MoodLevel) => void;
+    setAge: (value: number) => void;
     setTestMode: (mode: 'full' | 'single') => void;
     setStartModule: (module: AssessmentModule) => void;
     setSingleModule: (module: AssessmentModule) => void;
@@ -69,6 +71,7 @@ export const useContextSetup = (): UseContextSetupReturn => {
     const [sleep, setSleep] = useState<number>(7);
     const [stress, setStress] = useState<StressLevel>('medium');
     const [mood, setMood] = useState<MoodLevel>('neutral');
+    const [age, setAge] = useState<number>(18);
     const [testMode, setTestMode] = useState<'full' | 'single'>(
         selectedModules.length === 1 ? 'single' : 'full'
     );
@@ -96,6 +99,7 @@ export const useContextSetup = (): UseContextSetupReturn => {
             sleep,
             stress,
             mood,
+            age,
         };
 
         startSessionMutation.mutate(contextData, {
@@ -133,6 +137,7 @@ export const useContextSetup = (): UseContextSetupReturn => {
         sleep,
         stress,
         mood,
+        age,
         isLoading: startSessionMutation.isPending,
         testMode,
         startModule,
@@ -140,6 +145,7 @@ export const useContextSetup = (): UseContextSetupReturn => {
         setSleep,
         setStress,
         setMood,
+        setAge,
         setTestMode,
         setStartModule,
         setSingleModule,
