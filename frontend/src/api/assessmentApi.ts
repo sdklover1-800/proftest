@@ -1,5 +1,6 @@
 import client from './client';
 import type { AssessmentModule, Question } from '../store/assessmentStore';
+import type { ProfileDashboard, ProfileDashboardResponse } from '@/types/assessment';
 
 export interface ContextData {
     sleep: number;
@@ -12,6 +13,18 @@ export interface QuestionQueryParams {
     modules?: AssessmentModule[];
     startModule?: AssessmentModule;
     perCategory?: number;
+}
+
+export interface PlanCreatePayload {
+    run_id: number;
+    title?: string;
+    goal?: string;
+    selected_rec_ids?: string[];
+}
+
+export interface UpdateTaskStatusPayload {
+    task_id: string;
+    status: 'todo' | 'in_progress' | 'done';
 }
 
 export const assessmentApi = {
@@ -62,6 +75,82 @@ export const assessmentApi = {
                 lang,
             },
         });
+        return response.data;
+    },
+
+    getAssessmentBlocks: async (sessionId: number, lang?: string): Promise<ProfileDashboard> => {
+        const response = await client.get<ProfileDashboard>(`/api/v1/assessment/${sessionId}/blocks`, {
+            params: {
+                lang,
+            },
+        });
+        return response.data;
+    },
+
+    getProfileDashboard: async (lang?: string): Promise<ProfileDashboardResponse> => {
+        const response = await client.get<ProfileDashboardResponse>('/api/v1/profile/dashboard', {
+            params: {
+                lang,
+            },
+        });
+        return response.data;
+    },
+
+    createPlan: async (payload: PlanCreatePayload): Promise<any> => {
+        const response = await client.post('/api/v1/plans', payload);
+        return response.data;
+    },
+
+    getPlan: async (planId: string): Promise<any> => {
+        const response = await client.get(`/api/v1/plans/${planId}`);
+        return response.data;
+    },
+
+    updatePlanTaskStatus: async (planId: string, payload: UpdateTaskStatusPayload): Promise<any> => {
+        const response = await client.post(`/api/v1/plans/${planId}/task-status`, payload);
+        return response.data;
+    },
+
+    getPlanProgress: async (planId: string): Promise<any> => {
+        const response = await client.get(`/api/v1/plans/${planId}/progress`);
+        return response.data;
+    },
+
+    getEvidenceByIds: async (ids: string[]): Promise<any[]> => {
+        const response = await client.get('/api/v1/evidence', {
+            params: {
+                ids: ids.join(','),
+            },
+        });
+        return response.data;
+    },
+
+    getEvidenceById: async (evidenceId: string): Promise<any> => {
+        const response = await client.get(`/api/v1/evidence/${evidenceId}`);
+        return response.data;
+    },
+
+    getAssessmentDelta: async (runId: number, prevRunId?: number): Promise<any> => {
+        const response = await client.get(`/api/v1/assessments/${runId}/delta`, {
+            params: {
+                prev_run_id: prevRunId,
+            },
+        });
+        return response.data;
+    },
+
+    getRfcTemplate: async (): Promise<any> => {
+        const response = await client.get('/api/v1/plans/templates/rfc');
+        return response.data;
+    },
+
+    getTaskCatalog: async (): Promise<any> => {
+        const response = await client.get('/api/v1/plans/tasks/catalog');
+        return response.data;
+    },
+
+    getRuleVersions: async (): Promise<any> => {
+        const response = await client.get('/api/v1/rules/version');
         return response.data;
     },
 

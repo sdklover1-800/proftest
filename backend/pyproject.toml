@@ -12,9 +12,15 @@ dependencies = [
     "pydantic",
     "pydantic-settings",
     "asyncpg",
+    "psycopg2-binary",
+    "python-dotenv",
+    "email-validator",
     "python-multipart",
     "python-jose[cryptography]",
     "passlib[bcrypt]",
+    "bcrypt",
+    "pandas",
+    "httpx",
 ]
 requires-python = ">=3.11"
 

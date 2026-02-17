@@ -1,27 +1,27 @@
 import axios from 'axios';
 
 /**
- * Dynamically determines the API base URL.
- * - If VITE_API_URL is set in .env, use that (manual override).
- * - If running on localhost/127.0.0.1, use localhost:8000.
- * - Otherwise (e.g., mobile phone via WiFi), use the same host with port 8000.
+ * Resolves API base URL with production-safe defaults.
+ * - `VITE_API_URL` has highest priority (manual override).
+ * - In development, fall back to `http://<host>:8000`.
+ * - In production, default to same-origin to avoid mixed-content issues.
  */
 const getApiBaseUrl = (): string => {
-    // Manual override from .env takes priority
-    if (import.meta.env.VITE_API_URL) {
-        return import.meta.env.VITE_API_URL;
+    const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
+    if (configuredApiUrl) {
+        return configuredApiUrl.replace(/\/+$/, '');
     }
 
-    const hostname = window.location.hostname;
+    const { hostname, origin } = window.location;
 
-    // Local development on desktop
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return 'http://localhost:8000';
+    if (import.meta.env.DEV) {
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            return 'http://localhost:8000';
+        }
+        return `http://${hostname}:8000`;
     }
 
-    // Mobile or other device accessing via network IP
-    // Use the same IP as the frontend, just change port to 8000
-    return `http://${hostname}:8000`;
+    return origin.replace(/\/+$/, '');
 };
 
 const client = axios.create({
