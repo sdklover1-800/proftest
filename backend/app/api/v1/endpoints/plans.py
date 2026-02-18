@@ -102,6 +102,17 @@ async def create_plan(
     return plan
 
 
+@router.get("/plans/active", response_model=dict)
+async def get_active_plan(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    plan = await weekly_plan_service.get_active_plan(db, current_user.id)
+    if not plan:
+        raise HTTPException(status_code=404, detail="Active plan not found")
+    return plan
+
+
 @router.get("/plans/{plan_id}", response_model=dict)
 async def get_plan(
     plan_id: str,

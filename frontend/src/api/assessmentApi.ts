@@ -1,6 +1,11 @@
 import client from './client';
 import type { AssessmentModule, Question } from '../store/assessmentStore';
-import type { ProfileDashboard, ProfileDashboardResponse } from '@/types/assessment';
+import type {
+    PlanTaskStatus,
+    ProfileDashboard,
+    ProfileDashboardResponse,
+    WeeklyPlan,
+} from '@/types/assessment';
 
 export interface ContextData {
     sleep: number;
@@ -12,6 +17,8 @@ export interface ContextData {
 export interface QuestionQueryParams {
     modules?: AssessmentModule[];
     startModule?: AssessmentModule;
+    perModule?: number;
+    // Deprecated: use perModule
     perCategory?: number;
 }
 
@@ -24,7 +31,7 @@ export interface PlanCreatePayload {
 
 export interface UpdateTaskStatusPayload {
     task_id: string;
-    status: 'todo' | 'in_progress' | 'done';
+    status: PlanTaskStatus;
 }
 
 export const assessmentApi = {
@@ -33,7 +40,7 @@ export const assessmentApi = {
             params: {
                 modules: params?.modules?.join(','),
                 start_module: params?.startModule,
-                per_category: params?.perCategory,
+                per_module: params?.perModule ?? params?.perCategory,
             },
         });
         return response.data;
@@ -96,13 +103,18 @@ export const assessmentApi = {
         return response.data;
     },
 
-    createPlan: async (payload: PlanCreatePayload): Promise<any> => {
-        const response = await client.post('/api/v1/plans', payload);
+    createPlan: async (payload: PlanCreatePayload): Promise<WeeklyPlan> => {
+        const response = await client.post<WeeklyPlan>('/api/v1/plans', payload);
         return response.data;
     },
 
-    getPlan: async (planId: string): Promise<any> => {
-        const response = await client.get(`/api/v1/plans/${planId}`);
+    getActivePlan: async (): Promise<WeeklyPlan> => {
+        const response = await client.get<WeeklyPlan>('/api/v1/plans/active');
+        return response.data;
+    },
+
+    getPlan: async (planId: string): Promise<WeeklyPlan> => {
+        const response = await client.get<WeeklyPlan>(`/api/v1/plans/${planId}`);
         return response.data;
     },
 

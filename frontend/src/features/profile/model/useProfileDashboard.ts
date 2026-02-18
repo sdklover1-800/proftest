@@ -94,14 +94,20 @@ const isActionContent = (value: unknown): value is DashboardActionContent => {
     return typeof record.headline === 'string' && typeof record.description === 'string';
 };
 
-export const useProfileDashboard = (): UseProfileDashboardReturn => {
+export const useProfileDashboard = (enabled: boolean = true): UseProfileDashboardReturn => {
     const { i18n } = useTranslation();
     const [dashboard, setDashboard] = useState<ProfileDashboard | null>(null);
     const [sessionId, setSessionId] = useState<number | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(enabled);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        if (!enabled) {
+            setLoading(false);
+            setError(null);
+            return;
+        }
+
         let cancelled = false;
 
         const fetchDashboard = async (): Promise<void> => {
@@ -130,7 +136,7 @@ export const useProfileDashboard = (): UseProfileDashboardReturn => {
         return () => {
             cancelled = true;
         };
-    }, [i18n.language]);
+    }, [i18n.language, enabled]);
 
     const blocks = useMemo(() => dashboard?.blocks ?? [], [dashboard?.blocks]);
 

@@ -67,4 +67,27 @@ export interface TestConfig {
     cognitive_limit: number;
 }
 
+export type ModuleKey = 'RIASEC' | 'BIG5' | 'COGNITIVE' | 'SJT';
+export type QualityPrediction = 'good' | 'acceptable' | 'too_short' | 'fatigue_risk';
+
+export interface TestModuleLimitMeta {
+    hard_min: number;
+    recommended_min: number;
+    recommended_max: number;
+    optimal_min: number;
+    optimal_max: number;
+    default: number;
+    hard_max: number;
+    avg_seconds_per_item: number;
+}
+
+export interface TestConfigResponse extends TestConfig {
+    id: number;
+    is_active: boolean;
+    limits_meta: Record<ModuleKey, TestModuleLimitMeta>;
+    warnings: string[];
+    estimated_total_minutes: number;
+    quality_prediction: QualityPrediction;
+}
+
 export type TabType = 'dashboard' | 'users' | 'questions' | 'sessions' | 'analytics' | 'settings';

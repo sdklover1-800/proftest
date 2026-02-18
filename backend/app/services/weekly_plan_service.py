@@ -18,6 +18,7 @@ from app.services.versioning import (
 
 
 PLAN_STATUS_VALUES = {"todo", "in_progress", "done"}
+PLAN_TEMPLATE_VERSION = "week_v1"
 
 
 RFC_TEMPLATE = """# RFC: <Title>
@@ -472,6 +473,66 @@ def _iter_tasks(days: list[dict[str, Any]]):
             yield day, task
 
 
+def _compute_plan_progress(
+    days: list[dict[str, Any]],
+    estimated_total_minutes: int,
+) -> dict[str, Any]:
+    total_count = 0
+    done_count = 0
+    in_progress_count = 0
+    completed_minutes = 0
+    today_day_index: int | None = None
+    day_progress: list[dict[str, Any]] = []
+
+    for day in sorted(days, key=lambda item: int(item.get("day_index", 0) or 0)):
+        tasks = day.get("tasks", [])
+        day_total = 0
+        day_done = 0
+
+        for task in tasks:
+            day_total += 1
+            total_count += 1
+            task_status = str(task.get("status", "todo"))
+            if task_status == "done":
+                day_done += 1
+                done_count += 1
+                completed_minutes += int(task.get("estimated_minutes", 0) or 0)
+            elif task_status == "in_progress":
+                in_progress_count += 1
+
+        progress_percent = int(round((day_done / day_total) * 100)) if day_total else 0
+        day["done_count"] = day_done
+        day["total_count"] = day_total
+        day["progress_percent"] = progress_percent
+        day_progress.append(
+            {
+                "day_index": day.get("day_index"),
+                "title": day.get("title"),
+                "done_tasks": day_done,
+                "total_tasks": day_total,
+                "percent": progress_percent,
+            }
+        )
+
+        if today_day_index is None and day_total > 0 and day_done < day_total:
+            today_day_index = int(day.get("day_index", 0) or 0)
+
+    progress_percent = int(round((done_count / total_count) * 100)) if total_count else 0
+    is_completed = total_count > 0 and done_count == total_count
+
+    return {
+        "done_count": done_count,
+        "total_count": total_count,
+        "in_progress_count": in_progress_count,
+        "progress_percent": progress_percent,
+        "completed_minutes": completed_minutes,
+        "estimated_total_minutes": estimated_total_minutes,
+        "day_progress": day_progress,
+        "is_completed": is_completed,
+        "today_day_index": None if is_completed else today_day_index,
+    }
+
+
 class WeeklyPlanService:
     async def _get_plan_row(
         self,
@@ -521,6 +582,25 @@ class WeeklyPlanService:
                 if status_row.done_at:
                     task["done_at"] = status_row.done_at.isoformat()
 
+        payload["plan_template_version"] = str(
+            payload.get("plan_template_version") or PLAN_TEMPLATE_VERSION
+        )
+        progress = _compute_plan_progress(
+            days=payload.get("days", []),
+            estimated_total_minutes=int(payload.get("estimated_total_minutes", 0) or 0),
+        )
+        payload["progress"] = {
+            "done_count": progress["done_count"],
+            "total_count": progress["total_count"],
+            "in_progress_count": progress["in_progress_count"],
+            "progress_percent": progress["progress_percent"],
+            "completed_minutes": progress["completed_minutes"],
+            "estimated_total_minutes": progress["estimated_total_minutes"],
+            "day_progress": progress["day_progress"],
+        }
+        payload["today_day_index"] = progress["today_day_index"]
+        payload["is_completed"] = progress["is_completed"]
+
         return payload
 
     async def create_plan(
@@ -553,6 +633,7 @@ class WeeklyPlanService:
             "run_id": f"run_{run_id}",
             "title": title or "7-day readiness boost",
             "goal": goal or "Increase Testing + Observability signals with measurable outcomes",
+            "plan_template_version": PLAN_TEMPLATE_VERSION,
             "estimated_total_minutes": _calculate_estimated_total_minutes(days),
             "success_metrics": [
                 {"id": "ci_enabled", "label": "CI pipeline enabled", "target": True},
@@ -590,6 +671,24 @@ class WeeklyPlanService:
             return None
         status_rows = await self._get_status_rows(db, plan_id)
         return self._serialize_plan(plan_row, status_rows)
+
+    async def get_active_plan(
+        self,
+        db: AsyncSession,
+        user_id: int,
+    ) -> dict[str, Any] | None:
+        result = await db.execute(
+            select(Plan)
+            .where(Plan.user_id == user_id)
+            .order_by(Plan.updated_at.desc(), Plan.created_at.desc())
+        )
+        plan_rows = list(result.scalars().all())
+        for plan_row in plan_rows:
+            status_rows = await self._get_status_rows(db, plan_row.plan_id)
+            payload = self._serialize_plan(plan_row, status_rows)
+            if not bool(payload.get("is_completed")):
+                return payload
+        return None
 
     async def set_task_status(
         self,
@@ -661,49 +760,23 @@ class WeeklyPlanService:
         plan = await self.get_plan(db, plan_id, user_id)
         if not plan:
             return None
-
-        total_tasks = 0
-        done_tasks = 0
-        in_progress_tasks = 0
-        total_minutes_done = 0
-        day_progress: list[dict[str, Any]] = []
-
-        for day in plan.get("days", []):
-            day_total = 0
-            day_done = 0
-            for task in day.get("tasks", []):
-                day_total += 1
-                total_tasks += 1
-                task_status = str(task.get("status", "todo"))
-                if task_status == "done":
-                    done_tasks += 1
-                    day_done += 1
-                    total_minutes_done += int(task.get("estimated_minutes", 0) or 0)
-                elif task_status == "in_progress":
-                    in_progress_tasks += 1
-
-            percent = int(round((day_done / day_total) * 100)) if day_total else 0
-            day_progress.append(
-                {
-                    "day_index": day.get("day_index"),
-                    "title": day.get("title"),
-                    "done_tasks": day_done,
-                    "total_tasks": day_total,
-                    "percent": percent,
-                }
-            )
-
-        completion_percent = int(round((done_tasks / total_tasks) * 100)) if total_tasks else 0
+        progress = dict(plan.get("progress") or {})
+        done_tasks = int(progress.get("done_count", 0) or 0)
+        total_tasks = int(progress.get("total_count", 0) or 0)
+        in_progress_tasks = int(progress.get("in_progress_count", 0) or 0)
+        completion_percent = int(progress.get("progress_percent", 0) or 0)
         return {
             "plan_id": plan_id,
             "completion_percent": completion_percent,
             "done_tasks": done_tasks,
             "in_progress_tasks": in_progress_tasks,
             "total_tasks": total_tasks,
-            "completed_minutes": total_minutes_done,
-            "estimated_total_minutes": plan.get("estimated_total_minutes", 0),
-            "day_progress": day_progress,
-            "is_completed": done_tasks == total_tasks and total_tasks > 0,
+            "completed_minutes": int(progress.get("completed_minutes", 0) or 0),
+            "estimated_total_minutes": int(progress.get("estimated_total_minutes", 0) or 0),
+            "day_progress": list(progress.get("day_progress", [])),
+            "is_completed": bool(plan.get("is_completed")),
+            "today_day_index": plan.get("today_day_index"),
+            "progress": progress,
             "updated_at": plan.get("updated_at"),
         }
 
@@ -722,6 +795,7 @@ __all__ = [
     "default_week_plan_days",
     "RECOMMENDATION_TASK_MAP",
     "PLAN_STATUS_VALUES",
+    "PLAN_TEMPLATE_VERSION",
     "RULESET_VERSION",
     "SCORING_MODEL_VERSION",
     "LLM_TEXT_VERSION",

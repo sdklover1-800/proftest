@@ -68,7 +68,6 @@ export const useAssessment = (): UseAssessmentReturn => {
     } = useAssessmentQuestions({
         modules: selectedModules,
         startModule,
-        perCategory: 10,
     });
 
     // 3. Mutations

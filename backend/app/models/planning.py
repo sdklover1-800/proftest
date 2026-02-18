@@ -152,3 +152,27 @@ class PlanTaskStatus(Base):
     )
 
     plan = relationship("Plan", back_populates="task_statuses", lazy="raise")
+
+
+class UserProfileAggregate(Base):
+    """
+    Cached aggregate profile scores across all completed user assessments.
+    """
+
+    __tablename__ = "user_profile_aggregates"
+
+    user_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("users.id"),
+        primary_key=True,
+    )
+    tests_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    aggregated_scores_json: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    user = relationship("User", lazy="raise")

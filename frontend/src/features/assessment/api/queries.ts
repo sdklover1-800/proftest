@@ -10,6 +10,7 @@ export const ASSESSMENT_KEYS = {
         'questions',
         params?.modules?.join(',') ?? 'all',
         params?.startModule ?? 'none',
+        params?.perModule ?? 'default',
         params?.perCategory ?? 'default',
     ] as const,
     session: (id: number) => [...ASSESSMENT_KEYS.all, 'session', id] as const,

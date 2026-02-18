@@ -190,10 +190,20 @@ export interface ProfileDashboard {
         llm_text_version: string;
     };
     overall: {
+        readiness?: number;
         readiness_score: number;
+        raw_readiness_score?: number;
         target_role: string;
         target_level: string;
         confidence: number;
+        stability_score?: number;
+        tests_count?: number;
+    };
+    aggregate?: {
+        tests_count: number;
+        updated_at?: string | null;
+        stability_score?: number;
+        measurement_confidence?: number;
     };
     blocks: DashboardBlock[];
     explainers: Record<string, string>;
@@ -203,4 +213,82 @@ export interface ProfileDashboardResponse {
     session_id: number | null;
     run_created_at?: string | null;
     dashboard: ProfileDashboard | null;
+}
+
+export type PlanTaskStatus = 'todo' | 'in_progress' | 'done';
+export type PlanTaskType =
+    | 'setup'
+    | 'planning'
+    | 'build'
+    | 'improve'
+    | 'document'
+    | 'measure';
+
+export interface PlanSuccessMetric {
+    id: string;
+    label: string;
+    target: boolean | number | string;
+    current?: boolean | number | string;
+}
+
+export interface PlanTaskOutputRef {
+    kind: 'artifact' | 'metric' | 'note';
+    label: string;
+    ref: string;
+}
+
+export interface PlanTask {
+    task_id: string;
+    title: string;
+    type: PlanTaskType;
+    estimated_minutes: number;
+    instructions: string[];
+    outputs?: PlanTaskOutputRef[];
+    tags?: string[];
+    expected_impact?: Record<string, number>;
+    recommended?: boolean;
+    status: PlanTaskStatus;
+    done_at?: string | null;
+}
+
+export interface PlanDay {
+    day_index: number;
+    title: string;
+    estimated_minutes: number;
+    tasks: PlanTask[];
+    done_count?: number;
+    total_count?: number;
+    progress_percent?: number;
+}
+
+export interface PlanProgressSummary {
+    done_count: number;
+    total_count: number;
+    in_progress_count: number;
+    progress_percent: number;
+    completed_minutes: number;
+    estimated_total_minutes: number;
+    day_progress: Array<{
+        day_index: number;
+        title: string;
+        done_tasks: number;
+        total_tasks: number;
+        percent: number;
+    }>;
+}
+
+export interface WeeklyPlan {
+    plan_id: string;
+    run_id: string;
+    title: string;
+    goal: string;
+    created_at?: string;
+    updated_at?: string;
+    plan_template_version?: string;
+    estimated_total_minutes: number;
+    success_metrics: PlanSuccessMetric[];
+    today_day_index?: number | null;
+    is_completed?: boolean;
+    progress: PlanProgressSummary;
+    days: PlanDay[];
 }

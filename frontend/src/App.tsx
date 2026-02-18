@@ -30,6 +30,7 @@ import { HomePage } from '@features/home';
 import { ProfilePage } from '@features/profile';
 import { AssessmentPage, ContextSetupPage } from '@features/assessment';
 import { ResultsPage } from '@features/results';
+import { PlanPage } from '@features/plan';
 import { LoginPage, RegisterPage } from '@features/auth';
 import Welcome from './pages/Welcome';
 import AdminDashboard from './pages/AdminDashboard';
@@ -44,7 +45,11 @@ const AuthenticatedApp: React.FC = () => {
   const location = useLocation();
 
   // Hide tabs on assessment and results pages for full-screen experience
-  const hideTabBar = location.pathname === '/assessment' || location.pathname === '/results';
+  const hideTabBar =
+    location.pathname === '/assessment' ||
+    location.pathname === '/results' ||
+    location.pathname === '/plan' ||
+    location.pathname.startsWith('/plan/');
 
   return (
     <IonTabs>
@@ -54,6 +59,8 @@ const AuthenticatedApp: React.FC = () => {
         <Route exact path="/assessment/context" component={ContextSetupPage} />
         <Route exact path="/assessment" component={AssessmentPage} />
         <Route exact path="/results" component={ResultsPage} />
+        <Route exact path="/plan" component={PlanPage} />
+        <Route exact path="/plan/:planId" component={PlanPage} />
         <Route exact path="/">
           <Redirect to="/home" />
         </Route>

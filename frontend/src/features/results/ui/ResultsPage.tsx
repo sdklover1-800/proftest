@@ -22,6 +22,7 @@ import { useResultsPage } from '../model/useResultsPage';
 import { usePdfExport } from '../model/usePdfExport';
 import ResultCharts from './ResultCharts';
 import DevelopmentPlan from './DevelopmentPlan';
+import AILoadingOverlay from '@/shared/ui/AILoadingOverlay';
 import LoadingOverlay from '@/shared/ui/LoadingOverlay';
 
 /**
@@ -77,9 +78,13 @@ const ResultsPage: React.FC = () => {
     if (loading) {
         return (
             <IonPage className="bg-gray-50 dark:bg-gray-900 dark:text-gray-100 transition-colors animate-fade-in">
+                <AILoadingOverlay
+                    isOpen={loading}
+                    title="AI is generating your results"
+                    message="Scoring modules and preparing personalized recommendations..."
+                />
                 <IonContent className="ion-padding flex items-center justify-center h-full bg-gray-50 dark:bg-gray-900 transition-colors">
                     <div className="flex flex-col items-center justify-center h-full space-y-4">
-                        <IonSpinner name="crescent" />
                         <p className="text-gray-500">{t('results.calculating')}</p>
                     </div>
                 </IonContent>

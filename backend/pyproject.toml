@@ -12,6 +12,7 @@ dependencies = [
     "pydantic",
     "pydantic-settings",
     "asyncpg",
+    "aiosqlite",
     "psycopg2-binary",
     "python-dotenv",
     "email-validator",

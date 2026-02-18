@@ -10,7 +10,17 @@ import { useTranslation } from 'react-i18next';
 
 import { client } from '@/api/client';
 import { useAuthStore } from '@/store/authStore';
-import type { DashboardStats, User, Question, Session, NewQuestion, TabType, AnalyticsData, TestConfig } from './types';
+import type {
+    DashboardStats,
+    User,
+    Question,
+    Session,
+    NewQuestion,
+    TabType,
+    AnalyticsData,
+    TestConfig,
+    TestConfigResponse,
+} from './types';
 
 // Re-export types for convenience
 export type { DashboardStats, User, Question, Session, NewQuestion, TabType, AnalyticsData, TestConfig };
@@ -26,10 +36,10 @@ const EMPTY_QUESTION: NewQuestion = {
 };
 
 const DEFAULT_TEST_CONFIG: TestConfig = {
-    riasec_limit: 20,
-    big5_limit: 20,
-    sjt_limit: 20,
-    cognitive_limit: 20,
+    riasec_limit: 36,
+    big5_limit: 30,
+    sjt_limit: 8,
+    cognitive_limit: 12,
 };
 
 export const useAdminDashboard = () => {
@@ -49,7 +59,7 @@ export const useAdminDashboard = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [sessions, setSessions] = useState<Session[]>([]);
     const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
-    const [testConfig, setTestConfig] = useState<TestConfig | null>(null);
+    const [testConfig, setTestConfig] = useState<TestConfigResponse | null>(null);
     const [configForm, setConfigForm] = useState<TestConfig>(DEFAULT_TEST_CONFIG);
     const [isSavingConfig, setIsSavingConfig] = useState(false);
     const [newQuestion, setNewQuestion] = useState<NewQuestion>(EMPTY_QUESTION);
@@ -123,12 +133,13 @@ export const useAdminDashboard = () => {
     const fetchConfig = useCallback(async () => {
         try {
             const response = await client.get('/api/v1/admin/config', { headers: authHeaders });
-            setTestConfig(response.data);
+            const payload = response.data as TestConfigResponse;
+            setTestConfig(payload);
             setConfigForm({
-                riasec_limit: response.data.riasec_limit,
-                big5_limit: response.data.big5_limit,
-                sjt_limit: response.data.sjt_limit,
-                cognitive_limit: response.data.cognitive_limit,
+                riasec_limit: payload.riasec_limit,
+                big5_limit: payload.big5_limit,
+                sjt_limit: payload.sjt_limit,
+                cognitive_limit: payload.cognitive_limit,
             });
         } catch (err: any) {
             handleApiError(err);
@@ -143,15 +154,22 @@ export const useAdminDashboard = () => {
         try {
             setIsSavingConfig(true);
             const response = await client.post('/api/v1/admin/config', configForm, { headers: authHeaders });
-            setTestConfig(response.data);
+            const payload = response.data as TestConfigResponse;
+            setTestConfig(payload);
             setConfigForm({
-                riasec_limit: response.data.riasec_limit,
-                big5_limit: response.data.big5_limit,
-                sjt_limit: response.data.sjt_limit,
-                cognitive_limit: response.data.cognitive_limit,
+                riasec_limit: payload.riasec_limit,
+                big5_limit: payload.big5_limit,
+                sjt_limit: payload.sjt_limit,
+                cognitive_limit: payload.cognitive_limit,
             });
         } catch (err: any) {
-            alert(t('admin.errors.update_error') + ': ' + (err.response?.data?.detail || err.message));
+            const detail = err.response?.data?.detail;
+            const detailMessage =
+                typeof detail === 'string'
+                    ? detail
+                    : detail?.message ||
+                    (Array.isArray(detail?.violations) ? detail.violations.join('; ') : err.message);
+            alert(t('admin.errors.update_error') + ': ' + detailMessage);
         } finally {
             setIsSavingConfig(false);
         }

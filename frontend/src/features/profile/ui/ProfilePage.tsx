@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
     IonPage,
     IonContent,
     IonButton,
-    IonSpinner,
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { useProfile } from '../model/useProfile';
 import { useProfileDashboard } from '../model/useProfileDashboard';
 import ProfileSettings from './ProfileSettings';
 import PsychometricRadar from '@/shared/ui/PsychometricRadar';
+import AILoadingOverlay from '@/shared/ui/AILoadingOverlay';
 import type { DashboardCTA, DashboardMetricItem } from '@/types/assessment';
 import { assessmentApi } from '@/api/assessmentApi';
+import { formatPercent, toPercentNumber } from '@/shared/utils/percent';
 
 interface EvidenceItem {
     evidence_id: string;
@@ -22,6 +23,7 @@ interface EvidenceItem {
 }
 
 interface RadarPoint {
+    id: string;
     subject: string;
     A: number;
     fullMark: number;
@@ -50,6 +52,86 @@ const metricStatusDotClass = (status: DashboardMetricItem['status']): string => 
  */
 const ProfilePage: React.FC = () => {
     const { user, t, i18n, handleLogout, handleLanguageChange } = useProfile();
+    const uiLang = (i18n.language || 'en').split('-')[0];
+    const uiCopy = useMemo(() => {
+        if (uiLang === 'ru') {
+            return {
+                profileAnalysisTitle: 'Анализ профиля',
+                profileAnalysisHint: 'Нажмите кнопку, чтобы собрать единый анализ по всем пройденным тестам.',
+                runAnalysis: 'Запустить анализ',
+                readiness: 'Готовность',
+                role: 'Роль',
+                tests: 'Тесты',
+                loadingProfile: 'Загрузка AI-анализа...',
+                emptyTitle: 'AI Career Copilot',
+                emptyDescription: 'Пройдите хотя бы один тест, чтобы открыть вердикт профиля, диагностику и план на 7 дней.',
+                startAssessment: 'Начать тест',
+                continuePlan: 'Продолжить план',
+                strengths: 'Сильные стороны',
+                weaknesses: 'Зоны роста',
+                recommendations: 'Рекомендации',
+                why: 'Почему?',
+                hideWhy: 'Скрыть',
+                loadingEvidence: 'Загрузка evidence...',
+                noEvidence: 'Пока нет доступных evidence-фрагментов.',
+                target: 'цель',
+                impactEffort: 'Влияние',
+                effort: 'Усилие',
+                confidence: 'Уверенность',
+            };
+        }
+        if (uiLang === 'kz') {
+            return {
+                profileAnalysisTitle: 'Профиль талдауы',
+                profileAnalysisHint: 'Барлық өткен тесттер бойынша біріккен талдауды алу үшін түймені басыңыз.',
+                runAnalysis: 'Талдауды бастау',
+                readiness: 'Дайындық',
+                role: 'Рөл',
+                tests: 'Тесттер',
+                loadingProfile: 'AI талдауы жүктелуде...',
+                emptyTitle: 'AI Career Copilot',
+                emptyDescription: 'Профиль қорытындысын, диагностика мен 7 күндік жоспарды ашу үшін кемінде бір тест өтіңіз.',
+                startAssessment: 'Тесті бастау',
+                continuePlan: 'Жоспарды жалғастыру',
+                strengths: 'Күшті жақтар',
+                weaknesses: 'Өсу аймақтары',
+                recommendations: 'Ұсыныстар',
+                why: 'Неге?',
+                hideWhy: 'Жасыру',
+                loadingEvidence: 'Evidence жүктелуде...',
+                noEvidence: 'Evidence үзінділері әлі қолжетімді емес.',
+                target: 'мақсат',
+                impactEffort: 'Әсері',
+                effort: 'Күші',
+                confidence: 'Сенімділік',
+            };
+        }
+        return {
+            profileAnalysisTitle: 'Profile analysis',
+            profileAnalysisHint: 'Press the button to build one combined analysis across all completed tests.',
+            runAnalysis: 'Run analysis',
+            readiness: 'Readiness',
+            role: 'Role',
+            tests: 'Tests',
+            loadingProfile: 'Loading AI profile...',
+            emptyTitle: 'AI Career Copilot',
+            emptyDescription: 'Complete one assessment to unlock profile verdict, diagnostics, and a 7-day growth plan.',
+            startAssessment: 'Start assessment',
+            continuePlan: 'Continue plan',
+            strengths: 'Strengths',
+            weaknesses: 'Weaknesses',
+            recommendations: 'Recommendations',
+            why: 'Why?',
+            hideWhy: 'Hide why',
+            loadingEvidence: 'Loading evidence...',
+            noEvidence: 'No evidence snippets available.',
+            target: 'target',
+            impactEffort: 'Impact',
+            effort: 'Effort',
+            confidence: 'Confidence',
+        };
+    }, [uiLang]);
+    const [analysisRequested, setAnalysisRequested] = useState<boolean>(false);
     const {
         dashboard,
         sessionId,
@@ -73,7 +155,7 @@ const ProfilePage: React.FC = () => {
         getRecommendationsContent,
         getProgressContent,
         getActionContent,
-    } = useProfileDashboard();
+    } = useProfileDashboard(analysisRequested);
 
     const history = useHistory();
 
@@ -83,12 +165,81 @@ const ProfilePage: React.FC = () => {
     const [expandedInsightIds, setExpandedInsightIds] = useState<Record<string, boolean>>({});
     const [insightEvidence, setInsightEvidence] = useState<Record<string, EvidenceItem[]>>({});
     const [insightEvidenceLoading, setInsightEvidenceLoading] = useState<Record<string, boolean>>({});
+    const [activePlanId, setActivePlanId] = useState<string | null>(null);
+    const [isPlanActionLoading, setIsPlanActionLoading] = useState<boolean>(false);
 
-    const handleDashboardAction = (cta?: DashboardCTA): void => {
+    useEffect(() => {
+        let cancelled = false;
+        const loadActivePlan = async (): Promise<void> => {
+            try {
+                const activePlan = await assessmentApi.getActivePlan();
+                if (!cancelled) {
+                    setActivePlanId(activePlan.plan_id);
+                }
+            } catch (err) {
+                if (!cancelled && (err as { response?: { status?: number } }).response?.status === 404) {
+                    setActivePlanId(null);
+                    return;
+                }
+                if (!cancelled) {
+                    console.error('Failed to load active plan', err);
+                }
+            }
+        };
+
+        void loadActivePlan();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    const openOrCreatePlan = async (): Promise<void> => {
+        setIsPlanActionLoading(true);
+        if (activePlanId) {
+            history.push(`/plan/${activePlanId}`);
+            setIsPlanActionLoading(false);
+            return;
+        }
+
+        try {
+            const activePlan = await assessmentApi.getActivePlan();
+            setActivePlanId(activePlan.plan_id);
+            history.push(`/plan/${activePlan.plan_id}`);
+            setIsPlanActionLoading(false);
+            return;
+        } catch (err) {
+            if ((err as { response?: { status?: number } }).response?.status !== 404) {
+                console.error('Failed to fetch active plan', err);
+            }
+        }
+
+        if (!sessionId) {
+            history.push('/assessment/context');
+            setIsPlanActionLoading(false);
+            return;
+        }
+
+        try {
+            const createdPlan = await assessmentApi.createPlan({ run_id: sessionId });
+            setActivePlanId(createdPlan.plan_id);
+            history.push(`/plan/${createdPlan.plan_id}`);
+        } catch (err) {
+            console.error('Failed to create plan', err);
+        } finally {
+            setIsPlanActionLoading(false);
+        }
+    };
+
+    const handleDashboardAction = async (cta?: DashboardCTA): Promise<void> => {
         if (!cta) return;
 
         if (cta.action === 'start_assessment') {
             history.push('/assessment/context');
+            return;
+        }
+
+        if (cta.action === 'open_plan' || cta.action === 'add_to_plan' || cta.action === 'open_skill_plan') {
+            await openOrCreatePlan();
             return;
         }
 
@@ -111,17 +262,31 @@ const ProfilePage: React.FC = () => {
     const actionContent = getActionContent(actionBlock);
 
     const radarData: RadarPoint[] = (radarContent?.axes || []).map((axis) => ({
+        id: String(axis.id),
         subject: axis.label,
-        A: axis.value,
+        A: toPercentNumber(axis.value),
         fullMark: 100,
-    }));
+    }))
+        .filter((axis) => axis.subject && Number.isFinite(axis.A));
 
-    const readinessValue = dashboard?.overall.readiness_score ?? 0;
-    const confidenceValue = dashboard?.overall.confidence
-        ? Math.round(dashboard.overall.confidence * 100)
-        : 0;
+    const radarBenchmarkValues = Object.fromEntries(
+        Object.entries(radarContent?.benchmark?.values || {}).map(([key, value]) => [
+            key,
+            toPercentNumber(Number(value)),
+        ]),
+    );
+    const hasRadarChartData = radarData.length >= 3 && radarData.some((item) => item.A > 0);
+    const topRadarAxes = [...radarData]
+        .sort((left, right) => right.A - left.A)
+        .slice(0, 3);
+
+    const readinessRaw =
+        dashboard?.overall.readiness ??
+        dashboard?.overall.readiness_score ??
+        0;
+    const readinessValue = toPercentNumber(readinessRaw);
+    const confidenceValue = toPercentNumber(dashboard?.overall.confidence ?? 0);
     const roleLabel = dashboard?.overall.target_role || 'Backend Engineer';
-    const levelLabel = dashboard?.overall.target_level || 'Middle';
 
     const toggleInsightWhy = async (insightKey: string, evidenceRefs: string[]): Promise<void> => {
         const isOpen = !!expandedInsightIds[insightKey];
@@ -145,6 +310,15 @@ const ProfilePage: React.FC = () => {
 
     return (
         <IonPage className="bg-gray-50 dark:bg-gray-900 dark:text-gray-100 transition-colors animate-fade-in">
+            <AILoadingOverlay
+                isOpen={(analysisRequested && loading) || isPlanActionLoading}
+                title={isPlanActionLoading ? 'AI is generating your weekly plan' : 'AI is generating your dashboard'}
+                message={
+                    isPlanActionLoading
+                        ? 'Building a 7-day roadmap from your latest assessment...'
+                        : 'Analyzing signals and assembling profile insights...'
+                }
+            />
             <IonContent className="ion-padding bg-gray-50 dark:bg-gray-900 transition-colors">
                 <div className="p-6 space-y-6">
                     <div className="flex flex-col items-center mt-6 mb-2">
@@ -157,47 +331,65 @@ const ProfilePage: React.FC = () => {
                         <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{user?.email}</p>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3 mb-2">
-                        <div className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-                            <div className="text-xs text-gray-400 uppercase tracking-wide">Readiness</div>
-                            <div className="text-lg font-bold text-indigo-600 mt-1">{readinessValue}%</div>
-                        </div>
-                        <div className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-                            <div className="text-xs text-gray-400 font-medium uppercase tracking-wide">Role</div>
-                            <div className="text-lg font-bold text-gray-900 dark:text-gray-100 mt-1 truncate">{roleLabel}</div>
-                        </div>
-                        <div className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-                            <div className="text-xs text-gray-400 font-medium uppercase tracking-wide">Level</div>
-                            <div className="text-lg font-bold text-emerald-600 mt-1">{levelLabel}</div>
-                        </div>
-                    </div>
-
-                    {loading && (
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-3">
-                            <IonSpinner name="crescent" />
-                            <span className="text-sm text-gray-500 dark:text-gray-300">Loading AI profile...</span>
+                    {!analysisRequested && (
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 space-y-4">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{uiCopy.profileAnalysisTitle}</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                                {uiCopy.profileAnalysisHint}
+                            </p>
+                            <IonButton
+                                expand="block"
+                                onClick={() => setAnalysisRequested(true)}
+                            >
+                                {uiCopy.runAnalysis}
+                            </IonButton>
                         </div>
                     )}
 
-                    {error && !loading && (
+                    {analysisRequested && dashboard && (
+                        <div className="grid grid-cols-3 gap-3 mb-2">
+                            <div className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+                                <div className="text-xs text-gray-400 uppercase tracking-wide">{uiCopy.readiness}</div>
+                                <div className="text-lg font-bold text-indigo-600 mt-1">{formatPercent(readinessValue)}</div>
+                            </div>
+                            <div className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+                                <div className="text-xs text-gray-400 font-medium uppercase tracking-wide">{uiCopy.role}</div>
+                                <div className="text-lg font-bold text-gray-900 dark:text-gray-100 mt-1 truncate">{roleLabel}</div>
+                            </div>
+                            <div className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+                                <div className="text-xs text-gray-400 font-medium uppercase tracking-wide">{uiCopy.tests}</div>
+                                <div className="text-lg font-bold text-emerald-600 mt-1">
+                                    {dashboard?.overall.tests_count ?? dashboard?.aggregate?.tests_count ?? 0}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {analysisRequested && loading && (
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-3">
+                            <span className="text-sm text-gray-500 dark:text-gray-300">{uiCopy.loadingProfile}</span>
+                        </div>
+                    )}
+
+                    {analysisRequested && error && !loading && (
                         <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 text-sm text-rose-700">
                             {error}
                         </div>
                     )}
 
-                    {!loading && !dashboard && !error && (
+                    {analysisRequested && !loading && !dashboard && !error && (
                         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 space-y-4">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">AI Career Copilot</h3>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{uiCopy.emptyTitle}</h3>
                             <p className="text-sm text-gray-600 dark:text-gray-300">
-                                Complete one assessment to unlock profile verdict, diagnostics, and a 7-day growth plan.
+                                {uiCopy.emptyDescription}
                             </p>
                             <IonButton expand="block" onClick={() => history.push('/assessment/context')}>
-                                Start assessment
+                                {uiCopy.startAssessment}
                             </IonButton>
                         </div>
                     )}
 
-                    {!loading && dashboard && (
+                    {analysisRequested && !loading && dashboard && (
                         <div className="space-y-5">
                             {verdictContent && (
                                 <div className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
@@ -218,9 +410,9 @@ const ProfilePage: React.FC = () => {
                                     <IonButton
                                         expand="block"
                                         className="mt-4"
-                                        onClick={() => handleDashboardAction(verdictContent.cta)}
+                                        onClick={() => void handleDashboardAction(verdictContent.cta)}
                                     >
-                                        {verdictContent.cta.text}
+                                        {activePlanId ? uiCopy.continuePlan : verdictContent.cta.text}
                                     </IonButton>
                                 </div>
                             )}
@@ -233,7 +425,7 @@ const ProfilePage: React.FC = () => {
                                     <div className="space-y-4">
                                         <div>
                                             <div className="text-xs uppercase tracking-widest font-semibold text-emerald-600 mb-2">
-                                                Strengths
+                                                {uiCopy.strengths}
                                             </div>
                                             <div className="space-y-2">
                                                 {analysisContent.strengths.map((item, idx) => (
@@ -246,7 +438,7 @@ const ProfilePage: React.FC = () => {
                                         </div>
                                         <div>
                                             <div className="text-xs uppercase tracking-widest font-semibold text-amber-600 mb-2">
-                                                Weaknesses
+                                                {uiCopy.weaknesses}
                                             </div>
                                             <div className="space-y-2">
                                                 {analysisContent.weaknesses.map((item, idx) => (
@@ -259,7 +451,7 @@ const ProfilePage: React.FC = () => {
                                         </div>
                                         <div>
                                             <div className="text-xs uppercase tracking-widest font-semibold text-indigo-600 mb-2">
-                                                Recommendations
+                                                {uiCopy.recommendations}
                                             </div>
                                             <div className="space-y-2">
                                                 {analysisContent.recommendations.map((item, idx) => (
@@ -301,7 +493,7 @@ const ProfilePage: React.FC = () => {
                                                         className="text-xs text-indigo-600 font-semibold"
                                                         onClick={() => toggleInsightWhy(insightKey, insight.evidence_refs || [])}
                                                     >
-                                                        {expanded ? 'Hide why' : 'Why?'}
+                                                        {expanded ? uiCopy.hideWhy : uiCopy.why}
                                                     </button>
                                                 </div>
                                                 <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mt-2">
@@ -313,17 +505,17 @@ const ProfilePage: React.FC = () => {
                                                 {expanded && (
                                                     <div className="mt-3 space-y-2">
                                                         {loadingEvidence && (
-                                                            <div className="text-xs text-gray-500">Loading evidence...</div>
+                                                            <div className="text-xs text-gray-500">{uiCopy.loadingEvidence}</div>
                                                         )}
                                                         {!loadingEvidence && evidence.length === 0 && (
                                                             <div className="text-xs text-gray-500">
-                                                                No evidence snippets available.
+                                                                {uiCopy.noEvidence}
                                                             </div>
                                                         )}
                                                         {!loadingEvidence && evidence.map((item) => (
                                                             <div key={item.evidence_id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-2">
                                                                 <div className="text-[11px] uppercase tracking-wide text-gray-500">
-                                                                    {item.source_type} | confidence {Math.round((item.confidence || 0) * 100)}%
+                                                                    {item.source_type} | confidence {formatPercent(item.confidence)}
                                                                 </div>
                                                                 <div className="text-xs text-gray-700 dark:text-gray-200 mt-1">
                                                                     {item.snippet}
@@ -338,22 +530,48 @@ const ProfilePage: React.FC = () => {
                                 </div>
                             )}
 
-                            {radarContent && radarData.length > 0 && (
+                            {radarContent && (
                                 <div className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 space-y-4">
-                                    <PsychometricRadar
-                                        data={radarData}
-                                        title={radarBlock?.title || 'Capability Map'}
-                                        color="#0F766E"
-                                    />
+                                    {hasRadarChartData ? (
+                                        <div className="min-h-[260px] h-[260px]">
+                                            <PsychometricRadar
+                                                data={radarData}
+                                                benchmarkValues={radarBenchmarkValues}
+                                                title={radarBlock?.title || 'Capability Map'}
+                                                color="#0F766E"
+                                                height={260}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4">
+                                            <div className="text-sm text-gray-600">
+                                                {uiLang === 'ru'
+                                                    ? 'Недостаточно данных для паутины'
+                                                    : uiLang === 'kz'
+                                                        ? 'Өрмек графигіне дерек жеткіліксіз'
+                                                        : 'Not enough data for radar'}
+                                            </div>
+                                            {topRadarAxes.length > 0 && (
+                                                <div className="mt-3 space-y-1">
+                                                    {topRadarAxes.map((axis) => (
+                                                        <div key={`radar-fallback-${axis.id}`} className="text-xs text-gray-700">
+                                                            {axis.subject}: {formatPercent(axis.A)}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                     <p className="text-sm text-gray-600 dark:text-gray-300">{radarContent.ai_note}</p>
                                     <div className="grid grid-cols-2 gap-2">
                                         {radarContent.axes.map((axis) => {
-                                            const target = radarContent.benchmark.values[axis.id] ?? 0;
+                                            const score = toPercentNumber(axis.value);
+                                            const target = toPercentNumber(radarContent.benchmark.values[axis.id] ?? 0);
                                             return (
                                                 <div key={axis.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-2 text-xs">
                                                     <div className="font-semibold text-gray-700 dark:text-gray-200">{axis.label}</div>
                                                     <div className="text-gray-500 dark:text-gray-300">
-                                                        {axis.value}% / target {target}%
+                                                        {formatPercent(score)} / {uiCopy.target} {formatPercent(target)}
                                                     </div>
                                                 </div>
                                             );
@@ -369,12 +587,12 @@ const ProfilePage: React.FC = () => {
                                         <div key={skill.skill_id} className="border border-gray-100 dark:border-gray-700 rounded-xl p-3">
                                             <div className="flex items-center justify-between mb-1">
                                                 <div className="text-sm font-semibold text-gray-800 dark:text-gray-100">{skill.label}</div>
-                                                <div className={`text-sm font-bold ${statusTextClass(skill.status)}`}>{skill.score}%</div>
+                                                <div className={`text-sm font-bold ${statusTextClass(skill.status)}`}>{formatPercent(skill.score)}</div>
                                             </div>
                                             <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-2">
                                                 <div
                                                     className={`h-full rounded-full ${skill.status === 'good' ? 'bg-emerald-500' : skill.status === 'medium' ? 'bg-amber-500' : 'bg-rose-500'}`}
-                                                    style={{ width: `${skill.score}%` }}
+                                                    style={{ width: `${toPercentNumber(skill.score)}%` }}
                                                 />
                                             </div>
                                             <div className="text-xs text-gray-500 dark:text-gray-300">{skill.level} | {skill.target_hint}</div>
@@ -394,7 +612,7 @@ const ProfilePage: React.FC = () => {
                                                     <span className={`w-2 h-2 rounded-full ${metricStatusDotClass(metric.status)}`} />
                                                     <span className="text-xs uppercase tracking-wider text-gray-500">{metric.label}</span>
                                                 </div>
-                                                <div className="text-lg font-bold text-gray-900 mt-1">{metric.value}%</div>
+                                                <div className="text-lg font-bold text-gray-900 mt-1">{formatPercent(metric.value)}</div>
                                                 <div className="text-[11px] text-gray-600 mt-1">{metric.hint}</div>
                                             </div>
                                         ))}
@@ -413,7 +631,7 @@ const ProfilePage: React.FC = () => {
                                                     <div key={item.rec_id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
                                                         <div className="text-sm font-semibold text-gray-800 dark:text-gray-100">{item.title}</div>
                                                         <div className="text-xs text-gray-600 dark:text-gray-300 mt-1">
-                                                            Impact: {item.impact} | Effort: {item.effort}
+                                                            {uiCopy.impactEffort}: {item.impact} | {uiCopy.effort}: {item.effort}
                                                         </div>
                                                         <div className="text-xs text-gray-600 dark:text-gray-300 mt-1">{item.estimated_impact}</div>
                                                     </div>
@@ -451,12 +669,12 @@ const ProfilePage: React.FC = () => {
                                     <IonButton
                                         expand="block"
                                         className="mt-4"
-                                        onClick={() => handleDashboardAction(actionContent.cta)}
+                                        onClick={() => void handleDashboardAction(actionContent.cta)}
                                     >
-                                        {actionContent.cta.text}
+                                        {activePlanId ? uiCopy.continuePlan : actionContent.cta.text}
                                     </IonButton>
                                     <div className="text-xs text-indigo-700 mt-2">
-                                        Confidence: {confidenceValue}%
+                                        {uiCopy.confidence}: {formatPercent(confidenceValue)}
                                     </div>
                                 </div>
                             )}

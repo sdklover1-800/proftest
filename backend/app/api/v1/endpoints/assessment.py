@@ -1,13 +1,15 @@
+import random
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
+from app.core.test_config_limits import DEFAULT_LIMIT_BY_MODULE, MIN_LIMIT_BY_MODULE
 from app.db.session import get_db
 from app.models.config import TestConfig
-from app.models.user import User
 from app.models.question import ModuleEnum
+from app.models.user import User
 from app.schemas.assessment import (
     AnswerCreate,
     AssessmentSession,
@@ -20,17 +22,92 @@ from app.services.assessment_service import assessment_service
 
 router = APIRouter()
 
+DEFAULT_MODULE_LIMITS: dict[str, int] = dict(DEFAULT_LIMIT_BY_MODULE)
 
-import random
 
-DEFAULT_PER_CATEGORY_LIMIT = 10
+def _resolve_module_limit(
+    module_name: str,
+    config_value: int | None,
+    override_limit: int | None,
+) -> int:
+    """
+    Resolve final module budget:
+    - request override (if provided) wins,
+    - then active config value,
+    - then module default.
+    """
+    floor_limit = MIN_LIMIT_BY_MODULE.get(
+        module_name,
+        DEFAULT_MODULE_LIMITS.get(module_name, 0),
+    )
+    if override_limit is not None:
+        return max(override_limit, floor_limit)
+    if config_value is not None:
+        return max(config_value, floor_limit)
+    return max(DEFAULT_MODULE_LIMITS.get(module_name, 0), floor_limit)
+
+
+def _select_balanced_questions(
+    module_groups: dict[str, list[QuestionDTO]],
+    limit: int,
+) -> list[QuestionDTO]:
+    """
+    Select a total of `limit` questions from module categories in balanced rounds.
+    This avoids overfilling one category and keeps category coverage stable.
+    """
+    if limit <= 0 or not module_groups:
+        return []
+
+    categories = list(module_groups.keys())
+    random.shuffle(categories)
+
+    shuffled_groups: dict[str, list[QuestionDTO]] = {}
+    group_offsets: dict[str, int] = {}
+    for category in categories:
+        items = list(module_groups[category])
+        random.shuffle(items)
+        shuffled_groups[category] = items
+        group_offsets[category] = 0
+
+    selected: list[QuestionDTO] = []
+    while len(selected) < limit:
+        progressed = False
+        for category in categories:
+            offset = group_offsets[category]
+            pool = shuffled_groups[category]
+            if offset >= len(pool):
+                continue
+
+            selected.append(pool[offset])
+            group_offsets[category] = offset + 1
+            progressed = True
+
+            if len(selected) >= limit:
+                break
+
+        if not progressed:
+            break
+
+    random.shuffle(selected)
+    return selected
 
 @router.get("/questions", response_model=list[QuestionDTO])
 async def get_questions(
     db: AsyncSession = Depends(get_db),
     modules: str | None = Query(default=None, description="Comma-separated module list"),
     start_module: str | None = Query(default=None, description="Module to start from"),
-    per_category: int | None = Query(default=None, ge=1, le=200, description="Per-category limit"),
+    per_module: int | None = Query(
+        default=None,
+        ge=1,
+        le=200,
+        description="Override total question budget per module",
+    ),
+    per_category: int | None = Query(
+        default=None,
+        ge=1,
+        le=200,
+        description="Deprecated alias of per_module",
+    ),
 ):
     """
     Returns list of questions in random order based on active test configuration.
@@ -75,20 +152,15 @@ async def get_questions(
             start_idx = requested_modules.index(start_cleaned)
             requested_modules = requested_modules[start_idx:] + requested_modules[:start_idx]
 
-    # 5) Shuffle and slice per category (keep module blocks in order)
+    # 5) Select module totals with balanced category coverage
     selected_questions: list[QuestionDTO] = []
-    def resolve_limit(config_value: int | None) -> int:
-        if per_category is not None:
-            return per_category
-        if not config_value:
-            return DEFAULT_PER_CATEGORY_LIMIT
-        return max(config_value, DEFAULT_PER_CATEGORY_LIMIT)
+    override_limit = per_module if per_module is not None else per_category
 
     limit_by_module = {
-        "RIASEC": resolve_limit(config.riasec_limit),
-        "BIG5": resolve_limit(config.big5_limit),
-        "COGNITIVE": resolve_limit(config.cognitive_limit),
-        "SJT": resolve_limit(config.sjt_limit),
+        "RIASEC": _resolve_module_limit("RIASEC", config.riasec_limit, override_limit),
+        "BIG5": _resolve_module_limit("BIG5", config.big5_limit, override_limit),
+        "COGNITIVE": _resolve_module_limit("COGNITIVE", config.cognitive_limit, override_limit),
+        "SJT": _resolve_module_limit("SJT", config.sjt_limit, override_limit),
     }
 
     def take_module(module_name: str) -> None:
@@ -98,12 +170,7 @@ async def get_questions(
         module_groups = grouped.get(module_name, {})
         if not module_groups:
             return
-        module_selected = []
-        for items in module_groups.values():
-            items_list = list(items)
-            random.shuffle(items_list)
-            module_selected.extend(items_list[:limit])
-        random.shuffle(module_selected)
+        module_selected = _select_balanced_questions(module_groups, limit)
         selected_questions.extend(module_selected)
 
     for module_name in requested_modules:

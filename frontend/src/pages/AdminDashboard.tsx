@@ -145,6 +145,10 @@ const AdminDashboard: React.FC = () => {
                                     onFieldChange={updateConfigField}
                                     onSave={saveConfig}
                                     isSaving={isSavingConfig}
+                                    limitsMeta={testConfig?.limits_meta}
+                                    serverWarnings={testConfig?.warnings}
+                                    estimatedTotalMinutes={testConfig?.estimated_total_minutes}
+                                    qualityPrediction={testConfig?.quality_prediction}
                                 />
                             )}
                         </>

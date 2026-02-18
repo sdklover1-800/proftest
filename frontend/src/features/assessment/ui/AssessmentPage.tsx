@@ -6,7 +6,7 @@ import AssessmentLayout from './AssessmentLayout';
 import QuestionCard from './QuestionCard';
 import { useAssessment } from '../model/useAssessment';
 import { getCognitiveTimeLimitMs } from '../model/assessmentTiming';
-import LoadingOverlay from '@/shared/ui/LoadingOverlay';
+import AILoadingOverlay from '@/shared/ui/AILoadingOverlay';
 
 /**
  * Assessment page - ultra-thin wrapper.
@@ -91,9 +91,13 @@ const AssessmentPage: React.FC = () => {
     if (isLoading) {
         return (
             <AssessmentLayout>
+                <AILoadingOverlay
+                    isOpen={isLoading}
+                    title="AI is preparing your assessment"
+                    message="Loading questions and initializing your session..."
+                />
                 <div className="flex items-center justify-center h-full">
-                    {/* Keep content centered, overlay will handle the spinner */}
-                    <LoadingOverlay isOpen={isLoading} />
+                    <p className="text-gray-500">{t('common.loading')}</p>
                 </div>
             </AssessmentLayout>
         );
