@@ -5,12 +5,20 @@ Follows the Thin Router pattern - only sets up middleware and routes.
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
 from app.api.v1.endpoints import admin, assessment, auth, plans, questions, results
 from app.core.config import settings
 
 
 app = FastAPI(title=settings.PROJECT_NAME)
+is_production = settings.ENVIRONMENT.strip().lower() in {"production", "prod"}
+
+if is_production and settings.BACKEND_TRUSTED_HOSTS:
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=settings.BACKEND_TRUSTED_HOSTS,
+    )
 
 cors_kwargs = {
     "allow_origins": settings.BACKEND_CORS_ORIGINS,

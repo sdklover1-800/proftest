@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from typing import Annotated, Any
+from urllib.parse import urlparse
 
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
@@ -10,6 +11,11 @@ DEFAULT_SECRET_KEY = "changethis-to-a-secure-secret-key-in-production"
 DEFAULT_DEV_CORS_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+]
+DEFAULT_DEV_TRUSTED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "testserver",
 ]
 
 
@@ -36,6 +42,7 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: Annotated[list[str], NoDecode] = DEFAULT_DEV_CORS_ORIGINS
     BACKEND_CORS_ORIGIN_REGEX: str | None = None
     BACKEND_CORS_ALLOW_CREDENTIALS: bool = False
+    BACKEND_TRUSTED_HOSTS: Annotated[list[str], NoDecode] = DEFAULT_DEV_TRUSTED_HOSTS
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
@@ -55,6 +62,40 @@ class Settings(BaseSettings):
         if isinstance(value, list):
             return [str(item).strip() for item in value if str(item).strip()]
         return list(DEFAULT_DEV_CORS_ORIGINS)
+
+    @field_validator("BACKEND_TRUSTED_HOSTS", mode="before")
+    @classmethod
+    def parse_trusted_hosts(cls, value: Any) -> list[str]:
+        def normalize_host(raw_value: str) -> str:
+            value_str = raw_value.strip()
+            if not value_str:
+                return ""
+            if value_str == "*":
+                return value_str
+            if "://" in value_str:
+                parsed = urlparse(value_str)
+                if parsed.hostname:
+                    return parsed.hostname.strip()
+            if ":" in value_str:
+                return value_str.split(":", 1)[0].strip()
+            return value_str
+
+        if isinstance(value, str):
+            raw = value.strip()
+            if raw.startswith("["):
+                try:
+                    parsed = json.loads(raw)
+                    if isinstance(parsed, list):
+                        hosts = [normalize_host(str(item)) for item in parsed]
+                        return [item for item in hosts if item]
+                except Exception:
+                    pass
+            hosts = [normalize_host(item) for item in raw.split(",")]
+            return [item for item in hosts if item]
+        if isinstance(value, list):
+            hosts = [normalize_host(str(item)) for item in value]
+            return [item for item in hosts if item]
+        return list(DEFAULT_DEV_TRUSTED_HOSTS)
 
     @staticmethod
     def _normalize_async_db_url_value(url: str) -> str:
@@ -111,6 +152,22 @@ class Settings(BaseSettings):
             if "*" in self.BACKEND_CORS_ORIGINS:
                 raise ValueError(
                     "BACKEND_CORS_ORIGINS cannot contain '*' in production."
+                )
+            if not self.BACKEND_CORS_ORIGINS:
+                raise ValueError(
+                    "BACKEND_CORS_ORIGINS must be configured in production."
+                )
+            if any(not origin.startswith("https://") for origin in self.BACKEND_CORS_ORIGINS):
+                raise ValueError(
+                    "BACKEND_CORS_ORIGINS must use https:// URLs in production."
+                )
+            if "*" in self.BACKEND_TRUSTED_HOSTS:
+                raise ValueError(
+                    "BACKEND_TRUSTED_HOSTS cannot contain '*' in production."
+                )
+            if not self.BACKEND_TRUSTED_HOSTS:
+                raise ValueError(
+                    "BACKEND_TRUSTED_HOSTS must be configured in production."
                 )
         return self
 
