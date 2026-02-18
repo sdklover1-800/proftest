@@ -7,6 +7,25 @@ import ru from './locales/ru.json';
 import kz from './locales/kz.json';
 import en from './locales/en.json';
 
+const normalizeDetectedLanguage = (lng: string): string => {
+    const normalized = (lng || '').toLowerCase().trim();
+    if (!normalized) {
+        return 'ru';
+    }
+
+    // Device locale for Kazakh is usually "kk", map it to app locale "kz".
+    if (normalized.startsWith('kk') || normalized.startsWith('kz')) {
+        return 'kz';
+    }
+    if (normalized.startsWith('ru')) {
+        return 'ru';
+    }
+    if (normalized.startsWith('en')) {
+        return 'en';
+    }
+    return 'ru';
+};
+
 /**
  * i18n configuration for multi-language support.
  * Supports Russian (default), Kazakh, and English.
@@ -36,6 +55,7 @@ i18n
             lookupLocalStorage: 'app-language',
             // Cache the detected language
             caches: ['localStorage'],
+            convertDetectedLanguage: normalizeDetectedLanguage,
         },
 
         react: {

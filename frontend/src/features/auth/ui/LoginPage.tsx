@@ -6,8 +6,6 @@ import {
     IonToolbar,
     IonTitle,
     IonContent,
-    IonItem,
-    IonLabel,
     IonInput,
     IonButton,
     IonSpinner,
@@ -47,25 +45,27 @@ const LoginPage: React.FC = () => {
                     </div>
 
                     <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
-                        <IonItem className="rounded-lg border border-gray-200">
-                            <IonLabel position="floating">{t('auth.email')}</IonLabel>
-                            <IonInput
-                                type="email"
-                                value={email}
-                                onIonChange={(e) => setEmail(e.detail.value!)}
-                                disabled={isLoading}
-                            />
-                        </IonItem>
+                        <IonInput
+                            label={t('auth.email')}
+                            labelPlacement="stacked"
+                            fill="outline"
+                            type="email"
+                            value={email}
+                            onIonInput={(e) => setEmail(String(e.detail.value ?? ''))}
+                            autocomplete="email"
+                            disabled={isLoading}
+                        />
 
-                        <IonItem className="rounded-lg border border-gray-200">
-                            <IonLabel position="floating">{t('auth.password')}</IonLabel>
-                            <IonInput
-                                type="password"
-                                value={password}
-                                onIonChange={(e) => setPassword(e.detail.value!)}
-                                disabled={isLoading}
-                            />
-                        </IonItem>
+                        <IonInput
+                            label={t('auth.password')}
+                            labelPlacement="stacked"
+                            fill="outline"
+                            type="password"
+                            value={password}
+                            onIonInput={(e) => setPassword(String(e.detail.value ?? ''))}
+                            autocomplete="current-password"
+                            disabled={isLoading}
+                        />
 
                         <IonButton
                             expand="block"

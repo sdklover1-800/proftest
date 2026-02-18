@@ -6,8 +6,6 @@ import {
     IonToolbar,
     IonTitle,
     IonContent,
-    IonItem,
-    IonLabel,
     IonInput,
     IonButton,
     IonSpinner,
@@ -34,6 +32,23 @@ const RegisterPage: React.FC = () => {
         clearError
     } = useRegister();
 
+    const handleAgeInput = (raw: string | number | null | undefined): void => {
+        const value = String(raw ?? '').trim();
+        if (!value) {
+            setAge(undefined);
+            return;
+        }
+
+        const parsed = Number.parseInt(value, 10);
+        if (Number.isNaN(parsed)) {
+            setAge(undefined);
+            return;
+        }
+
+        const safeAge = Math.max(0, Math.min(parsed, 120));
+        setAge(safeAge);
+    };
+
     return (
         <IonPage>
             <IonHeader>
@@ -49,35 +64,40 @@ const RegisterPage: React.FC = () => {
                     </div>
 
                     <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
-                        <IonItem className="rounded-lg border border-gray-200">
-                            <IonLabel position="floating">{t('auth.email')}</IonLabel>
-                            <IonInput
-                                type="email"
-                                value={email}
-                                onIonChange={(e) => setEmail(e.detail.value!)}
-                                disabled={isLoading}
-                            />
-                        </IonItem>
+                        <IonInput
+                            label={t('auth.email')}
+                            labelPlacement="stacked"
+                            fill="outline"
+                            type="email"
+                            value={email}
+                            onIonInput={(e) => setEmail(String(e.detail.value ?? ''))}
+                            autocomplete="email"
+                            disabled={isLoading}
+                        />
 
-                        <IonItem className="rounded-lg border border-gray-200">
-                            <IonLabel position="floating">{t('auth.password')}</IonLabel>
-                            <IonInput
-                                type="password"
-                                value={password}
-                                onIonChange={(e) => setPassword(e.detail.value!)}
-                                disabled={isLoading}
-                            />
-                        </IonItem>
+                        <IonInput
+                            label={t('auth.password')}
+                            labelPlacement="stacked"
+                            fill="outline"
+                            type="password"
+                            value={password}
+                            onIonInput={(e) => setPassword(String(e.detail.value ?? ''))}
+                            autocomplete="new-password"
+                            disabled={isLoading}
+                        />
 
-                        <IonItem className="rounded-lg border border-gray-200">
-                            <IonLabel position="floating">{t('auth.age')} ({t('common.optional')})</IonLabel>
-                            <IonInput
-                                type="number"
-                                value={age}
-                                onIonChange={(e) => setAge(e.detail.value ? parseInt(e.detail.value) : undefined)}
-                                disabled={isLoading}
-                            />
-                        </IonItem>
+                        <IonInput
+                            label={`${t('auth.age')} (${t('common.optional')})`}
+                            labelPlacement="stacked"
+                            fill="outline"
+                            type="number"
+                            min={0}
+                            max={120}
+                            inputmode="numeric"
+                            value={age ?? ''}
+                            onIonInput={(e) => handleAgeInput(e.detail.value)}
+                            disabled={isLoading}
+                        />
 
                         <IonButton
                             expand="block"
