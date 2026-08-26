@@ -15,14 +15,31 @@ Required domain settings:
 - `BACKEND_CORS_ORIGINS=https://proftest.app,https://www.proftest.app`
 - `BACKEND_TRUSTED_HOSTS=proftest.app,www.proftest.app`
 
-## 3) Build frontend
+## 3) Database schema
+Migrations are owned by Alembic. From `backend/`:
+```bash
+# fresh database
+alembic upgrade head
+
+# database that already has the tables but no alembic_version
+alembic stamp 42b3db3ee8f8
+alembic upgrade head
+```
+Then load the question bank:
+```bash
+python scripts/import_all_questions.py
+```
+Never run `Base.metadata.create_all()` against a deployed database — it creates
+tables without recording a revision, and migrations then have nothing to apply.
+
+## 4) Build frontend
 ```bash
 cd /var/www/proftest/frontend
 npm ci
 npm run build
 ```
 
-## 4) Start backend with systemd
+## 5) Start backend with systemd
 1. Copy service:
 ```bash
 sudo cp /var/www/proftest/deploy/systemd/proftest-backend.service /etc/systemd/system/
@@ -35,7 +52,7 @@ sudo systemctl restart proftest-backend
 sudo systemctl status proftest-backend
 ```
 
-## 5) Configure nginx
+## 6) Configure nginx
 1. Copy nginx config:
 ```bash
 sudo cp /var/www/proftest/deploy/nginx/proftest.app.conf /etc/nginx/sites-available/proftest.app.conf
@@ -47,12 +64,12 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-## 6) TLS certificates
+## 7) TLS certificates
 ```bash
 sudo certbot --nginx -d proftest.app -d www.proftest.app
 ```
 
-## 7) Smoke checks
+## 8) Smoke checks
 - `https://proftest.app/` -> frontend loads
 - `https://proftest.app/healthz` -> `{"status":"ok"}`
 - `https://proftest.app/api/v1/assessment/questions` -> backend responds

@@ -1,20 +1,18 @@
-from sqlalchemy import create_engine
+"""
+Deprecated: the schema is owned by Alembic.
+
+`Base.metadata.create_all()` builds tables without recording a revision, so the
+database ends up untracked and the next migration has nothing to apply against.
+Use the migration tool instead:
+
+    alembic upgrade head          # fresh database, or catch up an existing one
+    alembic stamp <revision>      # database already at that revision's schema
+"""
+
 import sys
 
-from app.core.config import settings
-from app.db.base import Base
-import app.models  # noqa: F401
-
-
-def create_tables():
-    engine = create_engine(settings.SYNC_DATABASE_URL)
-    Base.metadata.create_all(bind=engine)
-    print("Tables created or already exist.")
-
+MESSAGE = __doc__.strip()
 
 if __name__ == "__main__":
-    try:
-        create_tables()
-    except Exception as e:
-        print("Error creating tables:", e)
-        sys.exit(1)
+    print(MESSAGE)
+    sys.exit(1)

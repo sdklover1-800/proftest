@@ -12,3 +12,4 @@ python-jose[cryptography]
 bcrypt
 python-multipart
 httpx
+alembic

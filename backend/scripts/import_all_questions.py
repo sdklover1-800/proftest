@@ -18,7 +18,6 @@ from sqlalchemy.orm import sessionmaker
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.core.config import settings
-from app.db.base import Base
 from app.models.question import Question
 
 
@@ -62,10 +61,7 @@ def import_questions():
     # Create sync engine
     engine = create_engine(settings.SYNC_DATABASE_URL)
 
-    # Create tables if they don't exist
-    print("Creating database tables...")
-    Base.metadata.create_all(bind=engine)
-
+    # Schema is owned by Alembic; run `alembic upgrade head` before importing.
     SessionLocal = sessionmaker(bind=engine)
 
     total_imported = 0

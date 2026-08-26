@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import JSON, DateTime, Enum, ForeignKey, Integer
+from sqlalchemy import JSON, DateTime, Enum, ForeignKey, Integer, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
@@ -20,7 +20,9 @@ class AssessmentSession(Base):
     __tablename__ = "assessment_sessions"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=True, index=True
+    )
     status: Mapped[AssessmentStatusEnum] = mapped_column(
         Enum(AssessmentStatusEnum), default=AssessmentStatusEnum.started
     )
@@ -39,12 +41,23 @@ class AssessmentSession(Base):
 class UserResponse(Base):
     """Individual answer to a question within a session."""
     __tablename__ = "user_responses"
+    __table_args__ = (
+        # Scoring counts every row, so a question may be answered only once
+        # per session. Re-answering updates the existing row.
+        UniqueConstraint(
+            "session_id", "question_id", name="uq_user_responses_session_question"
+        ),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     session_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("assessment_sessions.id")
+        Integer,
+        ForeignKey("assessment_sessions.id", ondelete="CASCADE"),
+        index=True,
     )
-    question_id: Mapped[int] = mapped_column(Integer, ForeignKey("questions.id"))
+    question_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("questions.id"), index=True
+    )
     value: Mapped[int] = mapped_column(Integer, nullable=False)
     reaction_time_ms: Mapped[int] = mapped_column(Integer, nullable=True)
 
