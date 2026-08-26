@@ -25,7 +25,7 @@ interface UseAssessmentReturn {
     moduleProgress: number;
     moduleIndex: number;
     moduleTotal: number;
-    handleSelect: (value: number, reactionTimeMs?: number) => void;
+    handleSelect: (value: number, reactionTimeMs?: number, timedOut?: boolean) => void;
     isBreakVisible: boolean;
     breakCountdown: number;
     skipBreak: () => void;
@@ -225,7 +225,7 @@ export const useAssessment = (): UseAssessmentReturn => {
         }
     };
 
-    const handleSelect = useCallback((value: number, reactionTimeMs?: number): void => {
+    const handleSelect = useCallback((value: number, reactionTimeMs?: number, timedOut = false): void => {
         if (currentQuestion && sessionId) {
             if (answeredRef.current) {
                 return;
@@ -246,14 +246,9 @@ export const useAssessment = (): UseAssessmentReturn => {
                 }, 1500);
             }
 
-            let isCorrect: boolean | null = null;
-            if (currentQuestion.module === 'COGNITIVE') {
-                isCorrect = value === 1;
-            } else {
-                isCorrect = true;
-            }
-
-            setFeedbackType(isCorrect ? 'correct' : 'incorrect');
+            // Only that the answer registered — whether it was right is the
+            // server's business, and showing it here would give the key away.
+            setFeedbackType('neutral');
             setShowFeedback(true);
             feedbackTimeoutRef.current = window.setTimeout(() => {
                 setShowFeedback(false);
@@ -273,6 +268,7 @@ export const useAssessment = (): UseAssessmentReturn => {
                 questionId: currentQuestion.id,
                 value,
                 reactionTimeMs: reactionTime,
+                timedOut,
             });
 
             if (isLastInModule && !isLastQuestion && nextModuleName) {
@@ -358,12 +354,7 @@ export const useAssessment = (): UseAssessmentReturn => {
                     return;
                 }
 
-                let timeoutValue = 0;
-                if (isGoNoGoQuestion(currentQuestion)) {
-                    timeoutValue = isNoGoStimulus(currentQuestion) ? 1 : 0;
-                }
-
-                handleSelect(timeoutValue, timeLimitMs);
+                handleSelect(0, timeLimitMs, true);
             }, timeLimitMs);
         }
 

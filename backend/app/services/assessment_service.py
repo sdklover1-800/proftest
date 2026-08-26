@@ -12,7 +12,7 @@ from app.schemas.assessment import (
     AssessmentSessionCreate,
     SessionSummary,
 )
-from app.services.answer_validation import validate_answer_value
+from app.services.answer_validation import resolve_answer_value
 from app.services.recommendation_service import recommendation_service
 from app.services.scoring_service import calculate_score
 
@@ -67,6 +67,9 @@ class AssessmentService:
         and only with a value the target question can actually take. Answering
         the same question twice overwrites the earlier answer instead of
         stacking duplicates, which would otherwise skew scoring.
+
+        For choice questions the caller sends the position it picked; the
+        weight that position is worth is resolved here and never travels back.
         """
         session = await self.get_session(db, answer_in.session_id)
         # A session that does not exist and a session owned by somebody else
@@ -89,7 +92,11 @@ class AssessmentService:
                 detail="Question not found.",
             )
 
-        validate_answer_value(question, answer_in.value)
+        # The stored value is the score, not the position the client sent:
+        # scoring reads this column directly.
+        scored_value = resolve_answer_value(
+            question, answer_in.value, answer_in.timed_out
+        )
 
         existing = await db.execute(
             select(DBUserResponse).where(
@@ -105,7 +112,7 @@ class AssessmentService:
             )
             db.add(db_answer)
 
-        db_answer.value = answer_in.value
+        db_answer.value = scored_value
         db_answer.reaction_time_ms = answer_in.reaction_time_ms
 
         await db.commit()

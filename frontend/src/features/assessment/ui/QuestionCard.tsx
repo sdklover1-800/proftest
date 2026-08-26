@@ -2,10 +2,13 @@ import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import { getLocalizedText } from '@/utils/langUtils';
+import { isNoGoStimulus } from '../model/assessmentTiming';
+import AnswerOptions from './AnswerOptions';
+import { QuestionSymbol, SymbolRun } from './QuestionSymbols';
+import StimulusTimer from './StimulusTimer';
 
 interface QuestionOption {
     text: string;
-    value: number;
 }
 
 interface Question {
@@ -21,8 +24,11 @@ interface Question {
 
 interface Props {
     question: Question;
+    /** Position of the option the user picked, or the rating for scale questions. */
     selectedValue?: number;
     onSelect: (value: number) => void;
+    /** Share of the response window still left, 1 → 0. Null when untimed. */
+    timeProgress?: number | null;
 }
 
 // Symbol to visual shape mapping
@@ -39,6 +45,30 @@ const symbolShapes: Record<string, React.ReactNode> = {
     '☆': <div className="text-4xl text-yellow-500">☆</div>,
     '🟢': <div className="w-16 h-16 rounded-full bg-green-500 shadow-lg animate-pulse" />,
     '🔴': <div className="w-16 h-16 rounded-full bg-red-500 shadow-lg" />,
+};
+
+/**
+ * Splits a question into words and glyph runs, drawing the runs as shapes.
+ *
+ * "Продолжи ряд: ■ ● ● → ?" is a pattern with a sentence around it; rendering
+ * the pattern as text makes the task harder to read than it actually is.
+ */
+const renderTextWithShapes = (text: string): React.ReactNode => {
+    const parts = text.split(/((?:[▲▼●○■□◆◇★☆🟢🔴]\s*){1,8})/u);
+    return parts.map((part, index) => {
+        if (!part) return null;
+        if (/^[▲▼●○■□◆◇★☆🟢🔴\s]+$/u.test(part) && /[▲▼●○■□◆◇★☆🟢🔴]/u.test(part)) {
+            return (
+                <SymbolRun
+                    key={`run-${index}`}
+                    value={part}
+                    size="w-6 h-6"
+                    gap="gap-1.5"
+                />
+            );
+        }
+        return <span key={`txt-${index}`}>{part}</span>;
+    });
 };
 
 // Parse symbols from question text
@@ -66,7 +96,7 @@ const getCognitiveSubtype = (code: string): CognitiveSubtype => {
  * Supports both 'scale' (1-5) and 'choice' (SJT options) types.
  * Special visual rendering for COGNITIVE module questions.
  */
-const QuestionCard: React.FC<Props> = ({ question, selectedValue, onSelect }) => {
+const QuestionCard: React.FC<Props> = ({ question, selectedValue, onSelect, timeProgress = null }) => {
     const { t, i18n } = useTranslation();
 
     const questionText = getLocalizedText(question, i18n.language);
@@ -104,17 +134,17 @@ const QuestionCard: React.FC<Props> = ({ question, selectedValue, onSelect }) =>
             const isGoNoGo = question.code?.startsWith('COG_GO_');
 
             if (isGoNoGo && options.length > 0) {
-                const pressOption = options.find((opt) => /press|наж|нажать/i.test(opt.text));
-                const skipOption = options.find((opt) => /skip|пропус|пропустить/i.test(opt.text));
+                const pressIndex = options.findIndex((opt) => /press|наж|нажать/i.test(opt.text));
+                const skipIndex = options.findIndex((opt) => /skip|пропус|пропустить/i.test(opt.text));
 
-                if (event.code === 'Space' && pressOption) {
+                if (event.code === 'Space' && pressIndex >= 0) {
                     event.preventDefault();
-                    onSelect(pressOption.value);
+                    onSelect(pressIndex);
                     return;
                 }
 
-                if ((event.key === '0' || event.key.toLowerCase() === 'n') && skipOption) {
-                    onSelect(skipOption.value);
+                if ((event.key === '0' || event.key.toLowerCase() === 'n') && skipIndex >= 0) {
+                    onSelect(skipIndex);
                 }
 
                 return;
@@ -123,14 +153,14 @@ const QuestionCard: React.FC<Props> = ({ question, selectedValue, onSelect }) =>
             if (options.length > 0) {
                 const index = Number(event.key) - 1;
                 if (!Number.isNaN(index) && index >= 0 && index < options.length) {
-                    onSelect(options[index].value);
+                    onSelect(index);
                 }
                 return;
             }
 
             const fallbackIndex = Number(event.key) - 1;
             if (!Number.isNaN(fallbackIndex) && fallbackIndex >= 0 && fallbackIndex < 4) {
-                onSelect(fallbackIndex + 1);
+                onSelect(fallbackIndex);
             }
         };
 
@@ -152,9 +182,11 @@ const QuestionCard: React.FC<Props> = ({ question, selectedValue, onSelect }) =>
 
     // Render Go/No-Go visual game
     const renderGoNoGo = () => {
-        const isGo = questionText.includes('🟢') || questionText.toLowerCase().includes('green') || questionText.includes('Зеленый') || questionText.includes('Жасыл');
-        const isNoGo = questionText.includes('🔴') || questionText.toLowerCase().includes('red') || questionText.includes('Красный') || questionText.includes('Қызыл');
-        
+        // Same rule the timer and the server use, rather than a third reading
+        // of the question text.
+        const isNoGo = isNoGoStimulus(question);
+        const isGo = !isNoGo;
+
         return (
             <div className="flex flex-col items-center gap-6 mb-8">
                 {isGo && (
@@ -188,14 +220,16 @@ const QuestionCard: React.FC<Props> = ({ question, selectedValue, onSelect }) =>
 
     // Render find symbol (COG_B): "Есть ли ★ среди: ▲ ■ ★ ●"
     const renderFindSymbol = () => {
-        const targetSymbol = '★';
-        const setSymbols = symbols.filter(s => s !== targetSymbol || symbols.indexOf(s) > 0);
-        
+        // "Есть ли ★ среди: ▲ ■ ★ ●" — the target is whatever the question
+        // names first; it used to be hard-coded to a star for every item.
+        const targetSymbol = symbols[0] ?? '★';
+        const setSymbols = symbols.slice(1);
+
         return (
             <div className="flex flex-col items-center gap-6 mb-8">
                 <div className="flex items-center gap-2">
-                    <span className="text-lg text-gray-600">{t('assessment.cognitive.findTarget', 'Find:')}</span>
-                    <div className="text-5xl text-yellow-500">★</div>
+                    <span className="text-lg text-muted-foreground">{t('assessment.cognitive.findTarget', 'Find:')}</span>
+                    <QuestionSymbol value={targetSymbol} size="w-12 h-12" />
                 </div>
                 <div className="flex items-center justify-center gap-4 p-4 bg-gray-50 rounded-xl">
                     {setSymbols.slice(0, 4).map((s, i) => renderSymbol(s, i))}
@@ -308,6 +342,8 @@ const QuestionCard: React.FC<Props> = ({ question, selectedValue, onSelect }) =>
         }
     };
 
+    const cognitiveVisual = isCognitive ? renderCognitiveVisual() : null;
+
     return (
         <div className="flex flex-col items-center justify-center flex-grow p-6 animate-fade-in">
             {/* Module Badge */}
@@ -315,21 +351,22 @@ const QuestionCard: React.FC<Props> = ({ question, selectedValue, onSelect }) =>
                 "mb-6 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase",
                 isCognitive ? "bg-purple-50 text-purple-600" : "bg-blue-50 text-blue-600"
             )}>
-                {question.module}
-                {cognitiveSubtype && cognitiveSubtype !== 'generic' && (
-                    <span className="ml-2 text-gray-400">• {cognitiveSubtype.replace('-', '/')}</span>
-                )}
+                {t(`assessment.module_names.${question.module.toLowerCase()}`, question.module)}
             </div>
 
-            {/* Cognitive Visual */}
-            {isCognitive && renderCognitiveVisual()}
+            {/* The stimulus, wearing its own response window */}
+            {isCognitive && cognitiveVisual && (
+                <StimulusTimer progress={timeProgress}>
+                    {cognitiveVisual}
+                </StimulusTimer>
+            )}
 
             {/* Question Text - Localized (smaller for cognitive with visuals) */}
             <h2 className={classNames(
-                "font-bold text-center text-gray-900 mb-8 leading-snug",
+                "font-bold text-center text-foreground mb-8 leading-snug",
                 isCognitive && cognitiveSubtype !== 'generic' ? "text-lg" : "text-2xl"
             )}>
-                {questionText}
+                {isCognitive ? renderTextWithShapes(questionText) : questionText}
             </h2>
 
             {/* Scale Options (1-5) */}
@@ -365,57 +402,15 @@ const QuestionCard: React.FC<Props> = ({ question, selectedValue, onSelect }) =>
                 </div>
             )}
 
-            {/* Choice Options (SJT - Dynamic from API) */}
-            {question.type === 'choice' && question.options && question.options.length > 0 && (
-                <div className="w-full max-w-md space-y-3">
-                    {question.options.map((opt, index) => (
-                        <button
-                            key={`${question.id}-opt-${index}`}
-                            onClick={() => onSelect(opt.value)}
-                            disabled={selectedValue !== undefined}
-                            className={classNames(
-                                "w-full p-4 text-left rounded-xl border transition-all duration-200 shadow-sm bg-white disabled:opacity-60 disabled:cursor-not-allowed",
-                                selectedValue === opt.value
-                                    ? "border-blue-500 ring-2 ring-blue-500 ring-opacity-50 bg-blue-50"
-                                    : "border-gray-200 hover:border-blue-300"
-                            )}
-                        >
-                            <span className={classNames(
-                                "text-base font-medium",
-                                selectedValue === opt.value ? "text-blue-900" : "text-gray-700"
-                            )}>
-                                {opt.text}
-                            </span>
-                        </button>
-                    ))}
-                </div>
+            {/* Choice answers: shaped by what the task actually asks for */}
+            {question.type === 'choice' && (
+                <AnswerOptions
+                    question={question}
+                    selectedValue={selectedValue}
+                    onSelect={onSelect}
+                />
             )}
 
-            {/* Fallback for choice without options (legacy) */}
-            {question.type === 'choice' && (!question.options || question.options.length === 0) && (
-                <div className="w-full max-w-sm space-y-3">
-                    {[
-                        { val: 1, label: 'A' },
-                        { val: 2, label: 'B' },
-                        { val: 3, label: 'C' },
-                        { val: 4, label: 'D' }
-                    ].map((opt) => (
-                        <button
-                            key={opt.val}
-                            onClick={() => onSelect(opt.val)}
-                            disabled={selectedValue !== undefined}
-                            className={classNames(
-                                "w-full p-4 text-center rounded-xl border-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed",
-                                selectedValue === opt.val
-                                    ? "bg-blue-600 border-blue-600 text-white shadow-md"
-                                    : "bg-white border-gray-200 text-gray-600 hover:border-blue-400"
-                            )}
-                        >
-                            <span className="text-lg font-bold">{opt.label}</span>
-                        </button>
-                    ))}
-                </div>
-            )}
         </div>
     );
 };

@@ -78,7 +78,7 @@ const ContextSetupPage: React.FC = () => {
                     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                <IonIcon icon={moonOutline} className="text-indigo-600 text-xl" />
+                                <IonIcon icon={moonOutline} aria-hidden="true" className="text-indigo-600 text-xl" />
                             </div>
                             <div>
                                 <h3 className="font-semibold text-gray-800">
@@ -111,7 +111,7 @@ const ContextSetupPage: React.FC = () => {
                     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
-                                <IonIcon icon={flashOutline} className="text-orange-600 text-xl" />
+                                <IonIcon icon={flashOutline} aria-hidden="true" className="text-orange-600 text-xl" />
                             </div>
                             <h3 className="font-semibold text-gray-800">
                                 {t('context.stress_question')}
@@ -137,7 +137,7 @@ const ContextSetupPage: React.FC = () => {
                     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                                <IonIcon icon={happyOutline} className="text-green-600 text-xl" />
+                                <IonIcon icon={happyOutline} aria-hidden="true" className="text-green-600 text-xl" />
                             </div>
                             <h3 className="font-semibold text-gray-800">
                                 {t('context.mood_question')}

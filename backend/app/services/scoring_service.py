@@ -6,6 +6,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.assessment import UserResponse
 from app.models.question import Question
+from app.services.cognitive_items import (
+    GO_NO_GO_PREFIX,
+    MEMORY_PREFIX,
+    SPEED_PREFIXES,
+    is_no_go_stimulus,
+)
 from app.services.psychometrics_service import (
     build_signals,
     compute_consistency_score,
@@ -110,23 +116,18 @@ async def calculate_score(session_id: int, db: AsyncSession) -> dict:
         if module == "COGNITIVE":
             question_code = question.code or ""
 
-            if question_code.startswith(("COG_A_", "COG_B_", "COG_C_", "COG_D_")):
+            if question_code.startswith(SPEED_PREFIXES):
                 speed_total += 1
                 if value == 1:
                     speed_correct += 1
                 if isinstance(rt_ms, int) and rt_ms > 0:
                     speed_rts.append(rt_ms)
-            elif question_code.startswith("COG_MEM_"):
+            elif question_code.startswith(MEMORY_PREFIX):
                 wm_total += 1
                 if value == 1:
                     wm_correct += 1
-            elif question_code.startswith("COG_GO_"):
-                combined_text = " ".join(
-                    filter(None, [question.text_ru, question.text_kz, question.text_en])
-                ).lower()
-                is_nogo = "🔴" in combined_text or "red" in combined_text or "красн" in combined_text or "қызыл" in combined_text
-
-                if is_nogo:
+            elif question_code.startswith(GO_NO_GO_PREFIX):
+                if is_no_go_stimulus(question):
                     attention_nogo_total += 1
                     if value == 0:
                         attention_false_alarms += 1

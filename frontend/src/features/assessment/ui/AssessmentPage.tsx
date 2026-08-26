@@ -226,11 +226,9 @@ const AssessmentPage: React.FC = () => {
                     <div className="text-sm font-semibold text-gray-500">
                         {t('assessment.question_count', { current: currentIndex + 1, total: totalQuestions })}
                     </div>
-                    {timeLeftMs !== null && (
-                        <div className="text-sm font-semibold text-red-500">
-                            {t('assessment.timer', { seconds: Math.ceil(timeLeftMs / 1000) })}
-                        </div>
-                    )}
+                    {/* The countdown lives on the stimulus now. Repeating it up
+                        here — in red, from the first second — only manufactured
+                        urgency the task does not need. */}
                     {showReactionTime && lastReactionTimeMs !== null && (
                         <div className="text-xs font-semibold text-indigo-500">
                             {t('assessment.reaction_time', { ms: lastReactionTimeMs })}
@@ -260,21 +258,19 @@ const AssessmentPage: React.FC = () => {
                     </div>
                 )}
                 {/* Timer Progress Bar */}
-                {timeProgress !== null && (
-                    <div className="w-full h-1 bg-red-50">
-                        <div
-                            className="h-full bg-red-400 transition-all duration-100 ease-linear"
-                            style={{ width: `${timeProgress * 100}%` }}
-                        />
-                    </div>
-                )}
+                {/* The response window now rides on the stimulus itself,
+                    where the eye already is. */}
             </div>
 
             {/* Feedback Flash */}
             {showFeedback && feedbackType && (
                 <div
                     className={`fixed inset-0 z-50 pointer-events-none transition-opacity duration-200 backdrop-blur-sm ${
-                        feedbackType === 'correct' ? 'bg-green-200/15' : 'bg-red-200/15'
+                        feedbackType === 'correct'
+                            ? 'bg-green-200/15'
+                            : feedbackType === 'incorrect'
+                                ? 'bg-red-200/15'
+                                : 'bg-blue-200/12'
                     }`}
                 />
             )}
@@ -349,12 +345,15 @@ const AssessmentPage: React.FC = () => {
                             </h2>
                             {renderPracticeIcons(currentPractice?.key)}
                             <p className="text-gray-600 mb-6">{currentPractice?.text}</p>
-                            <div className="space-y-3">
+                            {/* Same shape as the real answer tiles: practice is
+                                only useful if it rehearses what comes next. */}
+                            <div className="grid grid-cols-2 gap-3">
                                 {currentPractice?.options.map((label, idx) => (
                                     <button
                                         key={`practice-${currentPractice.key}-${idx}`}
                                         onClick={handlePracticeSelect}
-                                        className="w-full p-4 rounded-xl border border-gray-200 text-gray-700 font-medium hover:border-indigo-400"
+                                        style={{ animationDelay: `${idx * 45}ms` }}
+                                        className="animate-pop-in rounded-2xl border-2 border-border bg-card px-3 py-7 text-base font-bold leading-tight text-foreground transition-all duration-150 hover:border-primary/50 hover:shadow-md active:scale-95"
                                     >
                                         {label}
                                     </button>
@@ -366,6 +365,7 @@ const AssessmentPage: React.FC = () => {
                             question={currentQuestion}
                             selectedValue={responses[currentQuestion.id]}
                             onSelect={handleSelect}
+                            timeProgress={timeProgress}
                         />
                     )}
                 </div>

@@ -53,12 +53,24 @@ export const assessmentApi = {
         return response.data;
     },
 
-    submitAnswer: async (sessionId: number, questionId: number, value: number, reactionTimeMs?: number) => {
+    /**
+     * `value` is the position of the option chosen for choice questions, and
+     * the rating itself for scale questions. What a position is worth is
+     * resolved on the server, which is also what decides a timed-out answer.
+     */
+    submitAnswer: async (
+        sessionId: number,
+        questionId: number,
+        value: number,
+        reactionTimeMs?: number,
+        timedOut?: boolean,
+    ) => {
         const response = await client.post('/api/v1/assessment/submit', {
             session_id: sessionId,
             question_id: questionId,
             value: value,
-            reaction_time_ms: reactionTimeMs
+            reaction_time_ms: reactionTimeMs,
+            timed_out: timedOut ?? false
         });
         return response.data;
     },

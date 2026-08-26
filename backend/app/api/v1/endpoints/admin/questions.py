@@ -28,7 +28,7 @@ class QuestionCreate(BaseModel):
     text_kz: str | None = None
     text_en: str | None = None
     is_reverse: bool = False
-    options: dict | None = None
+    options: list[dict] | None = None
 
 
 class QuestionUpdate(BaseModel):
@@ -41,7 +41,7 @@ class QuestionUpdate(BaseModel):
     text_kz: str | None = None
     text_en: str | None = None
     is_reverse: bool = False
-    options: dict | None = None
+    options: list[dict] | None = None
 
 
 class BulkDeleteRequest(BaseModel):
@@ -74,6 +74,7 @@ async def list_questions(
             "text_kz": q.text_kz,
             "text_en": q.text_en,
             "is_reverse": q.is_reverse,
+            "options": q.options,
         }
         for q in result.scalars().all()
     ]
@@ -146,9 +147,10 @@ async def update_question(
     question.text_kz = question_data.text_kz
     question.text_en = question_data.text_en
     question.is_reverse = question_data.is_reverse
-    # Don't update options if passed as None, only if explicitly changed (or keep it simple and overwrite)
-    # Here we assume client sends full object, so we overwrite.
-    question.options = question_data.options
+    # Option weights are the answer key. An edit that does not mention them
+    # leaves them alone; only an explicit `options` field replaces them.
+    if "options" in question_data.model_fields_set:
+        question.options = question_data.options
 
     await db.commit()
     await db.refresh(question)

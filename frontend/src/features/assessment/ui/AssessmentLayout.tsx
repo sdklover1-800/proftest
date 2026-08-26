@@ -29,8 +29,8 @@ const AssessmentLayout: React.FC<Props> = ({ children, title, progress }) => {
             <IonHeader className="ion-no-border shadow-none">
                 <IonToolbar color="light">
                     <IonButtons slot="end">
-                        <IonButton onClick={handleClose}>
-                            <IonIcon icon={close} slot="icon-only" />
+                        <IonButton onClick={handleClose} aria-label={t('assessment.exit_title')}>
+                            <IonIcon icon={close} slot="icon-only" aria-hidden="true" />
                         </IonButton>
                     </IonButtons>
                     <IonTitle className="text-sm font-semibold text-gray-800">{title}</IonTitle>
@@ -40,7 +40,7 @@ const AssessmentLayout: React.FC<Props> = ({ children, title, progress }) => {
                 )}
             </IonHeader>
             <IonContent className="bg-gray-50">
-                <div className="flex flex-col h-full max-w-md mx-auto bg-white min-h-screen">
+                <div className="flex flex-col h-full max-w-md mx-auto bg-white min-h-dvh">
                     {children}
                 </div>
             </IonContent>

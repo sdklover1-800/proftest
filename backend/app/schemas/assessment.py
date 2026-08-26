@@ -8,10 +8,15 @@ from app.models.question import ModuleEnum, QuestionTypeEnum
 
 
 class QuestionOptionDTO(BaseModel):
-    """Single option for choice-type questions."""
+    """
+    Single option for choice-type questions, as shown to the person answering.
+
+    Deliberately carries no weight: for cognitive and situational items the
+    weight *is* the answer key, and a client that can read it can score itself.
+    Answers come back as the position of the option chosen.
+    """
 
     text: str
-    value: int
 
 
 # Question DTO
@@ -50,14 +55,36 @@ class AssessmentSession(AssessmentSessionBase):
 class AnswerCreate(BaseModel):
     session_id: int
     question_id: int
+    # What the person picked: the rating itself for scale questions (1..5),
+    # the zero-based position of the chosen option for choice questions.
+    # Both are checked against the target question on save.
     value: int
-    # Client-reported timing. Never negative; the value range allowed for
-    # `value` depends on the question and is checked against it on save.
+    # Set when a timed question expired with nothing chosen. The server decides
+    # what that is worth — for a no-go stimulus, holding back is the right answer.
+    timed_out: bool = False
+    # Client-reported timing. Never negative.
     reaction_time_ms: int | None = Field(default=None, ge=0)
 
 
 class UserResponse(AnswerCreate):
     id: int
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AnswerAck(BaseModel):
+    """
+    Confirmation that an answer was stored.
+
+    Deliberately says nothing about what the answer scored: a client that
+    learns the score can resubmit until the reply confirms a point, which hands
+    over the answer key one question at a time.
+    """
+
+    id: int
+    session_id: int
+    question_id: int
+    reaction_time_ms: int | None = None
+
     model_config = ConfigDict(from_attributes=True)
 
 

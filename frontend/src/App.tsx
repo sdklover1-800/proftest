@@ -105,8 +105,8 @@ const App: React.FC = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="bg-gray-200 dark:bg-gray-900 min-h-screen flex justify-center transition-colors">
-        <div className="max-w-md w-full h-full min-h-screen bg-gray-50 dark:bg-gray-900 shadow-2xl overflow-hidden relative transition-colors">
+      <div className="bg-gray-200 dark:bg-gray-900 min-h-dvh flex justify-center transition-colors">
+        <div className="max-w-md w-full h-full min-h-dvh bg-gray-50 dark:bg-gray-900 shadow-2xl overflow-hidden relative transition-colors">
           <IonApp>
             {isAuthenticated ? <AuthenticatedApp /> : (
               <IonRouterOutlet>

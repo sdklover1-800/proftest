@@ -5,3 +5,113 @@
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
+
+/*
+ * Design tokens.
+ *
+ * Named after the shadcn convention so components written against it drop in
+ * unchanged, but the values are this app's own palette: indigo primary on a
+ * light gray ground, matching the existing screens. `darkMode: 'class'` in the
+ * Tailwind config means the dark set applies when <html> carries `.dark`,
+ * which is what the theme store toggles.
+ */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 239 84% 67%;
+
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+  }
+
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --border: 217 33% 22%;
+    --input: 217 33% 22%;
+    --ring: 239 84% 67%;
+
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 63% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --card: 222 47% 13%;
+    --card-foreground: 210 40% 98%;
+  }
+}
+
+@layer base {
+  /*
+   * Ionic's normalize sets `button { border: 0 }`, which also clears
+   * border-style. Tailwind's `border-*` utilities then set a width that never
+   * paints, so every outlined button in the app renders borderless. Restoring
+   * the style is enough — the width still comes from the utility, and buttons
+   * without one keep Tailwind's preflight width of 0.
+   *
+   * Needs to out-specify Ionic's element selector, hence `html button`.
+   */
+  html button {
+    border-style: solid;
+  }
+}
+
+@layer base {
+  /*
+   * Keyboard users need to see where they are. Ionic ships with no visible
+   * focus ring on its controls, and the app defined none of its own, so the
+   * whole assessment was untraversable by keyboard — which matters here,
+   * because the cognitive block is explicitly keyboard-driven.
+   */
+  html :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+/*
+ * Motion is a preference, not a default. The entrance and press animations
+ * carry meaning (an option arriving, a tile responding), but none of it is
+ * load-bearing — so when the system asks for less motion, collapse it rather
+ * than remove the feedback entirely.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

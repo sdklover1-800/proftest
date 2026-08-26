@@ -38,11 +38,13 @@ export const useSubmitAnswer = () => {
             questionId,
             value,
             reactionTimeMs,
+            timedOut,
         }: {
             sessionId: number;
             questionId: number;
             value: number;
             reactionTimeMs?: number;
-        }) => assessmentApi.submitAnswer(sessionId, questionId, value, reactionTimeMs),
+            timedOut?: boolean;
+        }) => assessmentApi.submitAnswer(sessionId, questionId, value, reactionTimeMs, timedOut),
     });
 };

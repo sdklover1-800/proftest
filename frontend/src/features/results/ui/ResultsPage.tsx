@@ -111,7 +111,7 @@ const ResultsPage: React.FC = () => {
             <IonHeader>
                 <IonToolbar>
                     <IonButtons slot="start">
-                        <IonButton onClick={handleHome}><IonIcon icon={homeOutline} /></IonButton>
+                        <IonButton onClick={handleHome} aria-label={t('tabs.home')}><IonIcon icon={homeOutline} aria-hidden="true" /></IonButton>
                     </IonButtons>
                     <IonTitle>{t('results.your_result')}</IonTitle>
                     <IonButtons slot="end">

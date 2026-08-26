@@ -11,12 +11,12 @@ from app.models.config import TestConfig
 from app.models.question import ModuleEnum
 from app.models.user import User
 from app.schemas.assessment import (
+    AnswerAck,
     AnswerCreate,
     AssessmentSession,
     AssessmentSessionCreate,
     QuestionDTO,
     SessionSummary,
-    UserResponse,
 )
 from app.services.assessment_service import assessment_service
 
@@ -194,7 +194,7 @@ async def start_assessment(
     )
 
 
-@router.post("/submit", response_model=UserResponse)
+@router.post("/submit", response_model=AnswerAck)
 async def submit_answer(
     answer_in: AnswerCreate,
     db: AsyncSession = Depends(get_db),

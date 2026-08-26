@@ -62,7 +62,7 @@ const HomePage: React.FC = () => {
 
                         <div>
                             <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2 px-1">
-                                <IonIcon icon={calendarOutline} className="text-indigo-600" />
+                                <IonIcon icon={calendarOutline} aria-hidden="true" className="text-indigo-600" />
                                 {t('home.history_title')}
                             </h3>
 

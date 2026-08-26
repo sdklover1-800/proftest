@@ -73,7 +73,9 @@ class AssessmentAuthorizationTest(ApiTestCase):
         response = self.client.post("/api/v1/assessment/submit", json=self._answer())
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["value"], 4)
+        acknowledged = response.json()
+        self.assertEqual(acknowledged["question_id"], self.question_id)
+        self.assertEqual(acknowledged["session_id"], self.session_id)
 
     def test_finish_rejects_anonymous_caller(self) -> None:
         self.authenticate_as_nobody()

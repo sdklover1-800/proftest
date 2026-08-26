@@ -2,8 +2,8 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 export interface QuestionOption {
+    /** Weights stay on the server: they are the answer key. */
     text: string;
-    value: number;
 }
 
 export type AssessmentModule = 'RIASEC' | 'BIG5' | 'COGNITIVE' | 'SJT';

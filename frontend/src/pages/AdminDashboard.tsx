@@ -73,10 +73,10 @@ const AdminDashboard: React.FC = () => {
 
     return (
         <IonPage>
-            <div className="min-h-screen bg-gray-50 flex" style={{ height: '100%' }}>
+            <div className="min-h-dvh bg-gray-50 flex" style={{ height: '100%' }}>
                 {/* Sidebar Navigation - position:relative needed for z-index to work */}
                 <aside
-                    className="w-64 bg-gray-900 text-white min-h-screen p-4"
+                    className="w-64 bg-gray-900 text-white min-h-dvh p-4"
                     style={{ zIndex: 1000, position: 'relative' }}
                 >
                     <h1 className="text-xl font-bold mb-8 flex items-center gap-2">
