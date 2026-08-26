@@ -118,6 +118,7 @@ async def _build_payload(
 async def finish_assessment_session(
     session_id: int,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
     lang: str | None = Query(default=None, description="UI language code (ru/kz/en)"),
     target_role: str = Query(default="Backend Engineer"),
     target_level: str = Query(default="Senior"),
@@ -126,6 +127,16 @@ async def finish_assessment_session(
     Finalizes the assessment session.
     Delegates calculation and recommendation generation to service layer.
     """
+    # 0. Only the owner may finalize a run: finishing computes scores and
+    # returns the full profile, and it spends an AI-insight call.
+    existing = await assessment_service.get_session(db, session_id)
+    if existing is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if existing.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403, detail="Not authorized to finish this session"
+        )
+
     # 1. Finish (calculate scores)
     session = await assessment_service.finish_assessment(db, session_id)
     if not session:

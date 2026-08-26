@@ -94,6 +94,7 @@ def _select_balanced_questions(
 @router.get("/questions", response_model=list[QuestionDTO])
 async def get_questions(
     db: AsyncSession = Depends(get_db),
+    _: User = Depends(deps.get_current_user),
     modules: str | None = Query(default=None, description="Comma-separated module list"),
     start_module: str | None = Query(default=None, description="Module to start from"),
     per_module: int | None = Query(
@@ -194,11 +195,15 @@ async def start_assessment(
 
 
 @router.post("/submit", response_model=UserResponse)
-async def submit_answer(answer_in: AnswerCreate, db: AsyncSession = Depends(get_db)):
+async def submit_answer(
+    answer_in: AnswerCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
     """
-    Saves a user answer.
+    Saves an answer inside the caller's own session.
     """
-    return await assessment_service.save_answer(db, answer_in)
+    return await assessment_service.record_answer(db, answer_in, current_user.id)
 
 
 @router.get("/history", response_model=list[SessionSummary])

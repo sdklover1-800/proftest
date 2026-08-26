@@ -1,8 +1,9 @@
 
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.assessment import AssessmentSession
+from app.models.assessment import AssessmentSession, AssessmentStatusEnum
 from app.models.assessment import UserResponse as DBUserResponse
 from app.models.question import Question
 from app.repositories.assessment_repository import assessment_repository
@@ -11,6 +12,7 @@ from app.schemas.assessment import (
     AssessmentSessionCreate,
     SessionSummary,
 )
+from app.services.answer_validation import validate_answer_value
 from app.services.recommendation_service import recommendation_service
 from app.services.scoring_service import calculate_score
 
@@ -55,19 +57,57 @@ class AssessmentService:
         result = await db.execute(query)
         return result.scalars().all()
 
-    async def save_answer(
-        self, db: AsyncSession, answer_in: AnswerCreate
+    async def record_answer(
+        self, db: AsyncSession, answer_in: AnswerCreate, user_id: int
     ) -> DBUserResponse:
         """
-        Saves a single user answer.
+        Saves one answer on behalf of `user_id`.
+
+        Answering is only allowed inside the caller's own unfinished session,
+        and only with a value the target question can actually take. Answering
+        the same question twice overwrites the earlier answer instead of
+        stacking duplicates, which would otherwise skew scoring.
         """
-        db_answer = DBUserResponse(
-            session_id=answer_in.session_id,
-            question_id=answer_in.question_id,
-            value=answer_in.value,
-            reaction_time_ms=answer_in.reaction_time_ms,
+        session = await self.get_session(db, answer_in.session_id)
+        # A session that does not exist and a session owned by somebody else
+        # are answered the same way, so session ids cannot be probed.
+        if session is None or session.user_id != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not authorized to answer in this session.",
+            )
+        if session.status == AssessmentStatusEnum.completed:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Assessment session is already completed.",
+            )
+
+        question = await db.get(Question, answer_in.question_id)
+        if question is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Question not found.",
+            )
+
+        validate_answer_value(question, answer_in.value)
+
+        existing = await db.execute(
+            select(DBUserResponse).where(
+                DBUserResponse.session_id == answer_in.session_id,
+                DBUserResponse.question_id == answer_in.question_id,
+            )
         )
-        db.add(db_answer)
+        db_answer = existing.scalars().first()
+        if db_answer is None:
+            db_answer = DBUserResponse(
+                session_id=answer_in.session_id,
+                question_id=answer_in.question_id,
+            )
+            db.add(db_answer)
+
+        db_answer.value = answer_in.value
+        db_answer.reaction_time_ms = answer_in.reaction_time_ms
+
         await db.commit()
         await db.refresh(db_answer)
         return db_answer

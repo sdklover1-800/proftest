@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.assessment import AssessmentStatusEnum
 from app.models.question import ModuleEnum, QuestionTypeEnum
@@ -51,7 +51,9 @@ class AnswerCreate(BaseModel):
     session_id: int
     question_id: int
     value: int
-    reaction_time_ms: int | None = None
+    # Client-reported timing. Never negative; the value range allowed for
+    # `value` depends on the question and is checked against it on save.
+    reaction_time_ms: int | None = Field(default=None, ge=0)
 
 
 class UserResponse(AnswerCreate):
