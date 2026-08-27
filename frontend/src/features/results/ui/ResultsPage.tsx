@@ -19,6 +19,8 @@ import {
 import { downloadOutline, homeOutline } from 'ionicons/icons';
 import { useAssessmentStore } from '@/store/assessmentStore';
 import { useResultsPage } from '../model/useResultsPage';
+import CareerMatchList from './CareerMatchList';
+import ScoresAgainstNorm from './ScoresAgainstNorm';
 import { usePdfExport } from '../model/usePdfExport';
 import ResultCharts from './ResultCharts';
 import DevelopmentPlan from './DevelopmentPlan';
@@ -36,15 +38,12 @@ const ResultsPage: React.FC = () => {
 
     const contentRef = useRef<HTMLDivElement>(null);
     const { isPdfGenerating, downloadPDF } = usePdfExport(contentRef as React.RefObject<HTMLDivElement>);
-    const { results, recommendations, aiInsights, loading, error, activeTab, setActiveTab, history, historyLoading } = useResultsPage();
+    const {
+        results, recommendations, aiInsights, loading, error, activeTab, setActiveTab,
+        history, historyLoading, careers, norms,
+    } = useResultsPage();
 
     const cognitiveScore = results?.COGNITIVE?.total_score ?? 0;
-    const avgScore = (data: { A: number }[]) => data.length > 0
-        ? Math.round(data.reduce((sum, item) => sum + item.A, 0) / data.length)
-        : 0;
-    const toPercentile = (score: number) => Math.max(1, Math.min(99, Math.round(score)));
-    const riasecAvg = results ? avgScore(results.RIASEC) : 0;
-    const big5Avg = results ? avgScore(results.BIG5) : 0;
     const formatSkillLabel = (key: string): string =>
         key.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
     const sjtLabelMap: Record<string, string> = {
@@ -62,6 +61,37 @@ const ResultsPage: React.FC = () => {
         math: t('results.cognitive_math'),
     };
 
+    // The API keys scales by their internal names; the report shows the words
+    // the rest of the interface already uses.
+    const scaleLabel = (module: string, scale: string): string => {
+        const keys: Record<string, string> = {
+            'RIASEC.Realistic': 'results.riasec_realistic',
+            'RIASEC.Investigative': 'results.riasec_investigative',
+            'RIASEC.Artistic': 'results.riasec_artistic',
+            'RIASEC.Social': 'results.riasec_social',
+            'RIASEC.Enterprising': 'results.riasec_enterprising',
+            'RIASEC.Conventional': 'results.riasec_conventional',
+            'BIG5.Openness': 'results.big5_openness',
+            'BIG5.Conscientiousness': 'results.big5_conscientiousness',
+            'BIG5.Extraversion': 'results.big5_extraversion',
+            'BIG5.Agreeableness': 'results.big5_agreeableness',
+            'BIG5.Neuroticism': 'results.big5_neuroticism',
+            'COGNITIVE.processing_speed': 'results.cognitive_processing_speed',
+            'COGNITIVE.working_memory': 'results.cognitive_working_memory',
+            'COGNITIVE.attention': 'results.cognitive_attention',
+            'COGNITIVE.logic': 'results.cognitive_logic',
+            'COGNITIVE.total_score': 'results.cognitive_title',
+            'SJT.teamwork': 'results.sjt_teamwork',
+            'SJT.stress': 'results.sjt_stress',
+            'SJT.initiative': 'results.sjt_initiative',
+            'SJT.self_organization': 'results.sjt_self_organization',
+            'SJT.self_org': 'results.sjt_self_organization',
+            'SJT.learning': 'results.sjt_learning_strategy',
+        };
+        const key = keys[`${module}.${scale}`];
+        return key ? t(key, scale) : scale;
+    };
+
     const handleHome = (): void => {
         reset();
         historyNav.push('/home');
@@ -77,7 +107,7 @@ const ResultsPage: React.FC = () => {
 
     if (loading) {
         return (
-            <IonPage className="bg-gray-50 dark:bg-gray-900 dark:text-gray-100 transition-colors animate-fade-in">
+            <IonPage className="bg-background text-foreground transition-colors animate-fade-in">
                 <AILoadingOverlay
                     isOpen={loading}
                     title="AI is generating your results"
@@ -94,8 +124,8 @@ const ResultsPage: React.FC = () => {
 
     if (error || !results) {
         return (
-            <IonPage className="bg-gray-50 dark:bg-gray-900 dark:text-gray-100 transition-colors animate-fade-in">
-                <IonContent className="ion-padding bg-gray-50 dark:bg-gray-900 transition-colors">
+            <IonPage className="bg-background text-foreground transition-colors animate-fade-in">
+                <IonContent className="bg-background transition-colors">
                     <div className="flex flex-col items-center justify-center h-full text-center">
                         <h2 className="text-xl font-bold text-red-500 mb-2">{t('common.error')}</h2>
                         <p className="text-gray-600 mb-6">{error || t('results.not_found')}</p>
@@ -107,7 +137,7 @@ const ResultsPage: React.FC = () => {
     }
 
     return (
-        <IonPage className="bg-gray-50 dark:bg-gray-900 dark:text-gray-100 transition-colors animate-fade-in">
+        <IonPage className="bg-background text-foreground transition-colors animate-fade-in">
             <IonHeader>
                 <IonToolbar>
                     <IonButtons slot="start">
@@ -124,8 +154,12 @@ const ResultsPage: React.FC = () => {
 
             <LoadingOverlay isOpen={isPdfGenerating} message={t('results.generating_pdf')} />
 
-            <IonContent className="ion-padding bg-gray-50 dark:bg-gray-900 transition-colors">
-                <div ref={contentRef} className="max-w-md mx-auto space-y-6 pb-24 bg-gray-50 dark:bg-gray-900 transition-colors">
+            <IonContent className="bg-background transition-colors">
+                <div ref={contentRef} className="mx-auto w-full max-w-5xl space-y-7 px-5 pb-24 pt-4 transition-colors sm:px-8 lg:px-10 lg:pb-12">
+
+                    <CareerMatchList careers={careers} />
+
+                    <ScoresAgainstNorm norms={norms} labelFor={scaleLabel} />
 
                     {/* Tab Switcher */}
                     <div className="flex rounded-lg bg-gray-200 p-1">
@@ -143,21 +177,6 @@ const ResultsPage: React.FC = () => {
                         </button>
                     </div>
 
-                    {/* Percentile Summary */}
-                    <div className="grid grid-cols-3 gap-3">
-                        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
-                            <div className="text-[10px] text-gray-400 uppercase tracking-widest">{t('results.percentile_riasec')}</div>
-                            <div className="text-lg font-bold text-indigo-600 mt-1">{toPercentile(riasecAvg)}%</div>
-                        </div>
-                        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
-                            <div className="text-[10px] text-gray-400 uppercase tracking-widest">{t('results.percentile_big5')}</div>
-                            <div className="text-lg font-bold text-emerald-600 mt-1">{toPercentile(big5Avg)}%</div>
-                        </div>
-                        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-center">
-                            <div className="text-[10px] text-gray-400 uppercase tracking-widest">{t('results.percentile_cognitive')}</div>
-                            <div className="text-lg font-bold text-purple-600 mt-1">{toPercentile(cognitiveScore)}%</div>
-                        </div>
-                    </div>
 
                     {/* Context Warning */}
                     {results.contextData && (results.contextData.sleep < 6 || results.contextData.stress === 'high') && (

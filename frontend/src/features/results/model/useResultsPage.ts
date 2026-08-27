@@ -5,6 +5,27 @@ import { assessmentApi } from '@/api/assessmentApi';
 import { useAssessmentStore } from '@/store/assessmentStore';
 import type { AIInsights } from '@/types/assessment';
 
+/** A line of work the profile points at, as the API scores it. */
+export interface CareerMatch {
+    career_id: string;
+    title: string;
+    summary: string;
+    /** 0..100. */
+    match: number;
+    evidence: { label: string; value: number; supports: boolean }[];
+}
+
+/** One score placed against its reference distribution. */
+export interface ScaleNorm {
+    raw: number;
+    percentile: number;
+    median: number;
+    /** "provisional" until norms are measured on this app's own users. */
+    source: 'provisional' | 'sample' | 'none';
+}
+
+export type ProfileNorms = Record<string, Record<string, ScaleNorm>>;
+
 interface ChartData {
     subject: string;
     A: number;
@@ -46,6 +67,8 @@ interface UseResultsPageReturn {
     sessionId: number | null;
     history: SessionSummary[];
     historyLoading: boolean;
+    careers: CareerMatch[];
+    norms: ProfileNorms;
 }
 
 /**
@@ -82,6 +105,8 @@ export const useResultsPage = (): UseResultsPageReturn => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'RIASEC' | 'BIG5'>('RIASEC');
+    const [careers, setCareers] = useState<CareerMatch[]>([]);
+    const [norms, setNorms] = useState<ProfileNorms>({});
     const [history, setHistory] = useState<SessionSummary[]>([]);
     const [historyLoading, setHistoryLoading] = useState(true);
 
@@ -99,12 +124,16 @@ export const useResultsPage = (): UseResultsPageReturn => {
                     setResults(formatData(response.scores, response.context_data));
                     setRecommendations(response.recommendations || []);
                     setAiInsights(response.ai_insights || null);
+                    setCareers(response.careers || []);
+                    setNorms(response.norms || {});
                 } catch {
                     // If not found, try to finish the assessment
                     const response = await assessmentApi.finishAssessment(sessionId, i18n.language);
                     setResults(formatData(response.scores, response.context_data));
                     setRecommendations(response.recommendations || []);
                     setAiInsights(response.ai_insights || null);
+                    setCareers(response.careers || []);
+                    setNorms(response.norms || {});
                 }
             } catch (err) {
                 console.error("Failed to fetch results", err);
@@ -134,7 +163,10 @@ export const useResultsPage = (): UseResultsPageReturn => {
         fetchHistory();
     }, []);
 
-    return { results, recommendations, aiInsights, loading, error, activeTab, setActiveTab, sessionId, history, historyLoading };
+    return {
+        results, recommendations, aiInsights, loading, error, activeTab, setActiveTab,
+        sessionId, history, historyLoading, careers, norms,
+    };
 };
 
 /**

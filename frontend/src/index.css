@@ -3,11 +3,17 @@
 @tailwind utilities;
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
 }
 
 /*
- * Design tokens.
+ * Design tokens, all prefixed `--pt-`.
+ *
+ * The prefix is not cosmetic: Ionic reserves plain `--background`, `--color`
+ * and `--border-*` as its own component-level custom properties and sets
+ * them on ion-content, ion-page and friends. An unprefixed `--background`
+ * resolves to Ionic's value inside any of them, so `hsl(var(--background))`
+ * silently becomes `hsl(#fff)` — invalid, and the colour drops out.
  *
  * Named after the shadcn convention so components written against it drop in
  * unchanged, but the values are this app's own palette: indigo primary on a
@@ -17,57 +23,59 @@
  */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --pt-background: 44 18% 95%;
+    --pt-foreground: 220 13% 9%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --pt-muted: 40 14% 91%;
+    --pt-muted-foreground: 216 6% 43%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 239 84% 67%;
+    --pt-border: 42 15% 87%;
+    --pt-border-strong: 42 12% 56%;
+    --pt-input: 42 15% 87%;
+    --pt-ring: 154 56% 28%;
 
-    --primary: 239 84% 67%;
-    --primary-foreground: 0 0% 100%;
+    --pt-primary: 154 56% 28%;
+    --pt-primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --pt-secondary: 40 14% 91%;
+    --pt-secondary-foreground: 220 13% 9%;
 
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
+    --pt-accent: 145 20% 94%;
+    --pt-accent-foreground: 154 56% 28%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    --pt-destructive: 20 64% 33%;
+    --pt-destructive-foreground: 0 0% 100%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --pt-card: 0 0% 100%;
+    --pt-card-foreground: 220 13% 9%;
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    --pt-background: 220 14% 8%;
+    --pt-foreground: 44 18% 95%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --pt-muted: 220 12% 15%;
+    --pt-muted-foreground: 220 8% 66%;
 
-    --border: 217 33% 22%;
-    --input: 217 33% 22%;
-    --ring: 239 84% 67%;
+    --pt-border: 220 11% 20%;
+    --pt-border-strong: 220 10% 44%;
+    --pt-input: 220 11% 20%;
+    --pt-ring: 154 44% 52%;
 
-    --primary: 239 84% 67%;
-    --primary-foreground: 0 0% 100%;
+    --pt-primary: 154 44% 52%;
+    --pt-primary-foreground: 220 14% 8%;
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --pt-secondary: 220 12% 15%;
+    --pt-secondary-foreground: 44 18% 95%;
 
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 98%;
+    --pt-accent: 154 24% 18%;
+    --pt-accent-foreground: 154 44% 62%;
 
-    --destructive: 0 63% 51%;
-    --destructive-foreground: 0 0% 100%;
+    --pt-destructive: 20 62% 58%;
+    --pt-destructive-foreground: 220 14% 8%;
 
-    --card: 222 47% 13%;
-    --card-foreground: 210 40% 98%;
+    --pt-card: 220 13% 11%;
+    --pt-card-foreground: 44 18% 95%;
   }
 }
 
@@ -94,7 +102,7 @@
    * because the cognitive block is explicitly keyboard-driven.
    */
   html :focus-visible {
-    outline: 2px solid hsl(var(--ring));
+    outline: 2px solid hsl(var(--pt-ring));
     outline-offset: 2px;
   }
 }
@@ -114,4 +122,35 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/*
+ * Bridge to Ionic's own theme variables.
+ *
+ * Ionic components (tab bar, spinners, toggles, refresher) colour themselves
+ * from `--ion-color-*`, not from ours — without this the chrome keeps Ionic's
+ * default blue while everything around it has moved to the new palette.
+ *
+ * `html:root` rather than `:root`: Ionic's stylesheet loads after this one
+ * and sets the same variables at the same specificity, so it would win.
+ */
+html:root {
+  --ion-color-primary: hsl(var(--pt-primary));
+  --ion-color-primary-rgb: 31, 111, 74;
+  --ion-color-primary-contrast: hsl(var(--pt-primary-foreground));
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: hsl(154 56% 24%);
+  --ion-color-primary-tint: hsl(154 48% 36%);
+
+  --ion-background-color: hsl(var(--pt-background));
+  --ion-text-color: hsl(var(--pt-foreground));
+  --ion-border-color: hsl(var(--pt-border));
+  --ion-toolbar-background: hsl(var(--pt-background));
+  --ion-item-background: hsl(var(--pt-card));
+}
+
+html.dark {
+  --ion-color-primary-rgb: 106, 191, 152;
+  --ion-color-primary-shade: hsl(154 44% 46%);
+  --ion-color-primary-tint: hsl(154 44% 60%);
 }

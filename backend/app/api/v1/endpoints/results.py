@@ -6,6 +6,8 @@ from app.db.session import get_db
 from app.models.user import User
 from app.services.assessment_service import assessment_service
 from app.services.ai_insights_service import ai_insights_service
+from app.services.career_matching_service import match_careers
+from app.services.norms_service import percentiles_for_profile
 from app.services.evidence_service import evidence_service
 from app.services.profile_aggregate_service import profile_aggregate_service
 from app.services.profile_blocks_service import (
@@ -87,6 +89,13 @@ async def _build_payload(
         evidence_refs=evidence_refs,
     )
 
+    # What the profile points at, and what every number means next to the norm.
+    # Both are derived from the scores, so they are stable for a given run and
+    # can be explained without asking a model.
+    scores = results.get("scores") or {}
+    careers = match_careers(scores)
+    norms = percentiles_for_profile(scores)
+
     snapshot = await run_snapshot_service.upsert_snapshot(
         db=db,
         run_id=session_id,
@@ -105,6 +114,8 @@ async def _build_payload(
 
     return {
         "scores": results["scores"],
+        "careers": careers,
+        "norms": norms,
         "recommendations": results["recommendations"],
         "context_data": results.get("context_data"),
         "ai_insights": ai_insights,

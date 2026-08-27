@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Narrow:wght@500;600;700&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #1D4E63; } a:hover { color: #123543; }
+    .cap { font-family: 'Archivo Narrow', 'Archivo', sans-serif; letter-spacing: 0.10em; text-transform: uppercase; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; height: 900px; background: #EEF1F0; color: #16242B; font-family: 'Archivo', system-ui, sans-serif; display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden;">
+
+  <!-- Survey header -->
+  <div style="border-bottom: 2px solid #16242B; padding: 20px 44px; display: flex; align-items: center; justify-content: space-between; gap: 24px; background: #E4E9E7;">
+    <div style="display: flex; align-items: center; gap: 26px;">
+      <span class="cap" style="font-size: 14px; font-weight: 700;">proftest</span>
+      <div style="display: flex; gap: 20px;">
+        <span class="cap" style="font-size: 11px; color: #55666D;">Главная</span>
+        <span class="cap" style="font-size: 11px; font-weight: 700; border-bottom: 2px solid #C2603A; padding-bottom: 2px;">Профиль</span>
+        <span class="cap" style="font-size: 11px; color: #55666D;">План</span>
+        <span class="cap" style="font-size: 11px; color: #55666D;">История</span>
+      </div>
+    </div>
+    <div class="cap" style="font-size: 11px; color: #55666D;">Лист 03 · съёмка 26.08.2026 · точность 74%</div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: minmax(0, 1fr) 420px; min-height: 0;">
+
+    <!-- The terrain -->
+    <div style="position: relative; padding: 36px 44px; display: flex; flex-direction: column; gap: 24px; min-height: 0; background:
+        repeating-linear-gradient(0deg, rgba(22,36,43,0.045) 0 1px, transparent 1px 40px),
+        repeating-linear-gradient(90deg, rgba(22,36,43,0.045) 0 1px, transparent 1px 40px), #EEF1F0;">
+
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <span class="cap" style="font-size: 11px; color: #55666D;">Область интересов</span>
+        <div style="display: flex; align-items: baseline; gap: 16px;">
+          <span class="cap" style="font-size: 52px; font-weight: 700; line-height: 1; letter-spacing: 0.06em;">IRA</span>
+          <span style="font-size: 16px; color: #35474F;">Исследователь · Практик · Творец</span>
+        </div>
+      </div>
+
+      <!-- Contour plot: the profile as a landform -->
+      <div style="flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center;">
+        <svg viewBox="0 0 460 380" width="100%" height="100%" style="max-height: 420px;" role="img" aria-label="Профиль интересов как рельеф">
+          <g fill="none" stroke="#16242B" stroke-opacity="0.16" stroke-width="1">
+            <polygon points="230,40 396,140 396,300 230,360 64,300 64,140"/>
+            <polygon points="230,90 353,164 353,276 230,320 107,276 107,164"/>
+            <polygon points="230,140 311,187 311,253 230,280 149,253 149,187"/>
+          </g>
+          <polygon points="230,52 386,146 340,268 230,318 96,272 82,150"
+                   fill="#C2603A" fill-opacity="0.16" stroke="#C2603A" stroke-width="2.5" stroke-linejoin="round"/>
+          <g fill="#C2603A">
+            <circle cx="230" cy="52" r="5"/><circle cx="386" cy="146" r="5"/><circle cx="340" cy="268" r="5"/>
+            <circle cx="230" cy="318" r="5"/><circle cx="96" cy="272" r="5"/><circle cx="82" cy="150" r="5"/>
+          </g>
+          <g font-family="Archivo Narrow, Archivo, sans-serif" font-size="11" fill="#35474F" letter-spacing="0.08em">
+            <text x="230" y="26" text-anchor="middle">ИССЛЕДОВАТЕЛЬСКИЕ 78</text>
+            <text x="410" y="140" text-anchor="middle">ТВОРЧЕСКИЕ 61</text>
+            <text x="404" y="292" text-anchor="middle">СОЦИАЛЬНЫЕ 54</text>
+            <text x="230" y="345" text-anchor="middle">ПРЕДПРИНИМАТЕЛЬСКИЕ 48</text>
+            <text x="52" y="292" text-anchor="middle">КОНВЕНЦИОНАЛЬНЫЕ 44</text>
+            <text x="56" y="140" text-anchor="middle">ПРАКТИЧЕСКИЕ 66</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Legend column -->
+    <div style="border-left: 2px solid #16242B; background: #E4E9E7; padding: 32px 32px; display: flex; flex-direction: column; gap: 26px; min-height: 0;">
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <span class="cap" style="font-size: 11px; color: #55666D;">Когнитивные навыки</span>
+        <div style="display: flex; flex-direction: column; gap: 11px;">
+          <sc-for list="{{cognitive}}" as="c" hint-placeholder-count="4">
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) 34px; align-items: baseline; gap: 10px; border-bottom: 1px dotted rgba(22,36,43,0.3); padding-bottom: 7px;">
+              <span style="font-size: 13px;">{{c.label}}</span>
+              <span class="cap" style="font-size: 15px; font-weight: 700; text-align: right;">{{c.n}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <span class="cap" style="font-size: 11px; color: #55666D;">Гибкие навыки</span>
+        <div style="display: flex; flex-direction: column; gap: 11px;">
+          <sc-for list="{{soft}}" as="s" hint-placeholder-count="5">
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) 34px; align-items: baseline; gap: 10px; border-bottom: 1px dotted rgba(22,36,43,0.3); padding-bottom: 7px;">
+              <span style="font-size: 13px;">{{s.label}}</span>
+              <span class="cap" style="font-size: 15px; font-weight: 700; text-align: right;">{{s.n}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="margin-top: auto; display: flex; gap: 10px;">
+        <div style="height: 44px; flex: 1; display: flex; align-items: center; justify-content: center; border: 2px solid #16242B; font-size: 12px; font-weight: 600;">Скачать PDF</div>
+        <div style="height: 44px; flex: 1; display: flex; align-items: center; justify-content: center; background: #16242B; color: #EEF1F0; font-size: 12px; font-weight: 600;">Построить план</div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      cognitive: [
+        { label: 'Логическое мышление', n: 80 },
+        { label: 'Рабочая память', n: 71 },
+        { label: 'Скорость обработки', n: 62 },
+        { label: 'Внимание', n: 58 },
+      ],
+      soft: [
+        { label: 'Самоорганизация', n: 72 },
+        { label: 'Стратегии обучения', n: 70 },
+        { label: 'Командность', n: 66 },
+        { label: 'Стрессоустойчивость', n: 61 },
+        { label: 'Инициативность', n: 58 },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #1F6F4A; } a:hover { color: #145235; }
+    .tnum { font-variant-numeric: tabular-nums; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; height: 900px; background: #F6F5F1; color: #14171C; font-family: 'Bricolage Grotesque', system-ui, sans-serif; display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden;">
+
+  <div style="padding: 22px 48px; display: flex; align-items: center; justify-content: space-between; gap: 24px;">
+    <div style="display: flex; align-items: center; gap: 30px;">
+      <span style="font-size: 16px; font-weight: 700; letter-spacing: -0.02em;">proftest</span>
+      <div style="display: flex; gap: 22px; font-size: 13px; color: #5B6169;">
+        <span>Главная</span><span style="color: #14171C; font-weight: 600;">Профиль</span><span>План</span><span>История</span>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px; font-size: 12px; color: #5B6169;">
+      <span>уверенность замера</span><span class="tnum" style="font-size: 14px; font-weight: 600; color: #14171C;">74%</span>
+    </div>
+  </div>
+
+  <div style="padding: 8px 48px 40px; display: flex; flex-direction: column; gap: 26px; min-height: 0;">
+
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <span style="font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #686D75;">Куда это ведёт</span>
+      <h1 style="margin: 0; font-size: 34px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.15; max-width: 760px; text-wrap: pretty;">
+        Ваш профиль ближе всего к работе, где нужно разобраться в устройстве и довести до результата руками.
+      </h1>
+    </div>
+
+    <!-- The answer the person came for -->
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px;">
+      <sc-for list="{{careers}}" as="c" hint-placeholder-count="3">
+        <div style="background: #FFFFFF; border: 1px solid #E4E2DB; border-radius: 14px; padding: 22px 24px; display: flex; flex-direction: column; gap: 16px;">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;">
+            <span style="font-size: 20px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2;">{{c.title}}</span>
+            <span class="tnum" style="font-size: 15px; font-weight: 700; color: #1F6F4A; white-space: nowrap;">{{c.match}}</span>
+          </div>
+          <div style="height: 6px; background: #EDEBE4; border-radius: 3px; overflow: hidden;">
+            <div style="width: {{c.matchw}}; height: 100%; background: #1F6F4A; border-radius: 3px;"></div>
+          </div>
+          <p style="margin: 0; font-size: 13px; line-height: 1.55; color: #4A5059; text-wrap: pretty;">{{c.why}}</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <sc-for list="{{c.tags}}" as="tag" hint-placeholder-count="3">
+              <span style="font-size: 11px; padding: 5px 10px; border-radius: 999px; background: #EFF3EF; color: #1F6F4A;">{{tag}}</span>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- Scores, demoted to evidence -->
+    <div style="background: #FFFFFF; border: 1px solid #E4E2DB; border-radius: 14px; padding: 22px 26px; display: flex; flex-direction: column; gap: 16px; min-height: 0;">
+      <div style="display: flex; align-items: baseline; justify-content: space-between;">
+        <span style="font-size: 14px; font-weight: 600;">На чём это основано</span>
+        <span style="font-size: 12px; color: #686D75;">код Холланда IRA · вы против нормы</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 18px;">
+        <sc-for list="{{riasec}}" as="r" hint-placeholder-count="6">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: baseline; gap: 6px;">
+              <span class="tnum" style="font-size: 22px; font-weight: 700; letter-spacing: -0.02em;">{{r.n}}</span>
+              <span class="tnum" style="font-size: 11px; color: {{r.deltaColor}};">{{r.delta}}</span>
+            </div>
+            <div style="position: relative; height: 5px; background: #EDEBE4; border-radius: 3px;">
+              <div style="position: absolute; inset: 0; width: {{r.value}}; background: #14171C; border-radius: 3px;"></div>
+              <div style="position: absolute; top: -3px; bottom: -3px; left: {{r.norm}}; width: 2px; background: #767C85;"></div>
+            </div>
+            <span style="font-size: 11px; color: #5B6169; line-height: 1.3;">{{r.label}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const pct = (n) => n + '%';
+    const careers = [
+      {
+        title: 'Инженер-технолог',
+        match: '88%', matchw: '88%',
+        why: 'Высокие исследовательские и практические интересы при сильной логике — сочетание, на котором держится работа с процессами и оборудованием.',
+        tags: ['Логика 80', 'Практика 66', 'Самоорганизация 72'],
+      },
+      {
+        title: 'Аналитик данных',
+        match: '81%', matchw: '81%',
+        why: 'Ведущая шкала — исследовательская, рабочая память выше нормы. Слабее командная составляющая, это зона роста.',
+        tags: ['Логика 80', 'Память 71', 'Обучение 70'],
+      },
+      {
+        title: 'Промышленный дизайнер',
+        match: '74%', matchw: '74%',
+        why: 'Творческие интересы держатся выше нормы и опираются на практические — редкая пара, она и даёт этот вариант.',
+        tags: ['Творчество 61', 'Практика 66'],
+      },
+    ];
+    const riasec = [
+      { label: 'Исследовательские', n: 78, norm: 52 },
+      { label: 'Практические', n: 66, norm: 55 },
+      { label: 'Творческие', n: 61, norm: 58 },
+      { label: 'Социальные', n: 54, norm: 61 },
+      { label: 'Предпринимательские', n: 48, norm: 57 },
+      { label: 'Конвенциональные', n: 44, norm: 53 },
+    ].map((r) => {
+      const d = r.n - r.norm;
+      return {
+        ...r,
+        value: pct(r.n),
+        norm: pct(r.norm),
+        delta: (d > 0 ? '+' : '') + d,
+        deltaColor: d > 0 ? '#1F6F4A' : '#8A6136',
+      };
+    });
+    return { careers, riasec };
+  }
+}
+</script>
+</body>
+</html>

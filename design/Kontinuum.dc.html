@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@300;400;500;600&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #3E5C8C; } a:hover { color: #2B4166; }
+    .serif { font-family: 'Instrument Serif', Georgia, serif; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; height: 900px; background: #FCFCFB; color: #1A1A18; font-family: 'Work Sans', system-ui, sans-serif; font-weight: 300; display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden;">
+
+  <div style="padding: 26px 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px;">
+    <div style="display: flex; align-items: center; gap: 34px;">
+      <span class="serif" style="font-size: 20px;">proftest</span>
+      <div style="display: flex; gap: 24px; font-size: 13px; color: #85857E;">
+        <span>Главная</span><span style="color: #1A1A18;">Профиль</span><span>План</span><span>История</span>
+      </div>
+    </div>
+    <span style="font-size: 12px; color: #85857E;">уверенность замера 74%</span>
+  </div>
+
+  <div style="padding: 10px 64px 48px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 64px; min-height: 0;">
+
+    <div style="display: flex; flex-direction: column; gap: 34px; min-height: 0;">
+
+      <div style="max-width: 620px;">
+        <p class="serif" style="margin: 0; font-size: 32px; line-height: 1.28; letter-spacing: -0.01em; text-wrap: pretty;">
+          Вы заметно ближе к тому, чтобы <em style="font-style: italic;">разбираться</em>, чем к тому, чтобы <em style="font-style: italic;">убеждать</em>.
+        </p>
+      </div>
+
+      <!-- Poles, not scores -->
+      <div style="display: flex; flex-direction: column; gap: 26px;">
+        <sc-for list="{{spectra}}" as="s" hint-placeholder-count="5">
+          <div style="display: flex; flex-direction: column; gap: 9px;">
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px; font-size: 13px;">
+              <span style="color: {{s.leftColor}};">{{s.left}}</span>
+              <span style="color: {{s.rightColor}};">{{s.right}}</span>
+            </div>
+            <div style="position: relative; height: 30px;">
+              <div style="position: absolute; left: 0; right: 0; top: 14px; height: 1px; background: #DEDED8;"></div>
+              <div style="position: absolute; left: 50%; top: 9px; bottom: 9px; width: 1px; background: #DEDED8;"></div>
+              <div style="position: absolute; top: 8px; left: {{s.pos}}; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: #3E5C8C;"></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 30px; border-left: 1px solid #EAEAE4; padding-left: 34px; min-height: 0;">
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #85857E;">Что это значит</span>
+        <p style="margin: 0; font-size: 13px; line-height: 1.65; color: #45453F; text-wrap: pretty;">
+          Ни один полюс не «лучше». Точка ближе к краю означает более устойчивое предпочтение, ближе к центру — что вам одинаково доступны оба способа работать.
+        </p>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <span style="font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #85857E;">Когнитивные навыки</span>
+        <sc-for list="{{cognitive}}" as="c" hint-placeholder-count="4">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 9px; border-bottom: 1px solid #EAEAE4;">
+            <span style="font-size: 13px; color: #45453F;">{{c.label}}</span>
+            <span class="serif" style="font-size: 20px;">{{c.n}}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 9px;">
+        <div style="height: 46px; display: flex; align-items: center; justify-content: center; background: #1A1A18; color: #FCFCFB; border-radius: 2px; font-size: 13px;">Построить план</div>
+        <div style="height: 46px; display: flex; align-items: center; justify-content: center; border: 1px solid #DEDED8; border-radius: 2px; font-size: 13px;">Скачать PDF</div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    // pos is where the marker sits, 0% = far left pole, 100% = far right pole.
+    const raw = [
+      { left: 'Разбираться в устройстве', right: 'Убеждать и вести', pos: 22 },
+      { left: 'Делать руками',            right: 'Работать с идеями', pos: 41 },
+      { left: 'Своим темпом',             right: 'В команде',         pos: 38 },
+      { left: 'По плану',                 right: 'По обстоятельствам', pos: 33 },
+      { left: 'Довести до конца',         right: 'Начать новое',      pos: 44 },
+    ];
+    const spectra = raw.map((s) => ({
+      ...s,
+      pos: s.pos + '%',
+      // The pole a person leans toward is the one that gets full ink.
+      leftColor: s.pos < 50 ? '#1A1A18' : '#A3A39B',
+      rightColor: s.pos < 50 ? '#A3A39B' : '#1A1A18',
+    }));
+
+    return {
+      spectra,
+      cognitive: [
+        { label: 'Логическое мышление', n: 80 },
+        { label: 'Рабочая память', n: 71 },
+        { label: 'Скорость обработки', n: 62 },
+        { label: 'Внимание', n: 58 },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

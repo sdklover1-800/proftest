@@ -22,6 +22,9 @@ from app.models.question import Question
 
 
 # List of CSV files to import
+#: Category spellings that mean the same scale.
+CATEGORY_ALIASES = {"self_org": "self_organization"}
+
 CSV_FILES = [
     "questions_riasec.csv",
     "questions_bigfive.csv",
@@ -94,10 +97,18 @@ def import_questions():
                 if module == "SJT_SELF":
                     module = "SJT"
 
+                # The self-report half writes "self_org" where the situational
+                # half writes "self_organization". Same construct, two
+                # spellings — left as-is they score as two separate scales and
+                # the report shows "Самоорганизация" twice.
+                category = row["category"] if pd.notna(row.get("category")) else None
+                if category in CATEGORY_ALIASES:
+                    category = CATEGORY_ALIASES[category]
+
                 question_data = {
                     "code": row["code"],
                     "module": module,
-                    "category": row["category"] if pd.notna(row.get("category")) else None,
+                    "category": category,
                     "text_ru": row["text_ru"] if pd.notna(row.get("text_ru")) else None,
                     "text_kz": row["text_kz"] if pd.notna(row.get("text_kz")) else None,
                     "text_en": row["text_en"] if pd.notna(row.get("text_en")) else None,

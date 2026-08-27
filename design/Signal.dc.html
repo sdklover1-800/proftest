@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #7DD3C0; } a:hover { color: #A7E6D8; }
+    .mono { font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; height: 900px; background: #0C0E12; color: #F3F5F7; font-family: 'Space Grotesk', system-ui, sans-serif; display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden;">
+
+  <div style="padding: 22px 48px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid #1C2029;">
+    <div style="display: flex; align-items: center; gap: 32px;">
+      <span style="font-size: 15px; font-weight: 700; letter-spacing: -0.02em;">proftest</span>
+      <div style="display: flex; gap: 22px; font-size: 13px;">
+        <span style="color: #7A828F;">Главная</span>
+        <span style="font-weight: 600;">Профиль</span>
+        <span style="color: #7A828F;">План</span>
+        <span style="color: #7A828F;">История</span>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px; font-size: 12px; color: #7A828F;">
+      <span>уверенность замера</span>
+      <span class="mono" style="font-size: 15px; font-weight: 600; color: #F3F5F7;">74%</span>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: minmax(0, 1fr) 400px; min-height: 0;">
+
+    <div style="padding: 40px 48px; display: flex; flex-direction: column; gap: 34px; min-height: 0;">
+
+      <!-- Identity, carried by the instrument's own shapes -->
+      <div style="display: flex; align-items: center; gap: 28px;">
+        <div style="display: flex; gap: 12px;">
+          <div style="width: 60px; height: 60px; background: #4B7BEC; clip-path: polygon(50% 0%, 0% 100%, 100% 100%);"></div>
+          <div style="width: 60px; height: 60px; border-radius: 50%; background: #EC4B6E;"></div>
+          <div style="width: 60px; height: 60px; border-radius: 6px; background: #14B88A;"></div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <span class="mono" style="font-size: 54px; font-weight: 700; line-height: 1;">IRA</span>
+          <span style="font-size: 15px; color: #A3ABB8;">Исследователь · Практик · Творец</span>
+        </div>
+      </div>
+
+      <!-- Interests -->
+      <div style="display: flex; flex-direction: column; gap: 16px; min-height: 0;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between;">
+          <span style="font-size: 13px; font-weight: 600; letter-spacing: 0.02em;">Профессиональные интересы</span>
+          <span style="font-size: 11px; color: #7A828F;">светлая метка — норма</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 13px;">
+          <sc-for list="{{riasec}}" as="row" hint-placeholder-count="6">
+            <div style="display: grid; grid-template-columns: 168px minmax(0, 1fr) 42px; align-items: center; gap: 14px;">
+              <span style="font-size: 13px; color: #A3ABB8;">{{row.label}}</span>
+              <div style="position: relative; height: 22px; background: #161A21; border-radius: 4px;">
+                <div style="position: absolute; inset: 0; width: {{row.value}}; background: {{row.color}}; border-radius: 4px;"></div>
+                <div style="position: absolute; top: -3px; bottom: -3px; left: {{row.norm}}; width: 2px; background: #F3F5F7; opacity: 0.65;"></div>
+              </div>
+              <span class="mono" style="font-size: 14px; font-weight: 600; text-align: right;">{{row.n}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="border-left: 1px solid #1C2029; padding: 40px 34px; display: flex; flex-direction: column; gap: 30px; min-height: 0;">
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <span style="font-size: 13px; font-weight: 600;">Когнитивные навыки</span>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px;">
+          <sc-for list="{{cognitive}}" as="c" hint-placeholder-count="4">
+            <div style="background: #12161C; border: 1px solid #1C2029; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 6px;">
+              <span class="mono" style="font-size: 27px; font-weight: 700; line-height: 1;">{{c.n}}</span>
+              <span style="font-size: 11px; color: #7A828F; line-height: 1.35;">{{c.label}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px; min-height: 0;">
+        <span style="font-size: 13px; font-weight: 600;">Гибкие навыки</span>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <sc-for list="{{soft}}" as="s" hint-placeholder-count="5">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+                <span style="font-size: 12px; color: #A3ABB8;">{{s.label}}</span>
+                <span class="mono" style="font-size: 12px; font-weight: 600;">{{s.n}}</span>
+              </div>
+              <div style="height: 5px; background: #161A21; border-radius: 3px; overflow: hidden;">
+                <div style="width: {{s.value}}; height: 100%; background: #7A5CF0; border-radius: 3px;"></div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="margin-top: auto; display: flex; gap: 10px;">
+        <div style="height: 44px; flex: 1; display: flex; align-items: center; justify-content: center; border: 1px solid #2A303B; border-radius: 8px; font-size: 12px; font-weight: 500; color: #A3ABB8;">Скачать PDF</div>
+        <div style="height: 44px; flex: 1; display: flex; align-items: center; justify-content: center; background: #F3F5F7; color: #0C0E12; border-radius: 8px; font-size: 12px; font-weight: 600;">Построить план</div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const pct = (n) => n + '%';
+    const riasec = [
+      { label: 'Исследовательские',     n: 78, norm: 52, color: '#4B7BEC' },
+      { label: 'Практические',          n: 66, norm: 55, color: '#14B88A' },
+      { label: 'Творческие',            n: 61, norm: 58, color: '#EC4B6E' },
+      { label: 'Социальные',            n: 54, norm: 61, color: '#7A5CF0' },
+      { label: 'Предпринимательские',   n: 48, norm: 57, color: '#E08B2E' },
+      { label: 'Конвенциональные',      n: 44, norm: 53, color: '#3E9BB8' },
+    ].map((r) => ({ ...r, value: pct(r.n), norm: pct(r.norm) }));
+
+    const cognitive = [
+      { label: 'Логическое мышление', n: 80 },
+      { label: 'Рабочая память', n: 71 },
+      { label: 'Скорость обработки', n: 62 },
+      { label: 'Внимание', n: 58 },
+    ];
+
+    const soft = [
+      { label: 'Самоорганизация', n: 72 },
+      { label: 'Стратегии обучения', n: 70 },
+      { label: 'Командность', n: 66 },
+      { label: 'Стрессоустойчивость', n: 61 },
+      { label: 'Инициативность', n: 58 },
+    ].map((s) => ({ ...s, value: pct(s.n) }));
+
+    return { riasec, cognitive, soft };
+  }
+}
+</script>
+</body>
+</html>

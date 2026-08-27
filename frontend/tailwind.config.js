@@ -7,37 +7,43 @@ export default {
     ],
     theme: {
         extend: {
+            fontFamily: {
+                sans: ['"Bricolage Grotesque"', 'system-ui', '-apple-system', 'sans-serif'],
+            },
             // Mapped to the CSS variables in index.css so a colour works in
             // both themes without a `dark:` variant at every call site.
             colors: {
-                border: 'hsl(var(--border) / <alpha-value>)',
-                input: 'hsl(var(--input) / <alpha-value>)',
-                ring: 'hsl(var(--ring) / <alpha-value>)',
-                background: 'hsl(var(--background) / <alpha-value>)',
-                foreground: 'hsl(var(--foreground) / <alpha-value>)',
+                border: 'hsl(var(--pt-border) / <alpha-value>)',
+                // Boundaries that carry meaning (an answer tile, a control)
+                // rather than decorative dividers: measured to clear 3:1.
+                'border-strong': 'hsl(var(--pt-border-strong) / <alpha-value>)',
+                input: 'hsl(var(--pt-input) / <alpha-value>)',
+                ring: 'hsl(var(--pt-ring) / <alpha-value>)',
+                background: 'hsl(var(--pt-background) / <alpha-value>)',
+                foreground: 'hsl(var(--pt-foreground) / <alpha-value>)',
                 primary: {
-                    DEFAULT: 'hsl(var(--primary) / <alpha-value>)',
-                    foreground: 'hsl(var(--primary-foreground) / <alpha-value>)',
+                    DEFAULT: 'hsl(var(--pt-primary) / <alpha-value>)',
+                    foreground: 'hsl(var(--pt-primary-foreground) / <alpha-value>)',
                 },
                 secondary: {
-                    DEFAULT: 'hsl(var(--secondary) / <alpha-value>)',
-                    foreground: 'hsl(var(--secondary-foreground) / <alpha-value>)',
+                    DEFAULT: 'hsl(var(--pt-secondary) / <alpha-value>)',
+                    foreground: 'hsl(var(--pt-secondary-foreground) / <alpha-value>)',
                 },
                 muted: {
-                    DEFAULT: 'hsl(var(--muted) / <alpha-value>)',
-                    foreground: 'hsl(var(--muted-foreground) / <alpha-value>)',
+                    DEFAULT: 'hsl(var(--pt-muted) / <alpha-value>)',
+                    foreground: 'hsl(var(--pt-muted-foreground) / <alpha-value>)',
                 },
                 accent: {
-                    DEFAULT: 'hsl(var(--accent) / <alpha-value>)',
-                    foreground: 'hsl(var(--accent-foreground) / <alpha-value>)',
+                    DEFAULT: 'hsl(var(--pt-accent) / <alpha-value>)',
+                    foreground: 'hsl(var(--pt-accent-foreground) / <alpha-value>)',
                 },
                 destructive: {
-                    DEFAULT: 'hsl(var(--destructive) / <alpha-value>)',
-                    foreground: 'hsl(var(--destructive-foreground) / <alpha-value>)',
+                    DEFAULT: 'hsl(var(--pt-destructive) / <alpha-value>)',
+                    foreground: 'hsl(var(--pt-destructive-foreground) / <alpha-value>)',
                 },
                 card: {
-                    DEFAULT: 'hsl(var(--card) / <alpha-value>)',
-                    foreground: 'hsl(var(--card-foreground) / <alpha-value>)',
+                    DEFAULT: 'hsl(var(--pt-card) / <alpha-value>)',
+                    foreground: 'hsl(var(--pt-card-foreground) / <alpha-value>)',
                 },
             },
             // `animate-fade-in` and `animate-slide-up` were already in use in

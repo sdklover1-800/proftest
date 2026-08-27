@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #1F6F4A; } a:hover { color: #145235; }
+    .tnum { font-variant-numeric: tabular-nums; }
+  </style>
+</helmet>
+
+<div style="width: 390px; height: 844px; background: #F6F5F1; color: #14171C; font-family: 'Bricolage Grotesque', system-ui, sans-serif; display: grid; grid-template-rows: minmax(0, 1fr) auto; overflow: hidden;">
+
+  <div style="padding: 24px 18px 12px; display: flex; flex-direction: column; gap: 20px; overflow: hidden;">
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span style="font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #686D75;">Куда это ведёт</span>
+      <h1 style="margin: 0; font-size: 23px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.22; text-wrap: pretty;">
+        Работа, где нужно разобраться в устройстве и довести до результата руками.
+      </h1>
+    </div>
+
+    <!-- One card at a time; the rest are a swipe away. -->
+    <div style="background: #FFFFFF; border: 1px solid #E4E2DB; border-radius: 14px; padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
+        <span style="font-size: 19px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2;">Инженер-технолог</span>
+        <span class="tnum" style="font-size: 15px; font-weight: 700; color: #1F6F4A;">88%</span>
+      </div>
+      <div style="height: 6px; background: #EDEBE4; border-radius: 3px; overflow: hidden;">
+        <div style="width: 88%; height: 100%; background: #1F6F4A; border-radius: 3px;"></div>
+      </div>
+      <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #4A5059; text-wrap: pretty;">
+        Высокие исследовательские и практические интересы при сильной логике — сочетание, на котором держится работа с процессами и оборудованием.
+      </p>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+        <span style="font-size: 12px; padding: 6px 11px; border-radius: 999px; background: #EFF3EF; color: #1F6F4A;">Логика 80</span>
+        <span style="font-size: 12px; padding: 6px 11px; border-radius: 999px; background: #EFF3EF; color: #1F6F4A;">Практика 66</span>
+      </div>
+    </div>
+
+    <!-- Peeking neighbour signals the set continues -->
+    <div style="display: flex; gap: 12px; margin-right: -18px;">
+      <div style="flex: 0 0 78%; background: #FFFFFF; border: 1px solid #E4E2DB; border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+          <span style="font-size: 17px; font-weight: 600; letter-spacing: -0.02em;">Аналитик данных</span>
+          <span class="tnum" style="font-size: 14px; font-weight: 700; color: #1F6F4A;">81%</span>
+        </div>
+        <div style="height: 5px; background: #EDEBE4; border-radius: 3px; overflow: hidden;">
+          <div style="width: 81%; height: 100%; background: #1F6F4A; border-radius: 3px;"></div>
+        </div>
+      </div>
+      <div style="flex: 0 0 78%; background: #FFFFFF; border: 1px solid #E4E2DB; border-radius: 14px; padding: 16px 18px;">
+        <span style="font-size: 17px; font-weight: 600; letter-spacing: -0.02em;">Промышленный…</span>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 5px; justify-content: center;">
+      <div style="width: 18px; height: 4px; border-radius: 2px; background: #14171C;"></div>
+      <div style="width: 6px; height: 4px; border-radius: 2px; background: #CFCCC3;"></div>
+      <div style="width: 6px; height: 4px; border-radius: 2px; background: #CFCCC3;"></div>
+    </div>
+
+    <!-- Evidence, collapsed by default on a phone -->
+    <div style="background: #FFFFFF; border: 1px solid #E4E2DB; border-radius: 14px; padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px;">
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <span style="font-size: 15px; font-weight: 600;">На чём это основано</span>
+        <span style="font-size: 12px; color: #686D75;">код Холланда IRA · 15 шкал</span>
+      </div>
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <path d="M7 4 L13 10 L7 16" stroke="#686D75" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div style="background: #FFFFFF; border-top: 1px solid #E4E2DB; padding: 10px 18px calc(10px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 10px;">
+    <div style="height: 48px; display: flex; align-items: center; justify-content: center; background: #14171C; color: #F6F5F1; border-radius: 10px; font-size: 15px; font-weight: 600;">Построить план</div>
+    <div style="display: flex; justify-content: space-around;">
+      <sc-for list="{{tabs}}" as="tab" hint-placeholder-count="4">
+        <div style="min-width: 60px; min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;">
+          <div style="width: 20px; height: 20px; border-radius: 5px; background: {{tab.ink}};"></div>
+          <span style="font-size: 11px; color: {{tab.ink}};">{{tab.label}}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      tabs: [
+        { label: 'Главная', ink: '#9C9A93' },
+        { label: 'Профиль', ink: '#14171C' },
+        { label: 'План', ink: '#9C9A93' },
+        { label: 'История', ink: '#9C9A93' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

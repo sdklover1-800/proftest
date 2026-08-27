@@ -1,8 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-    IonSpinner
-} from '@ionic/react';
+import { IonSpinner } from '@ionic/react';
 
 interface Props {
     starting: boolean;
@@ -10,40 +8,44 @@ interface Props {
 }
 
 /**
- * Dumb UI component for the action card on home page.
+ * The one thing to do next.
+ *
+ * A flat ink surface rather than the gradient it replaces: the gradient read as
+ * decoration, and on the home screen the card is the primary action, so it
+ * carries the darkest weight on the page and nothing else competes with it.
  */
 const HomeActionCard: React.FC<Props> = ({ starting, onStart }) => {
     const { t } = useTranslation();
 
     return (
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/30 p-6">
-            {/* Background Pattern */}
-            <div className="absolute top-0 right-0 -mr-8 -mt-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
-            <div className="absolute bottom-0 left-0 -ml-8 -mb-8 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
+        <div className="rounded-2xl bg-foreground p-7 text-background sm:p-9">
+            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-background/60">
+                {t('home.start_eyebrow', 'Профориентация')}
+            </p>
 
-            <div className="relative z-10">
-                <h2 className="text-2xl font-bold text-white mb-2">
-                    {t('home.start_assessment')}
-                </h2>
-                <p className="text-blue-100 mb-6 text-sm leading-relaxed">
-                    {t('home.start_description')}
-                </p>
+            <h2 className="mt-3 text-[26px] font-semibold leading-[1.15] tracking-tight sm:text-3xl">
+                {t('home.start_assessment')}
+            </h2>
 
-                <button
-                    onClick={onStart}
-                    disabled={starting}
-                    className="w-full bg-white text-indigo-600 font-semibold py-3.5 px-6 rounded-xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-2"
-                >
-                    {starting ? (
-                        <>
-                            <IonSpinner name="crescent" className="w-5 h-5 text-indigo-600" />
-                            <span>{t('common.loading')}</span>
-                        </>
-                    ) : (
-                        t('home.begin_now')
-                    )}
-                </button>
-            </div>
+            <p className="mt-2.5 max-w-md text-sm leading-relaxed text-background/70">
+                {t('home.start_description')}
+            </p>
+
+            <button
+                type="button"
+                onClick={onStart}
+                disabled={starting}
+                className="mt-7 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-background px-6 text-[15px] font-semibold text-foreground transition-transform active:scale-[0.98] disabled:opacity-60 sm:w-auto sm:min-w-56"
+            >
+                {starting ? (
+                    <>
+                        <IonSpinner name="crescent" className="h-5 w-5" />
+                        <span>{t('common.loading')}</span>
+                    </>
+                ) : (
+                    t('home.begin_now')
+                )}
+            </button>
         </div>
     );
 };

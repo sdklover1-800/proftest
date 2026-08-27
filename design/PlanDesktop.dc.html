@@ -1,0 +1,132 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #1F6F4A; } a:hover { color: #145235; }
+    .tnum { font-variant-numeric: tabular-nums; }
+  </style>
+</helmet>
+
+<!-- The report side of the product: this one earns the width. -->
+<div style="width: 1440px; height: 900px; background: #F6F5F1; color: #14171C; font-family: 'Bricolage Grotesque', system-ui, sans-serif; display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden;">
+
+  <div style="padding: 22px 48px; display: flex; align-items: center; justify-content: space-between; gap: 24px;">
+    <div style="display: flex; align-items: center; gap: 30px;">
+      <span style="font-size: 16px; font-weight: 700; letter-spacing: -0.02em;">proftest</span>
+      <div style="display: flex; gap: 22px; font-size: 13px; color: #5B6169;">
+        <span>Главная</span><span>Профиль</span><span style="color: #14171C; font-weight: 600;">План</span><span>История</span>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <span style="font-size: 13px; color: #4A5059;">Выполнено 1 из 11 · 45 из 540 минут</span>
+      <div style="width: 140px; height: 6px; background: #E4E2DB; border-radius: 3px; overflow: hidden;">
+        <div style="width: 9%; height: 100%; background: #1F6F4A; border-radius: 3px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding: 8px 48px 40px; display: flex; flex-direction: column; gap: 22px; min-height: 0;">
+
+    <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #686D75;">Неделя к цели</span>
+        <h1 style="margin: 0; font-size: 30px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.15;">Поднять сигнал по тестированию и наблюдаемости</h1>
+      </div>
+      <div style="height: 44px; display: flex; align-items: center; padding: 0 20px; border: 1px solid #CFCCC3; border-radius: 10px; font-size: 13px; font-weight: 500; white-space: nowrap;">Собрать заново</div>
+    </div>
+
+    <!-- Seven days across, not a vertical list -->
+    <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; min-height: 0;">
+      <sc-for list="{{days}}" as="day" hint-placeholder-count="7">
+        <div style="background: {{day.bg}}; border: 1px solid {{day.border}}; border-radius: 14px; padding: 16px 14px; display: flex; flex-direction: column; gap: 12px; min-height: 0;">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px;">
+            <span class="tnum" style="font-size: 12px; font-weight: 700; color: {{day.dayInk}};">День {{day.n}}</span>
+            <span class="tnum" style="font-size: 11px; color: #686D75;">{{day.mins}}м</span>
+          </div>
+          <span style="font-size: 13px; font-weight: 600; line-height: 1.3; letter-spacing: -0.01em;">{{day.title}}</span>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <sc-for list="{{day.tasks}}" as="task" hint-placeholder-count="2">
+              <div style="display: flex; gap: 8px; align-items: flex-start; min-height: 44px;">
+                <div style="width: 16px; height: 16px; margin-top: 2px; border-radius: 5px; border: 2px solid {{task.border}}; background: {{task.fill}}; flex: none;"></div>
+                <span style="font-size: 12px; line-height: 1.4; color: {{task.ink}}; text-decoration: {{task.strike}};">{{task.label}}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="background: #FFFFFF; border: 1px solid #E4E2DB; border-radius: 14px; padding: 18px 24px; display: flex; align-items: center; gap: 34px;">
+      <span style="font-size: 13px; font-weight: 600; white-space: nowrap;">Как поймём, что получилось</span>
+      <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+        <sc-for list="{{metrics}}" as="m" hint-placeholder-count="3">
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span class="tnum" style="font-size: 17px; font-weight: 700;">{{m.target}}</span>
+            <span style="font-size: 12px; color: #4A5059;">{{m.label}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const done = { border: '#1F6F4A', fill: '#1F6F4A', ink: '#9C9A93', strike: 'line-through' };
+    const todo = { border: '#CFCCC3', fill: 'transparent', ink: '#14171C', strike: 'none' };
+    const raw = [
+      { n: 1, mins: 75, title: 'База и CI', today: true, tasks: [
+        { label: 'Настроить CI: линт, тесты, сборка', ...done },
+        { label: 'Зафиксировать текущее покрытие', ...todo },
+      ]},
+      { n: 2, mins: 80, title: 'Каркас тестов', tasks: [
+        { label: 'Поднять тестовую БД', ...todo },
+        { label: 'Первый интеграционный тест', ...todo },
+      ]},
+      { n: 3, mins: 90, title: 'Расширить покрытие', tasks: [
+        { label: 'Закрыть критичные маршруты', ...todo },
+      ]},
+      { n: 4, mins: 60, title: 'Наблюдаемость', tasks: [
+        { label: 'Логи вместо print', ...todo },
+      ]},
+      { n: 5, mins: 85, title: 'Десять тестов', tasks: [
+        { label: 'Довести до 10 тестов', ...todo },
+        { label: 'Покрытие 45%', ...todo },
+      ]},
+      { n: 6, mins: 60, title: 'Проход по качеству', tasks: [
+        { label: 'Разобрать замечания линтера', ...todo },
+      ]},
+      { n: 7, mins: 90, title: 'Показать результат', tasks: [
+        { label: 'Собрать короткий разбор', ...todo },
+        { label: 'Договориться о ревью', ...todo },
+      ]},
+    ];
+    const days = raw.map((d) => ({
+      ...d,
+      bg: d.today ? '#FFFFFF' : '#FBFAF7',
+      border: d.today ? '#14171C' : '#E4E2DB',
+      dayInk: d.today ? '#14171C' : '#686D75',
+    }));
+    return {
+      days,
+      metrics: [
+        { target: 'CI', label: 'пайплайн включён' },
+        { target: '10', label: 'интеграционных тестов' },
+        { target: '45%', label: 'покрытие критичных модулей' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

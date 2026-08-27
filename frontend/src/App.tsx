@@ -36,6 +36,8 @@ import Welcome from './pages/Welcome';
 import AdminDashboard from './pages/AdminDashboard';
 import { useAuthStore } from '@/store/authStore';
 import { useThemeStore } from '@/store/themeStore';
+import { AppShell } from '@/shared/ui/AppShell';
+import { useIsDesktop } from '@/shared/model/useMediaQuery';
 
 setupIonicReact();
 
@@ -43,9 +45,11 @@ setupIonicReact();
 const AuthenticatedApp: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation();
+  const isDesktop = useIsDesktop();
 
   // Hide tabs on assessment and results pages for full-screen experience
   const hideTabBar =
+    isDesktop ||
     location.pathname === '/assessment' ||
     location.pathname === '/results' ||
     location.pathname === '/plan' ||
@@ -103,10 +107,12 @@ const App: React.FC = () => {
     );
   }
 
+  // The sidebar sits OUTSIDE IonApp: Ionic imposes its own full-bleed layout
+  // inside, so nesting the shell there leaves no room for it.
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="bg-gray-200 dark:bg-gray-900 min-h-dvh flex justify-center transition-colors">
-        <div className="max-w-md w-full h-full min-h-dvh bg-gray-50 dark:bg-gray-900 shadow-2xl overflow-hidden relative transition-colors">
+      <AppShell showNav={isAuthenticated}>
+        <div className="relative mx-auto h-full min-h-dvh w-full overflow-hidden bg-background transition-colors max-lg:max-w-md max-lg:shadow-2xl">
           <IonApp>
             {isAuthenticated ? <AuthenticatedApp /> : (
               <IonRouterOutlet>
@@ -123,7 +129,7 @@ const App: React.FC = () => {
             )}
           </IonApp>
         </div>
-      </div>
+      </AppShell>
     </QueryClientProvider>
   );
 };

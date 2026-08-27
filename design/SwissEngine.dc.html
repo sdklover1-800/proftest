@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #92400E; } a:hover { color: #6B2F0A; }
+    .tnum { font-variant-numeric: tabular-nums; }
+  </style>
+</helmet>
+
+<!-- Tokens taken verbatim from the ui-ux-pro-max engine's "Swiss Modernism 2.0"
+     recommendation: bg #FFFBEB, fg #0F172A, primary #78716C, secondary #92400E,
+     accent #D97706, border #EEEDED, muted #F6F6F6. -->
+<div style="width: 1440px; height: 900px; background: #FFFBEB; color: #0F172A; font-family: 'Archivo', Helvetica, system-ui, sans-serif; display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden;">
+
+  <div style="border-bottom: 1px solid #EEEDED; padding: 20px 56px; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; align-items: center;">
+    <span style="grid-column: span 3; font-size: 15px; font-weight: 700; letter-spacing: -0.02em;">proftest</span>
+    <div style="grid-column: span 6; display: flex; gap: 24px; font-size: 13px; color: #78716C;">
+      <span>Главная</span><span style="color: #0F172A; font-weight: 600;">Профиль</span><span>План</span><span>История</span>
+    </div>
+    <span class="tnum" style="grid-column: span 3; text-align: right; font-size: 12px; color: #78716C;">Уверенность замера 74%</span>
+  </div>
+
+  <!-- 12-column grid, asymmetric placement -->
+  <div style="padding: 40px 56px; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; align-content: start; min-height: 0;">
+
+    <div style="grid-column: span 5; display: flex; flex-direction: column; gap: 18px;">
+      <div style="height: 6px; background: #D97706; width: 64px;"></div>
+      <h1 style="margin: 0; font-size: 44px; font-weight: 700; line-height: 1.06; letter-spacing: -0.035em;">
+        Исследователь<br>Практик<br>Творец
+      </h1>
+      <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #57534E; max-width: 330px; text-wrap: pretty;">
+        Код Холланда IRA. Две шкалы из шести держатся выше медианы вашей возрастной группы.
+      </p>
+      <div style="display: flex; gap: 10px; margin-top: 6px;">
+        <div style="height: 44px; display: flex; align-items: center; padding: 0 18px; background: #92400E; color: #FFFFFF; font-size: 13px; font-weight: 600;">Построить план</div>
+        <div style="height: 44px; display: flex; align-items: center; padding: 0 18px; border: 1px solid #78716C; font-size: 13px; font-weight: 500;">Скачать PDF</div>
+      </div>
+    </div>
+
+    <div style="grid-column: span 7; display: flex; flex-direction: column; gap: 26px; min-height: 0;">
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid #0F172A; padding-bottom: 8px;">
+          <span style="font-size: 13px; font-weight: 700; letter-spacing: 0.02em;">ПРОФЕССИОНАЛЬНЫЕ ИНТЕРЕСЫ</span>
+          <span style="font-size: 11px; color: #78716C;">штрих — норма</span>
+        </div>
+        <sc-for list="{{riasec}}" as="r" hint-placeholder-count="6">
+          <div style="display: grid; grid-template-columns: 170px minmax(0, 1fr) 38px; align-items: center; gap: 16px;">
+            <span style="font-size: 12px; color: #57534E;">{{r.label}}</span>
+            <div style="position: relative; height: 14px; background: #F6F6F6;">
+              <div style="position: absolute; inset: 0; width: {{r.value}}; background: {{r.fill}};"></div>
+              <div style="position: absolute; top: -3px; bottom: -3px; left: {{r.norm}}; width: 2px; background: #0F172A;"></div>
+            </div>
+            <span class="tnum" style="font-size: 13px; font-weight: 700; text-align: right;">{{r.n}}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; border-top: 1px solid #EEEDED; padding-top: 20px;">
+        <sc-for list="{{cognitive}}" as="c" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; gap: 5px;">
+            <span class="tnum" style="font-size: 30px; font-weight: 700; letter-spacing: -0.03em; line-height: 1;">{{c.n}}</span>
+            <span style="font-size: 11px; color: #78716C; line-height: 1.35;">{{c.label}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const pct = (n) => n + '%';
+    const riasec = [
+      { label: 'Исследовательские', n: 78, norm: 52 },
+      { label: 'Практические', n: 66, norm: 55 },
+      { label: 'Творческие', n: 61, norm: 58 },
+      { label: 'Социальные', n: 54, norm: 61 },
+      { label: 'Предпринимательские', n: 48, norm: 57 },
+      { label: 'Конвенциональные', n: 44, norm: 53 },
+    ].map((r) => ({
+      ...r,
+      value: pct(r.n),
+      norm: pct(r.norm),
+      // Accent marks the scales that clear the norm; the rest stay neutral.
+      fill: r.n > r.norm ? '#D97706' : '#78716C',
+    }));
+
+    return {
+      riasec,
+      cognitive: [
+        { label: 'Логическое мышление', n: 80 },
+        { label: 'Рабочая память', n: 71 },
+        { label: 'Скорость обработки', n: 62 },
+        { label: 'Внимание', n: 58 },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

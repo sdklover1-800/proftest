@@ -1,0 +1,95 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #1F6F4A; } a:hover { color: #145235; }
+    .tnum { font-variant-numeric: tabular-nums; }
+  </style>
+</helmet>
+
+<!-- Taking the test is the one screen that must NOT widen with the window:
+     86 items in a row, so the column stays narrow and everything else quiets down. -->
+<div style="width: 1440px; height: 900px; background: #F6F5F1; color: #14171C; font-family: 'Bricolage Grotesque', system-ui, sans-serif; display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden;">
+
+  <div style="padding: 18px 48px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid #E4E2DB;">
+    <div style="display: flex; align-items: center; gap: 18px;">
+      <span class="tnum" style="font-size: 13px; color: #4A5059;">Когнитивные · 7 из 12</span>
+      <div style="width: 260px; height: 5px; background: #E4E2DB; border-radius: 3px; overflow: hidden;">
+        <div style="width: 58%; height: 100%; background: #14171C; border-radius: 3px;"></div>
+      </div>
+    </div>
+    <div style="min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <path d="M5 5 L15 15 M15 5 L5 15" stroke="#4A5059" stroke-width="1.75" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div style="display: flex; align-items: center; justify-content: center; min-height: 0; padding: 40px;">
+    <div style="width: 640px; display: flex; flex-direction: column; align-items: center; gap: 34px;">
+
+      <!-- Stimulus wearing its response window -->
+      <div style="position: relative; padding: 20px;">
+        <svg style="position: absolute; inset: 0; width: 100%; height: 100%;" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <rect x="1.5" y="1.5" width="97" height="97" rx="10" fill="none" stroke="#DCD9D1" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+          <rect x="1.5" y="1.5" width="97" height="97" rx="10" fill="none" stroke="#1F6F4A" stroke-width="2.5" stroke-linecap="round"
+                vector-effect="non-scaling-stroke" pathLength="1" stroke-dasharray="1" stroke-dashoffset="0.34"/>
+        </svg>
+        <div style="position: relative; display: flex; align-items: center; gap: 26px; padding: 22px 34px;">
+          <div style="width: 66px; height: 66px; background: #4B7BEC; clip-path: polygon(50% 0%, 0% 100%, 100% 100%);"></div>
+          <div style="width: 66px; height: 66px; border-radius: 50%; background: #EC4B6E;"></div>
+          <div style="width: 66px; height: 66px; border-radius: 50%; background: #EC4B6E;"></div>
+          <span style="font-size: 34px; color: #9C9A93;">→</span>
+          <div style="width: 66px; height: 66px; border: 2px dashed #B8B4AA; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #B8B4AA;">?</div>
+        </div>
+      </div>
+
+      <h2 style="margin: 0; font-size: 20px; font-weight: 500; text-align: center; letter-spacing: -0.01em;">Продолжите ряд</h2>
+
+      <!-- Answers are patterns, drawn the way the stimulus is drawn -->
+      <div style="width: 100%; display: flex; flex-direction: column; gap: 12px;">
+        <sc-for list="{{options}}" as="opt" hint-placeholder-count="3">
+          <div style="min-height: 76px; background: #FFFFFF; border: 2px solid {{opt.border}}; border-radius: 14px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; gap: 20px;">
+            <span class="tnum" style="font-size: 13px; color: #686D75;">{{opt.key}}</span>
+            <div style="display: flex; align-items: center; gap: 18px;">
+              <sc-for list="{{opt.shapes}}" as="sh" hint-placeholder-count="3">
+                <div style="width: 34px; height: 34px; background: {{sh.fill}}; border-radius: {{sh.radius}}; clip-path: {{sh.clip}};"></div>
+              </sc-for>
+            </div>
+            <span style="width: 13px;"></span>
+          </div>
+        </sc-for>
+      </div>
+
+      <span style="font-size: 12px; color: #686D75;">Клавиши 1–3 или нажатие</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const tri = { fill: '#4B7BEC', radius: '0', clip: 'polygon(50% 0%, 0% 100%, 100% 100%)' };
+    const cir = { fill: '#EC4B6E', radius: '50%', clip: 'none' };
+    const sqr = { fill: '#14B88A', radius: '6px', clip: 'none' };
+    return {
+      options: [
+        { key: '1', border: '#1F6F4A', shapes: [tri, cir, cir] },
+        { key: '2', border: '#E4E2DB', shapes: [cir, cir, sqr] },
+        { key: '3', border: '#E4E2DB', shapes: [cir, sqr, cir] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

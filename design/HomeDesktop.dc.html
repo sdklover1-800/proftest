@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #1F6F4A; } a:hover { color: #145235; }
+    .tnum { font-variant-numeric: tabular-nums; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; height: 900px; background: #F6F5F1; color: #14171C; font-family: 'Bricolage Grotesque', system-ui, sans-serif; display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden;">
+
+  <div style="padding: 22px 48px; display: flex; align-items: center; justify-content: space-between; gap: 24px;">
+    <div style="display: flex; align-items: center; gap: 30px;">
+      <span style="font-size: 16px; font-weight: 700; letter-spacing: -0.02em;">proftest</span>
+      <div style="display: flex; gap: 22px; font-size: 13px; color: #5B6169;">
+        <span style="color: #14171C; font-weight: 600;">Главная</span><span>Профиль</span><span>План</span><span>История</span>
+      </div>
+    </div>
+    <div style="width: 36px; height: 36px; border-radius: 50%; background: #E4E2DB; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600;">Д</div>
+  </div>
+
+  <div style="padding: 12px 48px 40px; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 26px; align-content: start; min-height: 0;">
+
+    <!-- Continue where you left off, not a generic hero -->
+    <div style="background: #14171C; color: #F6F5F1; border-radius: 16px; padding: 34px 36px; display: flex; flex-direction: column; gap: 22px;">
+      <span style="font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: #9C9A93;">Незавершённый замер</span>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <span style="font-size: 30px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.15;">Осталось 34 задания<br>из 86</span>
+        <span style="font-size: 14px; color: #B8B4AA;">Примерно 9 минут. Ответы сохранены.</span>
+      </div>
+      <div style="height: 6px; background: #33373E; border-radius: 3px; overflow: hidden;">
+        <div style="width: 60%; height: 100%; background: #1F6F4A; border-radius: 3px;"></div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <div style="height: 48px; display: flex; align-items: center; padding: 0 22px; background: #F6F5F1; color: #14171C; border-radius: 10px; font-size: 14px; font-weight: 600;">Продолжить</div>
+        <div style="height: 48px; display: flex; align-items: center; padding: 0 22px; border: 1px solid #4A4E56; border-radius: 10px; font-size: 14px;">Начать заново</div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 20px; min-height: 0;">
+
+      <div style="background: #FFFFFF; border: 1px solid #E4E2DB; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 14px;">
+        <span style="font-size: 14px; font-weight: 600;">Ваш последний профиль</span>
+        <div style="display: flex; align-items: baseline; gap: 12px;">
+          <span class="tnum" style="font-size: 32px; font-weight: 700; letter-spacing: 0.02em; line-height: 1;">IRA</span>
+          <span style="font-size: 13px; color: #4A5059;">Исследователь · Практик · Творец</span>
+        </div>
+        <span style="font-size: 12px; color: #686D75;">Замер от 26 августа · уверенность 74%</span>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #E4E2DB; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 14px; min-height: 0;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between;">
+          <span style="font-size: 14px; font-weight: 600;">План на неделю</span>
+          <span class="tnum" style="font-size: 13px; color: #1F6F4A; font-weight: 600;">9%</span>
+        </div>
+        <sc-for list="{{tasks}}" as="task" hint-placeholder-count="3">
+          <div style="display: flex; align-items: center; gap: 12px; min-height: 44px; border-bottom: 1px solid #F0EEE8;">
+            <div style="width: 18px; height: 18px; border-radius: 5px; border: 2px solid {{task.border}}; background: {{task.fill}}; flex: none;"></div>
+            <span style="font-size: 13px; color: {{task.ink}}; text-decoration: {{task.strike}};">{{task.label}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      tasks: [
+        { label: 'Настроить CI: линт, тесты, сборка', border: '#1F6F4A', fill: '#1F6F4A', ink: '#9C9A93', strike: 'line-through' },
+        { label: 'Написать первые интеграционные тесты', border: '#CFCCC3', fill: 'transparent', ink: '#14171C', strike: 'none' },
+        { label: 'Разобрать один разбор кода с ментором', border: '#CFCCC3', fill: 'transparent', ink: '#14171C', strike: 'none' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

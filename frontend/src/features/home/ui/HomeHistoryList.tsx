@@ -12,6 +12,9 @@ interface Props {
     onViewResults: (id: number) => void;
 }
 
+/** Approximate RIASEC ceiling, used only to scale the bar. */
+const MAX_SCORE = 40;
+
 const HomeHistoryList: React.FC<Props> = ({ sessions, loading, onViewResults }) => {
     const { t } = useTranslation();
 
@@ -29,15 +32,13 @@ const HomeHistoryList: React.FC<Props> = ({ sessions, loading, onViewResults }) 
         return parts.length > 1 ? parseInt(parts[1], 10) : 0;
     };
 
-    const getMaxScore = () => 40; // Approx max for RIASEC
-
     if (loading) {
         return (
-            <div className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                    <div key={i} className="rounded-xl border border-border bg-card p-4">
                         <IonSkeletonText animated style={{ width: '60%', height: '20px', marginBottom: '8px' }} />
-                        <IonSkeletonText animated style={{ width: '100%', height: '8px', borderRadius: '4px' }} />
+                        <IonSkeletonText animated style={{ width: '100%', height: '6px', borderRadius: '3px' }} />
                     </div>
                 ))}
             </div>
@@ -46,46 +47,51 @@ const HomeHistoryList: React.FC<Props> = ({ sessions, loading, onViewResults }) 
 
     if (sessions.length === 0) {
         return (
-            <div className="text-center py-12 bg-white rounded-xl border border-gray-100 border-dashed">
-                <p className="text-gray-500 text-lg">{t('home.no_history')}</p>
-                <p className="text-gray-400 text-sm mt-1">{t('home.no_history_hint')}</p>
+            <div className="rounded-xl border border-dashed border-border bg-card px-6 py-12 text-center">
+                <p className="text-base text-foreground">{t('home.no_history')}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{t('home.no_history_hint')}</p>
             </div>
         );
     }
 
     return (
-        <div className="space-y-3">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {sessions.map((session) => {
                 const score = getScoreFromResult(session.top_result);
-                const progress = Math.min((score / getMaxScore()) * 100, 100);
+                const progress = Math.min((score / MAX_SCORE) * 100, 100);
+                const title = session.top_result || t('home.test_number', { id: session.id });
 
                 return (
-                    <div
+                    // A button, not a clickable div: this is the only route to a
+                    // past result, so it has to be reachable from the keyboard.
+                    <button
                         key={session.id}
+                        type="button"
                         onClick={() => onViewResults(session.id)}
-                        className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 active:bg-gray-50 transition-colors cursor-pointer"
+                        className="min-h-11 w-full rounded-xl border border-border bg-card p-4 text-left transition-colors hover:border-border-strong active:bg-muted"
                     >
-                        <div className="flex justify-between items-start mb-3">
-                            <div>
-                                <h3 className="font-bold text-gray-800 text-lg">
-                                    {session.top_result || t('home.test_number', { id: session.id })}
-                                </h3>
-                                <div className="flex items-center text-xs text-gray-400 mt-1">
-                                    <IonIcon icon={timeOutline} className="mr-1" />
+                        <div className="mb-3 flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                                <h3 className="truncate text-base font-semibold text-foreground">{title}</h3>
+                                <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                                    <IonIcon icon={timeOutline} aria-hidden="true" />
                                     {formatDate(session.date)}
                                 </div>
                             </div>
-                            <IonIcon icon={chevronForwardOutline} className="text-gray-300" />
+                            <IonIcon
+                                icon={chevronForwardOutline}
+                                aria-hidden="true"
+                                className="shrink-0 text-muted-foreground"
+                            />
                         </div>
 
-                        {/* Progress Bar */}
-                        <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                             <div
-                                className="h-full bg-indigo-500 rounded-full transition-all duration-1000"
+                                className="h-full rounded-full bg-primary transition-all duration-700"
                                 style={{ width: `${session.top_result ? progress : 100}%` }}
                             />
                         </div>
-                    </div>
+                    </button>
                 );
             })}
         </div>
